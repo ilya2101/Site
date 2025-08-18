@@ -5,5 +5,10 @@
 # Python
 __pycache__/
 *.py[cod]
+/create_admin.py
+
+/instance/
+/users.db
+/migrations/
 
 touch .gitignore
