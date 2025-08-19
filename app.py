@@ -1,13 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'ilya'  # Нужен для flash-сообщений
+app.config['SECRET_KEY'] = 'ilya'
+# Исправленная конфигурация БД
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_BINDS'] = {
+    'applications': 'sqlite:///applications.db'
+}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -27,17 +35,27 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return str(self.id)
 
-class ServiceRequest(db.Model):
+class Application(db.Model):
+    __bind_key__ = 'applications'  # Указываем привязку к конкретной БД
+    __tablename__ = 'applications'
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
     car_brand = db.Column(db.String(50), nullable=False)
     car_model = db.Column(db.String(50), nullable=False)
-    engine_volume = db.Column(db.Float, nullable=False)
-    desired_time = db.Column(db.DateTime, nullable=False)
+    desired_date = db.Column(db.Date, nullable=False)
+    desired_time = db.Column(db.Time, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='pending')
+    status = db.Column(db.String(20), default='new')
 
-    user = db.relationship('User', backref=db.backref('requests', lazy=True))
+    def __repr__(self):
+        return f'<Application {self.id} - {self.name}>'
+
+# Создаем таблицы в обеих базах данных
+with app.app_context():
+    # Создаем таблицу для заявок
+    db.create_all(bind_key='applications')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -151,6 +169,9 @@ def account():
     return render_template('account.html', user=current_user)
 
 
+class ServiceRequest:
+    pass
+
 
 @app.route('/admin/requests')
 @login_required
@@ -159,6 +180,40 @@ def view_requests():
         abort(403)
     requests = ServiceRequest.query.order_by(ServiceRequest.created_at.desc()).all()
     return render_template('admin_requests.html', requests=requests)
+
+
+@app.route('/submit_application', methods=['POST'])
+def submit_application():
+    if request.method == 'POST':
+        try:
+            # Получаем данные из формы
+            name = request.form['name']
+            phone = request.form['phone']
+            car_brand = request.form['carBrand']
+            car_model = request.form['carModel']
+            desired_date = datetime.strptime(request.form['date'], '%Y-%m-%d').date()
+            desired_time = datetime.strptime(request.form['time'], '%H:%M').time()
+
+            # Создаем новую заявку (сохраняем во вторую БД)
+            new_application = Application(
+                name=name,
+                phone=phone,
+                car_brand=car_brand,
+                car_model=car_model,
+                desired_date=desired_date,
+                desired_time=desired_time
+            )
+
+            # Сохраняем в базу данных applications
+            db.session.add(new_application)
+            db.session.commit()
+
+            # Возвращаем успешный ответ
+            return jsonify({'success': True, 'message': 'Заявка успешно отправлена!'})
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'message': f'Ошибка при отправке заявки: {str(e)}'})
 
 if __name__ == '__main__':
     with app.app_context():

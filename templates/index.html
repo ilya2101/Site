@@ -1,6 +1,254 @@
 {% extends 'base.html' %}
 
-
 {% block title %}
     Главная страница
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <!-- Заголовок и описание -->
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-5 fw-bold mb-3">Профессиональный ремонт вашего автомобиля</h1>
+                <p class="lead">Мы предоставляем полный спектр услуг по ремонту и обслуживанию автомобилей с гарантией качества</p>
+            </div>
+        </div>
+
+        <!-- Плашка для заявки -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="application-card">
+                    <div class="application-header">
+                        <h2><i class="bi bi-calendar-check"></i> Записаться на обслуживание</h2>
+                        <p>Заполните форму и наш менеджер свяжется с вами для подтверждения времени</p>
+                    </div>
+
+                    <form id="applicationForm" class="application-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <label for="name">Ваше имя *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
+                                    <label for="phone">Номер телефона *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="carBrand" name="carBrand" required>
+                                    <label for="carBrand">Марка автомобиля *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="carModel" name="carModel" required>
+                                    <label for="carModel">Модель автомобиля *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="date" name="date" required>
+                                    <label for="date">Желаемая дата *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="time" class="form-control" id="time" name="time" required>
+                                    <label for="time">Желаемое время *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-application">
+                                <i class="bi bi-car-front"></i> Отправить заявку
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Сообщение об успешной отправке -->
+                    <div id="successMessage" class="application-success" style="display: none;">
+                        <div class="success-icon">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <h3>Спасибо, что выбрали нас!</h3>
+                        <p>Ваша заявка успешно отправлена. Менеджер свяжется с вами в ближайшее время для согласования времени.</p>
+                        <button class="btn btn-outline-primary" onclick="location.reload()">Заполнить еще одну заявку</button>
+                    </div>
+
+                    <!-- Сообщение об ошибке -->
+                    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i> <span id="errorText">Произошла ошибка при отправке формы</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        .application-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 0;
+            position: relative;
+        }
+
+        .application-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #4e73df, #224abe);
+        }
+
+        .application-header {
+            background-color: #f8f9fa;
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .application-header h2 {
+            color: #224abe;
+            font-weight: 700;
+        }
+
+        .application-header p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+        .application-form {
+            padding: 2rem;
+        }
+
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 1rem 0.75rem;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.15);
+        }
+
+        .btn-application {
+            background: linear-gradient(90deg, #4e73df 0%, #224abe 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-application:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+        }
+
+        .application-success {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .application-header {
+                padding: 1.5rem;
+            }
+
+            .application-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('applicationForm');
+            const successMessage = document.getElementById('successMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Установка минимальной даты (сегодня)
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+            document.getElementById('date').min = todayStr;
+
+            // Обработка отправки формы
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Собираем данные формы
+                const formData = new FormData(form);
+
+                try {
+                    // Отправляем данные на сервер
+                    const response = await fetch('/submit_application', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Показываем сообщение об успехе
+                        form.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        errorMessage.style.display = 'none';
+
+                        // Прокручиваем к сообщению
+                        successMessage.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        // Показываем сообщение об ошибке
+                        errorText.textContent = result.message;
+                        errorMessage.style.display = 'block';
+
+                        // Прокручиваем к ошибке
+                        errorMessage.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } catch (error) {
+                    // Обработка ошибок сети
+                    errorText.textContent = 'Ошибка сети. Попробуйте еще раз.';
+                    errorMessage.style.display = 'block';
+                    errorMessage.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
 {% endblock %}
