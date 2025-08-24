@@ -48,14 +48,58 @@ class Application(db.Model):
     desired_time = db.Column(db.Time, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(20), default='new')
-
+    comment = db.Column(db.Text, default='')  # Добавляем поле для комментариев
     def __repr__(self):
         return f'<Application {self.id} - {self.name}>'
 
-# Создаем таблицы в обеих базах данных
+# Создаем модель для очереди
+class Queue(db.Model):
+    __bind_key__ = 'applications'  # Используем ту же базу
+    __tablename__ = 'queue'
+
+    id = db.Column(db.Integer, primary_key=True)
+    application_id = db.Column(db.Integer, db.ForeignKey('applications.id'))
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    car_brand = db.Column(db.String(50), nullable=False)
+    car_model = db.Column(db.String(50), nullable=False)
+    desired_date = db.Column(db.Date, nullable=False)
+    desired_time = db.Column(db.Time, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='in_queue')
+    comment = db.Column(db.Text, default='')
+    moved_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Связь с оригинальной заявкой
+    application = db.relationship('Application', backref='queue_entries')
+
+
+
+
+
+
+# Удаляем и пересоздаем таблицы
 with app.app_context():
-    # Создаем таблицу для заявок
+    # Удаляем старые таблицы
+    db.drop_all(bind_key='applications')
+
+    # Создаем новые таблицы с правильной структурой
     db.create_all(bind_key='applications')
+
+    inspector = db.inspect(db.get_engine(bind='applications'))
+    if 'queue' not in inspector.get_table_names():
+        Queue.__table__.create(db.get_engine(bind='applications'))
+        print("Таблица 'queue' создана успешно!")
+
+    print("Все таблицы созданы успешно!")
+
+    # Правильный способ проверки существования таблицы
+    inspector = db.inspect(db.get_engine(bind='applications'))
+    if 'queue' not in inspector.get_table_names():
+        Queue.__table__.create(db.get_engine(bind='applications'))
+        print("Таблица 'queue' создана успешно!")
+
+    print("Все таблицы созданы успешно!")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -161,7 +205,22 @@ def logout():
 def admin_dashboard():
     if not current_user.is_admin:
         abort(403)
-    return render_template('admin_dashboard.html', user=current_user)
+
+    # Получаем статистику
+    new_requests_count = Application.query.filter_by(status='new').count()
+    queue_count = Queue.query.count()
+    total_requests = Application.query.count()
+
+    # Получаем последние 5 заявок
+    recent_requests = Application.query.order_by(Application.created_at.desc()).limit(5).all()
+
+    return render_template('admin_dashboard.html',
+                           user=current_user,
+                           now=datetime.now(),
+                           new_requests_count=new_requests_count,
+                           queue_count=queue_count,
+                           total_requests=total_requests,
+                           recent_requests=recent_requests)
 
 @app.route('/account')
 @login_required
@@ -179,8 +238,126 @@ class ServiceRequest:
 def view_requests():
     if not current_user.is_admin:
         abort(403)
-    requests = ServiceRequest.query.order_by(ServiceRequest.created_at.desc()).all()
+
+    # Получаем все заявки из базы данных
+    requests = Application.query.order_by(Application.created_at.desc()).all()
+    return render_template('admin_requests.html',
+                           requests=requests,
+                           user=current_user)  # ДОБАВЬТЕ user=current_user
+
+
+    # Получаем все заявки из базы данных
+    requests = Application.query.order_by(Application.created_at.desc()).all()
     return render_template('admin_requests.html', requests=requests)
+
+@app.route('/admin/request/update/<int:request_id>', methods=['POST'])
+@login_required
+def update_request(request_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        application = Application.query.get_or_404(request_id)
+
+        # Обновляем данные
+        application.name = request.form.get('name')
+        application.phone = request.form.get('phone')
+        application.car_brand = request.form.get('car_brand')
+        application.car_model = request.form.get('car_model')
+        application.desired_date = datetime.strptime(request.form.get('desired_date'), '%Y-%m-%d').date()
+        application.desired_time = datetime.strptime(request.form.get('desired_time'), '%H:%M').time()
+        application.comment = request.form.get('comment', '')
+
+        db.session.commit()
+        flash('Заявка успешно обновлена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при обновлении заявки: {str(e)}', 'danger')
+
+    return redirect(url_for('view_requests'))
+
+
+@app.route('/admin/request/comment/<int:request_id>', methods=['POST'])
+@login_required
+def add_comment(request_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        application = Application.query.get_or_404(request_id)
+        comment = request.form.get('comment', '').strip()
+
+        if comment:
+            if application.comment:
+                application.comment += f"\n[{datetime.now().strftime('%d.%m.%Y %H:%M')}]: {comment}"
+            else:
+                application.comment = f"[{datetime.now().strftime('%d.%m.%Y %H:%M')}]: {comment}"
+
+            db.session.commit()
+            flash('Комментарий добавлен!', 'success')
+        else:
+            flash('Комментарий не может быть пустым', 'warning')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при добавлении комментария: {str(e)}', 'danger')
+
+    return redirect(url_for('view_requests'))
+
+@app.route('/admin/request/confirm/<int:request_id>')
+@login_required
+def confirm_request(request_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        application = Application.query.get_or_404(request_id)
+
+        # Создаем запись в очереди
+        queue_entry = Queue(
+            application_id=application.id,
+            name=application.name,
+            phone=application.phone,
+            car_brand=application.car_brand,
+            car_model=application.car_model,
+            desired_date=application.desired_date,
+            desired_time=application.desired_time,
+            created_at=application.created_at,
+            comment=application.comment,
+            status='in_queue'
+        )
+
+        # Добавляем в очередь и удаляем из заявок
+        db.session.add(queue_entry)
+        db.session.delete(application)
+        db.session.commit()
+
+        flash('Заявка перемещена в очередь!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при перемещении заявки: {str(e)}', 'danger')
+
+    return redirect(url_for('view_requests'))
+
+@app.route('/admin/request/delete/<int:request_id>')
+@login_required
+def delete_request(request_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        application = Application.query.get_or_404(request_id)
+        db.session.delete(application)
+        db.session.commit()
+        flash('Заявка удалена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении заявки: {str(e)}', 'danger')
+
+    return redirect(url_for('view_requests'))
 
 
 @app.route('/submit_application', methods=['POST'])
