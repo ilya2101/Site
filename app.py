@@ -1,28 +1,41 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
-from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
+import os
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ilya'
-# Исправленная конфигурация БД
+
+# Конфигурация БД
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {
     'applications': 'sqlite:///applications.db'
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Настройка загрузки файлов
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+app.config['ALLOWED_EXTENSIONS'] = {'xls', 'xlsx', 'csv'}
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Создаем папку для загрузок, если ее нет
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+# Функция для проверки разрешенных расширений
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 # Модели должны быть определены перед импортом роутов
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,40 +100,51 @@ class InService(db.Model):
     desired_date = db.Column(db.Date, nullable=False)
     desired_time = db.Column(db.Time, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    estimated_completion = db.Column(db.Date, nullable=True)  # Примерное окончание работ
-    estimated_cost = db.Column(db.String(100), nullable=True)  # Примерная стоимость
+    estimated_completion = db.Column(db.Date, nullable=True)
+    estimated_cost = db.Column(db.String(100), nullable=True)
     comment = db.Column(db.Text, default='')
-    work_list = db.Column(db.Text, default='')  # Список работ
+    work_list = db.Column(db.Text, default='')
+    excel_file = db.Column(db.String(255), nullable=True)  # Путь к Excel файлу
     moved_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Связь с записью в очереди
     queue_entry = db.relationship('Queue', backref='service_entries')
 
+
+# Создаем таблицы в обеих базах данных
 # Создаем таблицы в обеих базах данных
 with app.app_context():
-    # Создаем таблицу для заявок
+
+
+    try:
+        db.drop_all(bind_key='applications')
+        print("Таблицы applications удалены")
+    except Exception as e:
+        print(f"Ошибка удаления таблиц applications: {e}")
+
+    # Создаем все таблицы заново
+    db.create_all()
     db.create_all(bind_key='applications')
 
-    # Правильный способ проверки существования таблицы
-    inspector = db.inspect(db.get_engine(bind='applications'))
-
-    if 'queue' not in inspector.get_table_names():
-        Queue.__table__.create(db.get_engine(bind='applications'))
-        print("Таблица 'queue' создана успешно!")
-
-    if 'in_service' not in inspector.get_table_names():
-        InService.__table__.create(db.get_engine(bind='applications'))
-        print("Таблица 'in_service' создана успешно!")
-
     print("Все таблицы созданы успешно!")
 
-    # Правильный способ проверки существования таблицы
-    inspector = db.inspect(db.get_engine(bind='applications'))
-    if 'queue' not in inspector.get_table_names():
-        Queue.__table__.create(db.get_engine(bind='applications'))
-        print("Таблица 'queue' создана успешно!")
 
-    print("Все таблицы созданы успешно!")
+# Принудительное создание таблиц
+with app.app_context():
+    # Создаем таблицы по одной
+    try:
+        # Основная база
+        User.__table__.create(db.engine, checkfirst=True)
+
+        # База applications
+        Application.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
+        Queue.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
+        InService.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
+
+        print("Все таблицы созданы принудительно!")
+    except Exception as e:
+        print(f"Ошибка при создании таблиц: {e}")
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -489,6 +513,24 @@ def move_to_service(queue_id):
     try:
         queue_entry = Queue.query.get_or_404(queue_id)
 
+        # Обработка загрузки файла
+        excel_filename = None
+        if 'excel_file' in request.files:
+            file = request.files['excel_file']
+            if file and file.filename and allowed_file(file.filename):
+                # Создаем безопасное имя файла
+                filename = secure_filename(file.filename)
+                # Добавляем timestamp для уникальности
+                import time
+                timestamp = str(int(time.time()))
+                name, ext = os.path.splitext(filename)
+                filename = f"{name}_{timestamp}{ext}"
+
+                # Сохраняем файл
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                excel_filename = filename
+
+
         # Создаем запись в ремонте
         service_entry = InService(
             queue_id=queue_entry.id,
@@ -502,7 +544,8 @@ def move_to_service(queue_id):
             comment=queue_entry.comment,
             estimated_completion=datetime.strptime(request.form.get('estimated_completion'), '%Y-%m-%d').date() if request.form.get('estimated_completion') else None,
             estimated_cost=request.form.get('estimated_cost', ''),
-            work_list=request.form.get('work_list', '')
+            work_list=request.form.get('work_list', ''),
+            excel_file=excel_filename
         )
 
         # Добавляем в ремонт и удаляем из очереди
@@ -557,6 +600,28 @@ def update_service(service_id):
     try:
         service_entry = InService.query.get_or_404(service_id)
 
+        # Обработка загрузки нового файла
+        if 'excel_file' in request.files:
+            file = request.files['excel_file']
+            if file and file.filename and allowed_file(file.filename):
+                # Удаляем старый файл, если он есть
+                if service_entry.excel_file:
+                    try:
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], service_entry.excel_file))
+                    except:
+                        pass
+
+                # Создаем безопасное имя файла
+                filename = secure_filename(file.filename)
+                import time
+                timestamp = str(int(time.time()))
+                name, ext = os.path.splitext(filename)
+                filename = f"{name}_{timestamp}{ext}"
+
+                # Сохраняем новый файл
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                service_entry.excel_file = filename
+
         # Обновляем данные
         service_entry.name = request.form.get('name')
         service_entry.phone = request.form.get('phone')
@@ -576,6 +641,38 @@ def update_service(service_id):
 
     return redirect(url_for('view_service'))
 
+@app.route('/download/excel/<filename>')
+@login_required
+def download_excel(filename):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        return send_from_directory(
+            app.config['UPLOAD_FOLDER'],
+            filename,
+            as_attachment=True
+        )
+    except:
+        abort(404)
+
+@app.route('/view/excel/<filename>')
+@login_required
+def view_excel(filename):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        return send_from_directory(
+            app.config['UPLOAD_FOLDER'],
+            filename,
+            as_attachment=False
+        )
+    except:
+        abort(404)
+
+
+
 @app.route('/admin/service/delete/<int:service_id>')
 @login_required
 def delete_service(service_id):
@@ -584,6 +681,14 @@ def delete_service(service_id):
 
     try:
         service_entry = InService.query.get_or_404(service_id)
+
+        # Удаляем файл, если он есть
+        if service_entry.excel_file:
+            try:
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], service_entry.excel_file))
+            except:
+                pass
+
         db.session.delete(service_entry)
         db.session.commit()
         flash('Запись из ремонта удалена!', 'success')
@@ -593,7 +698,6 @@ def delete_service(service_id):
         flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
 
     return redirect(url_for('view_service'))
-
 
 
 

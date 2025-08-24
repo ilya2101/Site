@@ -193,28 +193,37 @@
             </div>
 
             <!-- Модальное окно перемещения в ремонт -->
+            <!-- Модальное окно перемещения в ремонт -->
             <div class="modal fade" id="serviceModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
+                <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Переместить в ремонт #{{ entry.id }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form method="POST" action="{{ url_for('move_to_service', queue_id=entry.id) }}">
+                        <form method="POST" action="{{ url_for('move_to_service', queue_id=entry.id) }}" enctype="multipart/form-data">
                             <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Примерное окончание работ</label>
-                                    <input type="date" class="form-control" name="estimated_completion">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Примерная стоимость</label>
-                                    <input type="text" class="form-control" name="estimated_cost"
-                                           placeholder="Введите стоимость">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Примерное окончание работ</label>
+                                        <input type="date" class="form-control" name="estimated_completion">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Примерная стоимость</label>
+                                        <input type="text" class="form-control" name="estimated_cost"
+                                               placeholder="Введите стоимость">
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Список работ (через запятую)</label>
                                     <textarea class="form-control" name="work_list" rows="3"
                                               placeholder="Замена масла, Диагностика, Ремонт тормозов..."></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Детализация (Excel файл)</label>
+                                    <input type="file" class="form-control" name="excel_file"
+                                           accept=".xls,.xlsx,.csv">
+                                    <small class="text-muted">Поддерживаемые форматы: .xls, .xlsx, .csv</small>
                                 </div>
                             </div>
                             <div class="modal-footer">
