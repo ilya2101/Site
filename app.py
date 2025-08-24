@@ -73,23 +73,44 @@ class Queue(db.Model):
     # Связь с оригинальной заявкой
     application = db.relationship('Application', backref='queue_entries')
 
+    # Модель для автомобилей в ремонте
+class InService(db.Model):
+    __bind_key__ = 'applications'
+    __tablename__ = 'in_service'
 
+    id = db.Column(db.Integer, primary_key=True)
+    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    car_brand = db.Column(db.String(50), nullable=False)
+    car_model = db.Column(db.String(50), nullable=False)
+    desired_date = db.Column(db.Date, nullable=False)
+    desired_time = db.Column(db.Time, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    estimated_completion = db.Column(db.Date, nullable=True)  # Примерное окончание работ
+    estimated_cost = db.Column(db.String(100), nullable=True)  # Примерная стоимость
+    comment = db.Column(db.Text, default='')
+    work_list = db.Column(db.Text, default='')  # Список работ
+    moved_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Связь с записью в очереди
+    queue_entry = db.relationship('Queue', backref='service_entries')
 
-
-
-# Удаляем и пересоздаем таблицы
+# Создаем таблицы в обеих базах данных
 with app.app_context():
-    # Удаляем старые таблицы
-
-
-    # Создаем новые таблицы с правильной структурой
+    # Создаем таблицу для заявок
     db.create_all(bind_key='applications')
 
+    # Правильный способ проверки существования таблицы
     inspector = db.inspect(db.get_engine(bind='applications'))
+
     if 'queue' not in inspector.get_table_names():
         Queue.__table__.create(db.get_engine(bind='applications'))
         print("Таблица 'queue' создана успешно!")
+
+    if 'in_service' not in inspector.get_table_names():
+        InService.__table__.create(db.get_engine(bind='applications'))
+        print("Таблица 'in_service' создана успешно!")
 
     print("Все таблицы созданы успешно!")
 
@@ -392,6 +413,219 @@ def submit_application():
         except Exception as e:
             db.session.rollback()
             return jsonify({'success': False, 'message': f'Ошибка при отправке заявки: {str(e)}'})
+
+@app.route('/admin/queue')
+@login_required
+def view_queue():
+    if not current_user.is_admin:
+        abort(403)
+
+    # Получаем все записи из очереди
+    queue_entries = Queue.query.order_by(Queue.moved_at.desc()).all()
+    return render_template('admin_queue.html',
+                           queue_entries=queue_entries,
+                           user=current_user)
+
+@app.route('/admin/queue/update/<int:queue_id>', methods=['POST'])
+@login_required
+def update_queue(queue_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        queue_entry = Queue.query.get_or_404(queue_id)
+
+        # Обновляем данные
+        queue_entry.name = request.form.get('name')
+        queue_entry.phone = request.form.get('phone')
+        queue_entry.car_brand = request.form.get('car_brand')
+        queue_entry.car_model = request.form.get('car_model')
+        queue_entry.desired_date = datetime.strptime(request.form.get('desired_date'), '%Y-%m-%d').date()
+        queue_entry.desired_time = datetime.strptime(request.form.get('desired_time'), '%H:%M').time()
+        queue_entry.comment = request.form.get('comment', '')
+
+        db.session.commit()
+        flash('Запись в очереди успешно обновлена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при обновлении записи: {str(e)}', 'danger')
+
+    return redirect(url_for('view_queue'))
+
+@app.route('/admin/queue/comment/<int:queue_id>', methods=['POST'])
+@login_required
+def add_queue_comment(queue_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        queue_entry = Queue.query.get_or_404(queue_id)
+        comment = request.form.get('comment', '').strip()
+
+        if comment:
+            if queue_entry.comment:
+                queue_entry.comment += f"\n[{datetime.now().strftime('%d.%m.%Y %H:%M')}]: {comment}"
+            else:
+                queue_entry.comment = f"[{datetime.now().strftime('%d.%m.%Y %H:%M')}]: {comment}"
+
+            db.session.commit()
+            flash('Комментарий добавлен!', 'success')
+        else:
+            flash('Комментарий не может быть пустым', 'warning')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при добавлении комментария: {str(e)}', 'danger')
+
+    return redirect(url_for('view_queue'))
+
+@app.route('/admin/queue/to_service/<int:queue_id>', methods=['POST'])
+@login_required
+def move_to_service(queue_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        queue_entry = Queue.query.get_or_404(queue_id)
+
+        # Создаем запись в ремонте
+        service_entry = InService(
+            queue_id=queue_entry.id,
+            name=queue_entry.name,
+            phone=queue_entry.phone,
+            car_brand=queue_entry.car_brand,
+            car_model=queue_entry.car_model,
+            desired_date=queue_entry.desired_date,
+            desired_time=queue_entry.desired_time,
+            created_at=queue_entry.created_at,
+            comment=queue_entry.comment,
+            estimated_completion=datetime.strptime(request.form.get('estimated_completion'), '%Y-%m-%d').date() if request.form.get('estimated_completion') else None,
+            estimated_cost=request.form.get('estimated_cost', ''),
+            work_list=request.form.get('work_list', '')
+        )
+
+        # Добавляем в ремонт и удаляем из очереди
+        db.session.add(service_entry)
+        db.session.delete(queue_entry)
+        db.session.commit()
+
+        flash('Автомобиль перемещен в ремонт!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при перемещении в ремонт: {str(e)}', 'danger')
+
+    return redirect(url_for('view_queue'))
+
+@app.route('/admin/queue/delete/<int:queue_id>')
+@login_required
+def delete_queue(queue_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        queue_entry = Queue.query.get_or_404(queue_id)
+        db.session.delete(queue_entry)
+        db.session.commit()
+        flash('Запись из очереди удалена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
+
+    return redirect(url_for('view_queue'))
+
+@app.route('/admin/service')
+@login_required
+def view_service():
+    if not current_user.is_admin:
+        abort(403)
+
+    # Получаем все записи в ремонте
+    service_entries = InService.query.order_by(InService.moved_at.desc()).all()
+    return render_template('admin_service.html',
+                           service_entries=service_entries,
+                           user=current_user)
+
+@app.route('/admin/service/update/<int:service_id>', methods=['POST'])
+@login_required
+def update_service(service_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        service_entry = InService.query.get_or_404(service_id)
+
+        # Обновляем данные
+        service_entry.name = request.form.get('name')
+        service_entry.phone = request.form.get('phone')
+        service_entry.car_brand = request.form.get('car_brand')
+        service_entry.car_model = request.form.get('car_model')
+        service_entry.estimated_completion = datetime.strptime(request.form.get('estimated_completion'), '%Y-%m-%d').date() if request.form.get('estimated_completion') else None
+        service_entry.estimated_cost = request.form.get('estimated_cost', '')
+        service_entry.comment = request.form.get('comment', '')
+        service_entry.work_list = request.form.get('work_list', '')
+
+        db.session.commit()
+        flash('Запись в ремонте успешно обновлена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при обновлении записи: {str(e)}', 'danger')
+
+    return redirect(url_for('view_service'))
+
+@app.route('/admin/service/delete/<int:service_id>')
+@login_required
+def delete_service(service_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    try:
+        service_entry = InService.query.get_or_404(service_id)
+        db.session.delete(service_entry)
+        db.session.commit()
+        flash('Запись из ремонта удалена!', 'success')
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
+
+    return redirect(url_for('view_service'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     with app.app_context():

@@ -160,15 +160,19 @@
                href="{{ url_for('admin_dashboard') }}">
                 <i class="fas fa-tachometer-alt me-2"></i>Главная
             </a>
+            <<!-- В навигационной панели обновляем ссылки -->
             <a class="nav-link {% if request.endpoint == 'view_requests' %}active{% endif %}"
                href="{{ url_for('view_requests') }}">
                 <i class="fas fa-clipboard-list me-2"></i>Заявки
             </a>
-            <a class="nav-link" href="#">
+            <a class="nav-link {% if request.endpoint == 'view_queue' %}active{% endif %}"
+               href="{{ url_for('view_queue') }}">
                 <i class="fas fa-clock me-2"></i>Очередь на сервис
             </a>
-            <a class="nav-link" href="#">
-                <i class="fas fa-tools me-2"></i>В работе
+            <a class="nav-link {% if request.endpoint == 'view_service' %}active{% endif %}"
+               href="{{ url_for('view_service') }}">
+                <i class="fas fa-wrench me-2"></i>В работе
+
             </a>
         </div>
     </div>

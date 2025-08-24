@@ -1,0 +1,174 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Автомобили в ремонте - Админ-панель{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-wrench me-2"></i>Автомобили в ремонте</h2>
+        <div>
+        <span class="badge bg-primary fs-6">
+            Всего в ремонте: {{ service_entries|length }}
+        </span>
+        </div>
+    </div>
+
+    {% if service_entries %}
+        <div class="admin-card">
+            <div class="admin-card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list me-2"></i>Список автомобилей в ремонте</span>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Клиент</th>
+                            <th>Автомобиль</th>
+                            <th>Окончание работ</th>
+                            <th>Стоимость</th>
+                            <th>Комментарий</th>
+                            <th>Действия</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for entry in service_entries %}
+                            <tr>
+                                <td class="fw-bold">#{{ entry.id }}</td>
+                                <td>
+                                    <strong>{{ entry.name }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ entry.phone }}</small>
+                                </td>
+                                <td>
+                                    {{ entry.car_brand }}
+                                    <br>
+                                    <small class="text-muted">{{ entry.car_model }}</small>
+                                </td>
+                                <td>
+                                    {% if entry.estimated_completion %}
+                                        {{ entry.estimated_completion.strftime('%d.%m.%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">не указано</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.estimated_cost %}
+                                        {{ entry.estimated_cost }}
+                                    {% else %}
+                                        <span class="text-muted">не указана</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if entry.comment %}
+                                        <small class="text-muted">{{ entry.comment|truncate(50) }}</small>
+                                    {% else %}
+                                        <span class="text-muted">нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <!-- Кнопка редактирования -->
+                                        <button type="button" class="btn btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editModal{{ entry.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+
+                                        <!-- Кнопка удаления -->
+                                        <a href="{{ url_for('delete_service', service_id=entry.id) }}"
+                                           class="btn btn-outline-danger"
+                                           onclick="return confirm('Удалить запись из ремонта?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальные окна -->
+        {% for entry in service_entries %}
+            <!-- Модальное окно редактирования -->
+            <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Редактирование записи #{{ entry.id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('update_service', service_id=entry.id) }}">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Имя клиента</label>
+                                        <input type="text" class="form-control" name="name"
+                                               value="{{ entry.name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Телефон</label>
+                                        <input type="tel" class="form-control" name="phone"
+                                               value="{{ entry.phone }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Марка авто</label>
+                                        <input type="text" class="form-control" name="car_brand"
+                                               value="{{ entry.car_brand }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Модель авто</label>
+                                        <input type="text" class="form-control" name="car_model"
+                                               value="{{ entry.car_model }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Примерное окончание работ</label>
+                                        <input type="date" class="form-control" name="estimated_completion"
+                                               value="{{ entry.estimated_completion if entry.estimated_completion else '' }}">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Примерная стоимость</label>
+                                        <input type="text" class="form-control" name="estimated_cost"
+                                               value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
+                                               placeholder="Введите стоимость">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Комментарий</label>
+                                    <textarea class="form-control" name="comment"
+                                              rows="3">{{ entry.comment }}</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Список работ</label>
+                                    <textarea class="form-control" name="work_list"
+                                              rows="3" placeholder="Список работ через запятую">{{ entry.work_list }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <div class="admin-card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-wrench fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Ремонт пуст</h4>
+                <p class="text-muted">Нет автомобилей в ремонте.</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
