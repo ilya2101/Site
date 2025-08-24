@@ -100,106 +100,110 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <!-- Модальное окно редактирования -->
-                            <div class="modal fade" id="editModal{{ request.id }}" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Редактирование заявки #{{ request.id }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form method="POST" action="{{ url_for('update_request', request_id=request.id) }}">
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Имя клиента</label>
-                                                        <input type="text" class="form-control" name="name"
-                                                               value="{{ request.name }}" required>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Телефон</label>
-                                                        <input type="tel" class="form-control" name="phone"
-                                                               value="{{ request.phone }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Марка авто</label>
-                                                        <input type="text" class="form-control" name="car_brand"
-                                                               value="{{ request.car_brand }}" required>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Модель авто</label>
-                                                        <input type="text" class="form-control" name="car_model"
-                                                               value="{{ request.car_model }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Дата записи</label>
-                                                        <input type="date" class="form-control" name="desired_date"
-                                                               value="{{ request.desired_date }}" required>
-                                                    </div>
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label">Время записи</label>
-                                                        <input type="time" class="form-control" name="desired_time"
-                                                               value="{{ request.desired_time.strftime('%H:%M') }}" required>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Комментарий</label>
-                                                    <textarea class="form-control" name="comment"
-                                                              rows="3">{{ request.comment }}</textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                <button type="submit" class="btn btn-primary">Сохранить</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Модальное окно комментария -->
-                            <div class="modal fade" id="commentModal{{ request.id }}" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Комментарий к заявке #{{ request.id }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <form method="POST" action="{{ url_for('add_comment', request_id=request.id) }}">
-                                            <div class="modal-body">
-                                                {% if request.comment %}
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Текущий комментарий:</label>
-                                                        <div class="alert alert-info">
-                                                            {{ request.comment|replace('\n', '<br>')|safe }}
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                                <div class="mb-3">
-                                                    <label class="form-label">Новый комментарий:</label>
-                                                    <textarea class="form-control" name="comment" rows="4"
-                                                              placeholder="Введите ваш комментарий..." required></textarea>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                <button type="submit" class="btn btn-primary">Добавить комментарий</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+        <!-- Модальные окна вынесены за пределы таблицы -->
+        {% for request in requests %}
+            <!-- Модальное окно редактирования -->
+            <div class="modal fade" id="editModal{{ request.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Редактирование заявки #{{ request.id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('update_request', request_id=request.id) }}">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Имя клиента</label>
+                                        <input type="text" class="form-control" name="name"
+                                               value="{{ request.name }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Телефон</label>
+                                        <input type="tel" class="form-control" name="phone"
+                                               value="{{ request.phone }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Марка авто</label>
+                                        <input type="text" class="form-control" name="car_brand"
+                                               value="{{ request.car_brand }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Модель авто</label>
+                                        <input type="text" class="form-control" name="car_model"
+                                               value="{{ request.car_model }}" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Дата записи</label>
+                                        <input type="date" class="form-control" name="desired_date"
+                                               value="{{ request.desired_date }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Время записи</label>
+                                        <input type="time" class="form-control" name="desired_time"
+                                               value="{{ request.desired_time.strftime('%H:%M') }}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Комментарий</label>
+                                    <textarea class="form-control" name="comment"
+                                              rows="3">{{ request.comment }}</textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Модальное окно комментария -->
+            <div class="modal fade" id="commentModal{{ request.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Комментарий к заявке #{{ request.id }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('add_comment', request_id=request.id) }}">
+                            <div class="modal-body">
+                                {% if request.comment %}
+                                    <div class="mb-3">
+                                        <label class="form-label">Текущий комментарий:</label>
+                                        <div class="alert alert-info">
+                                            {{ request.comment|replace('\n', '<br>')|safe }}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label class="form-label">Новый комментарий:</label>
+                                    <textarea class="form-control" name="comment" rows="4"
+                                              placeholder="Введите ваш комментарий..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
     {% else %}
         <div class="admin-card">
             <div class="card-body text-center py-5">
@@ -209,4 +213,21 @@
             </div>
         </div>
     {% endif %}
+
+    <!-- Добавим JavaScript для плавной работы модальных окон -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Предотвращаем двойное открытие модальных окон
+            $('.modal').on('show.bs.modal', function (e) {
+                if (document.querySelectorAll('.modal.show').length) {
+                    return false;
+                }
+            });
+
+            // Закрываем все модальные окна при открытии нового
+            $('[data-bs-toggle="modal"]').click(function() {
+                $('.modal').modal('hide');
+            });
+        });
+    </script>
 {% endblock %}

@@ -81,7 +81,7 @@ class Queue(db.Model):
 # Удаляем и пересоздаем таблицы
 with app.app_context():
     # Удаляем старые таблицы
-    db.drop_all(bind_key='applications')
+
 
     # Создаем новые таблицы с правильной структурой
     db.create_all(bind_key='applications')
