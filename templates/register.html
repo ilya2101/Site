@@ -1,56 +1,265 @@
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
 {% extends "base.html" %}
 
 {% block title %}Регистрация{% endblock %}
 
 {% block body %}
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center mb-4">Регистрация</h2>
-            <form action="{{ url_for('register') }}" method="POST">
-                <!-- Имя -->
-                <div class="mb-3">
-                    <label for="first_name" class="form-label">Имя</label>
-                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <!-- Заголовок карточки -->
+                    <div class="card-header bg-dark text-white py-4 rounded-top-4 text-center">
+                        <h3 class="mb-0">
+                            <i class="bi bi-person-plus-fill me-2"></i>Регистрация
+                        </h3>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Flash сообщения -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show rounded-3 mb-4">
+                                        <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form action="{{ url_for('register') }}" method="POST">
+                            <div class="row">
+                                <!-- Имя -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="first_name" class="form-label fw-medium text-dark mb-2">
+                                        <i class="bi bi-person text-warning me-2"></i>Имя
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-card-heading text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="first_name"
+                                               name="first_name"
+                                               required
+                                               placeholder="Ваше имя"
+                                               style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </div>
+                                </div>
+
+                                <!-- Фамилия -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="last_name" class="form-label fw-medium text-dark mb-2">
+                                        <i class="bi bi-person-badge text-warning me-2"></i>Фамилия
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0">
+                                            <i class="bi bi-card-text text-muted"></i>
+                                        </span>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="last_name"
+                                               name="last_name"
+                                               required
+                                               placeholder="Ваша фамилия"
+                                               style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Номер телефона -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label fw-medium text-dark mb-2">
+                                    <i class="bi bi-phone text-warning me-2"></i>Номер телефона
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-telephone text-muted"></i>
+                                    </span>
+                                    <input type="tel"
+                                           class="form-control"
+                                           id="phone"
+                                           name="phone"
+                                           pattern="\+?[0-9\s\-]+"
+                                           required
+                                           placeholder="+7 (900) 123-45-67"
+                                           style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                </div>
+                            </div>
+
+                            <!-- Пароль -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label fw-medium text-dark mb-2">
+                                    <i class="bi bi-key text-warning me-2"></i>Пароль
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-shield-lock text-muted"></i>
+                                    </span>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="password"
+                                           name="password"
+                                           minlength="6"
+                                           required
+                                           placeholder="Не менее 6 символов"
+                                           style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                </div>
+                            </div>
+
+                            <!-- Подтверждение пароля -->
+                            <div class="mb-4">
+                                <label for="confirm_password" class="form-label fw-medium text-dark mb-2">
+                                    <i class="bi bi-key-fill text-warning me-2"></i>Повторите пароль
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-shield-check text-muted"></i>
+                                    </span>
+                                    <input type="password"
+                                           class="form-control"
+                                           id="confirm_password"
+                                           name="confirm_password"
+                                           required
+                                           placeholder="Повторите пароль"
+                                           style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                </div>
+                                <div id="password_error" class="text-danger mt-2" style="display: none;">
+                                    <i class="bi bi-exclamation-triangle"></i> Пароли не совпадают!
+                                </div>
+                            </div>
+
+                            <!-- Кнопка отправки -->
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-semibold">
+                                <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+                            </button>
+                        </form>
+
+                        <!-- Ссылка на вход -->
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="text-muted mb-0">
+                                Уже есть аккаунт?
+                                <a href="{{ url_for('login') }}" class="text-warning text-decoration-none fw-medium">
+                                    Войти
+                                </a>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <!-- Фамилия -->
-                <div class="mb-3">
-                    <label for="last_name" class="form-label">Фамилия</label>
-                    <input type="text" class="form-control" id="last_name" name="last_name" required>
-                </div>
-                <!-- Номер телефона -->
-                <div class="mb-3">
-                    <label for="phone" class="form-label">Номер телефона</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" pattern="\+?[0-9\s\-]+" required>
-                </div>
-                <!-- Пароль -->
-                <div class="mb-3">
-                    <label for="password" class="form-label">Пароль</label>
-                    <input type="password" class="form-control" id="password" name="password" minlength="6" required>
-                </div>
-                <!-- Подтверждение пароля -->
-                <div class="mb-3">
-                    <label for="confirm_password" class="form-label">Повторите пароль</label>
-                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                    <div id="password_error" class="text-danger" style="display: none;">Пароли не совпадают!</div>
-                </div>
-                <!-- Кнопка отправки -->
-                <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
-            </form>
-            <!-- Ссылка на вход -->
-            <div class="mt-3 text-center">
-                <p>Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
             </div>
         </div>
     </div>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            margin: 0;
+            padding: 0;
+        }
+
+        .min-vh-100 {
+            min-height: 100vh;
+        }
+
+        .card {
+            border: none;
+            background: white;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+            border: none;
+        }
+
+        .form-control {
+            border: 2px solid #dce4ec;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border-radius: 0.375rem;
+        }
+
+        .form-control:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.15);
+            background: white;
+        }
+
+        .input-group-text {
+            border: 2px solid #dce4ec;
+            border-right: none;
+            background: #f8f9fa;
+            border-radius: 0.375rem 0 0 0.375rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+            background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 0.375rem;
+            padding: 1rem 1.25rem;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        a.text-warning:hover {
+            color: #e74c3c !important;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .card {
+                margin: 0;
+            }
+
+            .card-body {
+                padding: 1.5rem;
+            }
+
+            .btn-primary {
+                padding: 1rem;
+            }
+
+            .row .col-md-6 {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
     <!-- Проверка совпадения паролей -->
     <script>
@@ -61,8 +270,51 @@
 
             if (password !== confirmPassword) {
                 errorElement.style.display = 'block';
-                e.preventDefault(); // Отмена отправки
+                e.preventDefault();
+
+                // Плавная прокрутка к ошибке
+                errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+        });
+
+        // Скрываем ошибку при изменении паролей
+        document.getElementById('password').addEventListener('input', function() {
+            document.getElementById('password_error').style.display = 'none';
+        });
+
+        document.getElementById('confirm_password').addEventListener('input', function() {
+            document.getElementById('password_error').style.display = 'none';
         });
     </script>
 {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
