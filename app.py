@@ -115,11 +115,7 @@ class InService(db.Model):
 with app.app_context():
 
 
-    try:
-        db.drop_all(bind_key='applications')
-        print("Таблицы applications удалены")
-    except Exception as e:
-        print(f"Ошибка удаления таблиц applications: {e}")
+
 
     # Создаем все таблицы заново
     db.create_all()
@@ -698,6 +694,8 @@ def delete_service(service_id):
         flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
 
     return redirect(url_for('view_service'))
+
+
 
 
 
