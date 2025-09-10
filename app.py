@@ -175,9 +175,7 @@ def create_admin():
 def index():
     return render_template("index.html")
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -695,7 +693,21 @@ def delete_service(service_id):
 
     return redirect(url_for('view_service'))
 
+@app.route('/about')
+def about():
+    render_template('about.html')
 
+@app.route('/contacts')
+def contacts():
+    return render_template('contact.html')
+
+@app.route('/discounts')
+def discounts():
+    return render_template('discounts.html')
+
+@app.route('/price')
+def prices():
+    return render_template('price.html')
 
 
 
