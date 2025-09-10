@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Акции и скидки{% endblock %}
+
+{% block content %}
+<section class="discounts-section py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold text-primary mb-3">Акции и скидки</h1>
+                <p class="lead text-muted">Специальные предложения для наших клиентов</p>
+            </div>
+        </div>
+
+        {% if discounts %}
+        <div class="row">
+            {% for discount in discounts %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card discount-card h-100 shadow-lg border-0">
+                    {% if discount.image %}
+                    <img src="{{ url_for('static', filename=discount.image) }}"
+                         class="card-img-top discount-image"
+                         alt="{{ discount.title }}"
+                         style="height: 250px; object-fit: cover;">
+                    {% else %}
+                    <div class="discount-placeholder bg-light d-flex align-items-center justify-content-center"
+                         style="height: 250px;">
+                        <i class="bi bi-percent display-1 text-muted"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body">
+                        <h3 class="card-title fw-bold text-dark mb-3">{{ discount.title }}</h3>
+                        <p class="card-text text-muted mb-4">{{ discount.description }}</p>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if discount.expires_at %}
+                            <small class="text-danger">
+                                <i class="bi bi-clock me-1"></i>
+                                До {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                            </small>
+                            {% else %}
+                            <small class="text-success">
+                                <i class="bi bi-infinity me-1"></i>
+                                Постоянная акция
+                            </small>
+                            {% endif %}
+
+                            <span class="badge bg-primary rounded-pill px-3 py-2">
+                                <i class="bi bi-tag me-1"></i>
+                                Акция
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="bi bi-percent display-1 text-muted mb-4"></i>
+                    <h3 class="text-muted mb-3">Акций пока нет</h3>
+                    <p class="text-muted">Следите за обновлениями, скоро появятся специальные предложения!</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+    .discount-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .discount-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .discount-image {
+        transition: transform 0.3s ease;
+    }
+
+    .discount-card:hover .discount-image {
+        transform: scale(1.05);
+    }
+
+    .discount-placeholder {
+        border-radius: 15px 15px 0 0;
+    }
+
+    .empty-state {
+        padding: 3rem 0;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .card-title {
+        min-height: 3rem;
+    }
+
+    .card-text {
+        min-height: 4rem;
+    }
+</style>
+{% endblock %}

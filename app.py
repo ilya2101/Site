@@ -6,7 +6,12 @@ from flask_migrate import Migrate
 from datetime import datetime
 from flask_login import LoginManager, UserMixin, login_user, login_required, current_user, logout_user
 import os
-import time
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, BooleanField, DateField
+from wtforms.validators import DataRequired
+from flask_wtf.file import FileField, FileAllowed
+
+from forms import DiscountForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ilya'
@@ -29,6 +34,8 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -110,6 +117,28 @@ class InService(db.Model):
     queue_entry = db.relationship('Queue', backref='service_entries')
 
 
+class Discount(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(255), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=True)
+
+
+class DiscountForm(FlaskForm):
+    title = StringField('Название акции', validators=[DataRequired()])
+    description = TextAreaField('Описание', validators=[DataRequired()])
+    image = FileField('Изображение', validators=[  # Исправлено: FileField вместо TextAreaField
+        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения!')
+    ])
+    is_active = BooleanField('Активна', default=True)
+    expires_at = DateField('Действует до', format='%Y-%m-%d')
+
+
+
+
 # Создаем таблицы в обеих базах данных
 # Создаем таблицы в обеих базах данных
 with app.app_context():
@@ -142,9 +171,25 @@ with app.app_context():
 
 
 
+
+
+# Создаем папки для загрузок при запуске приложения
+def create_upload_folders():
+    folders = [
+        'static/uploads/discounts',
+        'static/uploads'
+    ]
+    for folder in folders:
+        os.makedirs(folder, exist_ok=True)
+        print(f"Папка создана: {folder}")
+
+# Вызываем создание папок при запуске
+create_upload_folders()
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
+
 
 # Создаем таблицы (выполнить один раз)
 with app.app_context():
@@ -703,7 +748,13 @@ def contacts():
 
 @app.route('/discounts')
 def discounts():
-    return render_template('discounts.html')
+    # Получаем только активные скидки
+    active_discounts = Discount.query.filter(
+        Discount.is_active == True,
+        (Discount.expires_at.is_(None)) | (Discount.expires_at >= datetime.now())
+    ).order_by(Discount.created_at.desc()).all()
+
+    return render_template('discounts.html', discounts=active_discounts)
 
 @app.route('/price')
 def prices():
@@ -711,7 +762,91 @@ def prices():
 
 
 
+@app.route('/admin/discounts', methods=['GET', 'POST'])
+@login_required
+def admin_discounts():
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('index'))
 
+    form = DiscountForm()
+    discounts = Discount.query.order_by(Discount.created_at.desc()).all()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            discount = Discount(
+                title=form.title.data,
+                description=form.description.data,
+                is_active=form.is_active.data,
+                expires_at=form.expires_at.data
+            )
+
+            # Обработка загрузки изображения
+            if form.image.data:
+                try:
+                    # Создаем папку если ее нет
+                    upload_folder = 'static/uploads/discounts'
+                    os.makedirs(upload_folder, exist_ok=True)
+
+                    filename = secure_filename(form.image.data.filename)
+                    unique_filename = f"{datetime.now().timestamp()}_{filename}"
+                    filepath = os.path.join(upload_folder, unique_filename)
+
+                    # Сохраняем файл
+                    form.image.data.save(filepath)
+                    discount.image = f"uploads/discounts/{unique_filename}"
+
+                except Exception as e:
+                    flash(f'Ошибка при загрузке изображения: {str(e)}', 'error')
+                    return redirect(url_for('admin_discounts'))
+
+            try:
+                db.session.add(discount)
+                db.session.commit()
+                flash('Скидка успешно добавлена!', 'success')
+                return redirect(url_for('admin_discounts'))
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Ошибка при сохранении: {str(e)}', 'error')
+                return redirect(url_for('admin_discounts'))
+
+    return render_template('admin_discounts.html',
+                           form=form,
+                           discounts=discounts,
+                           user=current_user)
+
+
+
+
+@app.route('/admin/discount/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_discount(id):
+    if not current_user.is_admin:
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('index'))
+
+    discount = db.session.get(Discount, id)
+    if not discount:
+        flash('Скидка не найдена!', 'error')
+        return redirect(url_for('admin_discounts'))
+
+    if discount.image:
+        try:
+            image_path = os.path.join('static', discount.image)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        except Exception as e:
+            flash(f'Ошибка при удалении изображения: {str(e)}', 'warning')
+
+    try:
+        db.session.delete(discount)
+        db.session.commit()
+        flash('Скидка удалена!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Ошибка при удалении: {str(e)}', 'error')
+
+    return redirect(url_for('admin_discounts'))
 
 
 

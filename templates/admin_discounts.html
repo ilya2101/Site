@@ -1,0 +1,127 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Управление скидками - Админ-панель{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-admin">
+                <i class="bi bi-percent me-2"></i>
+                Управление скидками и акциями
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Форма добавления -->
+        <div class="col-lg-6 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить новую скидку
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control", rows=4) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.image.label(class="form-label") }}
+                            {{ form.image(class="form-control") }}
+                            <div class="form-text">Рекомендуемый размер: 400x300px</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.expires_at.label(class="form-label") }}
+                                {{ form.expires_at(class="form-control", type="date") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch mt-4">
+                                    {{ form.is_active(class="form-check-input") }}
+                                    {{ form.is_active.label(class="form-check-label") }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-action w-100">
+                            <i class="bi bi-save me-2"></i>Сохранить скидку
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список скидок -->
+        <div class="col-lg-6 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <i class="bi bi-list me-2"></i>Активные скидки
+                </div>
+                <div class="card-body p-0">
+                    {% if discounts %}
+                    <div class="list-group list-group-flush">
+                        {% for discount in discounts %}
+                        <div class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                {% if discount.image %}
+                                <img src="{{ url_for('static', filename=discount.image) }}"
+                                     class="rounded me-3"
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ discount.title }}</h6>
+                                    <p class="text-muted mb-1 small">{{ discount.description|truncate(50) }}</p>
+                                    <small class="text-muted">
+                                        Создано: {{ discount.created_at.strftime('%d.%m.%Y') }}
+                                        {% if discount.expires_at %}
+                                        • Действует до: {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                            type="button"
+                                            data-bs-toggle="dropdown">
+                                        <i class="bi bi-gear"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-pencil me-2"></i>Редактировать
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-danger"
+                                               href="{{ url_for('delete_discount', id=discount.id) }}"
+                                               onclick="return confirm('Удалить эту скидку?')">
+                                                <i class="bi bi-trash me-2"></i>Удалить
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-percent text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">Нет добавленных скидок</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

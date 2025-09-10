@@ -23,3 +23,39 @@ header{
     position: relative;
 }
 
+/* Стили для карточек скидок */
+.discount-card {
+    transition: all 0.3s ease;
+}
+
+.discount-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.discount-image {
+    height: 250px;
+    object-fit: cover;
+}
+
+.discount-placeholder {
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+}
+
+/* Анимация при наведении */
+.discount-card {
+    overflow: hidden;
+}
+
+.discount-card img {
+    transition: transform 0.3s ease;
+}
+
+.discount-card:hover img {
+    transform: scale(1.05);
+}
+
