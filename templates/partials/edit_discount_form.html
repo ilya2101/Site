@@ -1,0 +1,131 @@
+<form method="POST" action="{{ url_for('update_discount', id=discount.id) }}" class="admin-form">
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-dark">Название акции</label>
+        <input type="text" class="form-control form-control-lg" name="title" value="{{ discount.title }}" required
+               placeholder="Введите название акции">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold text-dark">Описание</label>
+        <textarea class="form-control" name="description" rows="4" required
+                  placeholder="Описание акции...">{{ discount.description }}</textarea>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7 mb-3">
+            <label class="form-label fw-semibold text-dark">Действует до</label>
+            <input type="date" class="form-control" name="expires_at"
+                   value="{{ discount.expires_at.strftime('%Y-%m-%d') if discount.expires_at else '' }}"
+                   placeholder="Выберите дату окончания">
+            <div class="form-text text-muted">Оставьте пустым для бессрочной акции</div>
+        </div>
+        <div class="col-md-5 mb-3">
+            <div class="form-check form-switch mt-4 pt-3">
+                <input class="form-check-input" type="checkbox" name="is_active"
+                       id="is_active_switch"
+                       {{ 'checked' if discount.is_active else '' }}>
+                <label class="form-check-label fw-semibold text-dark" for="is_active_switch">
+                    Активна
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-admin-primary flex-fill py-2">
+            <i class="bi bi-save me-2"></i>Сохранить изменения
+        </button>
+        <button type="button" class="btn btn-admin-secondary py-2" data-bs-dismiss="modal">
+            <i class="bi bi-x me-2"></i>Отмена
+        </button>
+    </div>
+</form>
+
+<style>
+    .admin-form .form-control {
+        border-radius: 10px;
+        border: 2px solid #ecf0f1;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+
+    .admin-form .form-control:focus {
+        border-color: #132833;
+        box-shadow: 0 0 0 0.3rem rgba(52, 152, 219, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .admin-form .form-control-lg {
+        font-size: 1.1rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .admin-form .form-label {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+    }
+
+    .admin-form textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .admin-form .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        border: 2px solid #bdc3c7;
+    }
+
+    .admin-form .form-check-input:checked {
+        background-color: #2c3e50;
+        border-color: #2c3e50;
+    }
+
+    .admin-form .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+
+    .admin-form .form-text {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn-admin-primary {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .btn-admin-primary:hover {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
+        color: white;
+    }
+
+    .btn-admin-secondary {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        border: none;
+        color: white;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .btn-admin-secondary:hover {
+        background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    .admin-form {
+        padding: 0.5rem;
+    }
+</style>

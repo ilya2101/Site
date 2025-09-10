@@ -6,49 +6,64 @@
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
-            <div class="alert alert-admin">
-                <i class="bi bi-percent me-2"></i>
-                Управление скидками и акциями
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="alert alert-admin mb-0">
+                    <i class="bi bi-percent me-2"></i>
+                    Управление скидками и акциями
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="cleanupExpired()">
+                    <i class="bi bi-trash me-1"></i>Очистить просроченные
+                </button>
             </div>
         </div>
     </div>
 
     <div class="row">
         <!-- Форма добавления -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-5 mb-4">
             <div class="admin-card">
                 <div class="admin-card-header">
                     <i class="bi bi-plus-circle me-2"></i>Добавить новую скидку
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
+                    <form method="POST" enctype="multipart/form-data" id="discountForm">
                         {{ form.hidden_tag() }}
 
                         <div class="mb-3">
                             {{ form.title.label(class="form-label") }}
-                            {{ form.title(class="form-control") }}
+                            {{ form.title(class="form-control", placeholder="Название акции") }}
+                            {% if form.title.errors %}
+                            <div class="text-danger small">{{ form.title.errors[0] }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="mb-3">
                             {{ form.description.label(class="form-label") }}
-                            {{ form.description(class="form-control", rows=4) }}
+                            {{ form.description(class="form-control", rows=4, placeholder="Описание акции...") }}
+                            {% if form.description.errors %}
+                            <div class="text-danger small">{{ form.description.errors[0] }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="mb-3">
                             {{ form.image.label(class="form-label") }}
                             {{ form.image(class="form-control") }}
-                            <div class="form-text">Рекомендуемый размер: 400x300px</div>
+                            <div class="form-text">Поддерживаемые форматы: JPG, PNG, GIF. Макс. размер: 5MB</div>
+                            {% if form.image.errors %}
+                            <div class="text-danger small">{{ form.image.errors[0] }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-7 mb-3">
                                 {{ form.expires_at.label(class="form-label") }}
                                 {{ form.expires_at(class="form-control", type="date") }}
+                                <div class="form-text">Оставьте пустым для бессрочной акции</div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check form-switch mt-4">
-                                    {{ form.is_active(class="form-check-input") }}
-                                    {{ form.is_active.label(class="form-check-label") }}
+                            <div class="col-md-5 mb-3">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    {{ form.is_active(class="form-check-input", checked=True) }}
+                                    {{ form.is_active.label(class="form-check-label fw-bold") }}
                                 </div>
                             </div>
                         </div>
@@ -62,66 +77,166 @@
         </div>
 
         <!-- Список скидок -->
-        <div class="col-lg-6 mb-4">
+        <div class="col-lg-7 mb-4">
             <div class="admin-card">
-                <div class="admin-card-header">
-                    <i class="bi bi-list me-2"></i>Активные скидки
+                <div class="admin-card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list me-2"></i>Список скидок ({{ discounts|length }})</span>
                 </div>
                 <div class="card-body p-0">
                     {% if discounts %}
                     <div class="list-group list-group-flush">
                         {% for discount in discounts %}
-                        <div class="list-group-item">
-                            <div class="d-flex align-items-center">
+                        <div class="list-group-item {% if discount.expires_at and discount.expires_at < now %}bg-light{% endif %}">
+                            <div class="d-flex align-items-start">
                                 {% if discount.image %}
                                 <img src="{{ url_for('static', filename=discount.image) }}"
                                      class="rounded me-3"
-                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                     style="width: 60px; height: 60px; object-fit: cover;"
+                                     onerror="this.style.display='none'">
                                 {% endif %}
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-1">{{ discount.title }}</h6>
-                                    <p class="text-muted mb-1 small">{{ discount.description|truncate(50) }}</p>
-                                    <small class="text-muted">
-                                        Создано: {{ discount.created_at.strftime('%d.%m.%Y') }}
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">{{ discount.title }}</h6>
+
+                                        <!-- Кнопки действий -->
+                                        <!-- Кнопки действий -->
+                                        <div class="btn-group btn-group-sm">
+                                            <!-- Кнопка редактирования -->
+                                            <button class="btn btn-outline-primary btn-sm"
+                                                    onclick="editDiscount({{ discount.id }})"
+                                                    title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                            <!-- Кнопка удаления -->
+                                            <form method="POST"
+                                                  action="{{ url_for('delete_discount', id=discount.id) }}"
+                                                  class="d-inline">
+                                                <button type="submit"
+                                                        class="btn btn-outline-danger btn-sm"
+                                                        onclick="return confirm('Удалить скидку \"{{ discount.title }}\"?')"
+                                                title="Удалить">
+                                                <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-muted mb-2 small">{{ discount.description|truncate(80) }}</p>
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            {{ discount.created_at.strftime('%d.%m.%Y') }}
+                                        </small>
+
                                         {% if discount.expires_at %}
-                                        • Действует до: {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                        <small class="{% if discount.expires_at < now %}text-danger{% else %}text-success{% endif %}">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {% if discount.expires_at < now %}
+                                            Просрочена
+                                            {% else %}
+                                            До: {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                            {% endif %}
+                                        </small>
+                                        {% else %}
+                                        <small class="text-success">
+                                            <i class="bi bi-infinity me-1"></i>Бессрочная
+                                        </small>
                                         {% endif %}
-                                    </small>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                            type="button"
-                                            data-bs-toggle="dropdown">
-                                        <i class="bi bi-gear"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a class="dropdown-item" href="#">
-                                                <i class="bi bi-pencil me-2"></i>Редактировать
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-danger"
-                                               href="{{ url_for('delete_discount', id=discount.id) }}"
-                                               onclick="return confirm('Удалить эту скидку?')">
-                                                <i class="bi bi-trash me-2"></i>Удалить
-                                            </a>
-                                        </li>
-                                    </ul>
+                                    </div>
+
+                                    <div class="mt-2">
+                                <span class="badge {% if discount.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if discount.is_active %}Активна{% else %}Неактивна{% endif %}
+                                </span>
+                                        {% if discount.expires_at and discount.expires_at < now %}
+                                        <span class="badge bg-danger ms-1">Просрочена</span>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-percent text-muted" style="font-size: 2rem;"></i>
-                        <p class="text-muted mt-2">Нет добавленных скидок</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-percent text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">Нет добавленных скидок</p>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-</div>
+
+
+        <!-- Модальное окно редактирования -->
+        <div class="modal fade" id="editDiscountModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">Редактирование скидки</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="editDiscountBody">
+                        <!-- Контент будет загружен через AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Стили для кнопок -->
+        <style>
+            .btn-group-sm .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.875rem;
+            }
+            .btn-group-sm .btn i {
+                font-size: 0.9rem;
+            }
+        </style>
+
+        <!-- Скрипт для редактирования -->
+        <script>
+            function editDiscount(discountId) {
+                // Загружаем форму редактирования через AJAX
+                fetch(`/admin/discount/edit/${discountId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('editDiscountBody').innerHTML = html;
+                        const modal = new bootstrap.Modal(document.getElementById('editDiscountModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ошибка при загрузке формы редактирования');
+                    });
+            }
+        </script>
+
+<!-- Скрипт для очистки просроченных -->
+<script>
+    function cleanupExpired() {
+        if (confirm('Удалить все просроченные скидки?')) {
+            fetch('/admin/cleanup_expired', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Удалено ${data.deleted_count} просроченных скидок`);
+                    location.reload();
+                } else {
+                    alert('Ошибка при очистке: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Ошибка сети: ' + error);
+            });
+        }
+    }
+</script>
 {% endblock %}
