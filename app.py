@@ -15,6 +15,22 @@ from forms import DiscountForm
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from functools import wraps
+from flask import abort
+from flask_login import current_user
+
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)  # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ilya'
 
@@ -764,6 +780,13 @@ def discounts():
 @app.route('/price')
 def prices():
     return render_template('price.html')
+
+@app.route('/admin/price')
+@login_required
+@admin_required  # Теперь этот декоратор будет работать
+def admin_price():
+    # Простая версия без формы (чтобы избежать ошибок)
+    return render_template('admin_price.html')
 
 @app.route('/admin/discounts', methods=['GET', 'POST'])
 @login_required

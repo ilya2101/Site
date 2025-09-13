@@ -1,0 +1,50 @@
+{% extends "base_admin.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Управление ценами</h2>
+
+    <div class="alert alert-info">
+        <h4>Страница управления ценами</h4>
+        <p>Здесь будет функционал для редактирования цен на услуги.</p>
+        <p>В разработке...</p>
+    </div>
+
+    <!-- Простая таблица для демонстрации -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Текущие цены</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Услуга</th>
+                        <th>Цена</th>
+                        <th>Статус</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Базовая стирка</td>
+                        <td>500 руб.</td>
+                        <td><span class="badge bg-success">Активно</span></td>
+                    </tr>
+                    <tr>
+                        <td>Химчистка</td>
+                        <td>1200 руб.</td>
+                        <td><span class="badge bg-success">Активно</span></td>
+                    </tr>
+                    <tr>
+                        <td>Глажка</td>
+                        <td>300 руб.</td>
+                        <td><span class="badge bg-warning">На модерации</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
