@@ -750,19 +750,20 @@ def contacts():
 
 @app.route('/discounts')
 def discounts():
-    # ВЕРНУТЬ ОРИГИНАЛЬНЫЙ КОД:
+    # Получаем только активные скидки
     active_discounts = Discount.query.filter(
         Discount.is_active == True,
         (Discount.expires_at.is_(None)) | (Discount.expires_at >= datetime.now())
     ).order_by(Discount.created_at.desc()).all()
 
-    return render_template('discounts.html', discounts=active_discounts)
+    return render_template('discounts.html',
+                           discounts=active_discounts,
+                           user=current_user)  # Добавьте эту строку
+
 
 @app.route('/price')
 def prices():
     return render_template('price.html')
-
-
 
 @app.route('/admin/discounts', methods=['GET', 'POST'])
 @login_required

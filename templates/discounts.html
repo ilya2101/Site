@@ -1,393 +1,217 @@
-{% extends "base_admin.html" %}
+{% extends "base.html" %}
 
-{% block title %}Управление скидками - Админ-панель{% endblock %}
+{% block title %}Акции и скидки{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="alert alert-admin">
-                    <i class="bi bi-percent me-2"></i>
-                    Управление скидками и акциями
-                </div>
-                <button class="btn btn-admin-secondary" onclick="cleanupExpired()">
-                    <i class="bi bi-trash me-1"></i>Очистить просроченные
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Форма добавления -->
-        <div class="col-lg-5 mb-4">
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <i class="bi bi-plus-circle me-2"></i>Добавить новую скидку
-                </div>
-                <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="discountForm">
-                        {{ form.hidden_tag() }}
-
-                        <div class="mb-3">
-                            {{ form.title.label(class="form-label fw-semibold text-dark") }}
-                            {{ form.title(class="form-control form-control-lg", placeholder="Название акции") }}
-                            {% if form.title.errors %}
-                            <div class="text-danger small mt-1">{{ form.title.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form.description.label(class="form-label fw-semibold text-dark") }}
-                            {{ form.description(class="form-control", rows=4, placeholder="Описание акции...") }}
-                            {% if form.description.errors %}
-                            <div class="text-danger small mt-1">{{ form.description.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form.image.label(class="form-label fw-semibold text-dark") }}
-                            {{ form.image(class="form-control") }}
-                            <div class="form-text text-muted">Поддерживаемые форматы: JPG, PNG, GIF. Макс. размер: 5MB</div>
-                            {% if form.image.errors %}
-                            <div class="text-danger small mt-1">{{ form.image.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-7 mb-3">
-                                {{ form.expires_at.label(class="form-label fw-semibold text-dark") }}
-                                {{ form.expires_at(class="form-control", type="date") }}
-                                <div class="form-text text-muted">Оставьте пустым для бессрочной акции</div>
-                            </div>
-                            <div class="col-md-5 mb-3">
-                                <div class="form-check form-switch mt-4 pt-2">
-                                    {{ form.is_active(class="form-check-input", checked=True) }}
-                                    {{ form.is_active.label(class="form-check-label fw-semibold text-dark") }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-admin-primary w-100 py-2">
-                            <i class="bi bi-save me-2"></i>Сохранить скидку
-                        </button>
-                    </form>
-                </div>
+{% block body %}
+<section class="discounts-section py-5">
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold text-primary mb-3">Акции и скидки</h1>
+                <p class="lead text-muted">Специальные предложения для наших клиентов</p>
+                <div class="divider mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
             </div>
         </div>
 
-        <!-- Список скидок -->
-        <div class="col-lg-7 mb-4">
-            <div class="admin-card">
-                <div class="admin-card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list me-2"></i>Список скидок ({{ discounts|length }})</span>
-                    <span class="badge bg-info">Автоочистка каждый час</span>
-                </div>
-                <div class="card-body p-0">
-                    {% if discounts %}
-                    <div class="list-group list-group-flush">
-                        {% for discount in discounts %}
-                        <div class="list-group-item {% if discount.expires_at and discount.expires_at < now %}bg-expired{% endif %}">
-                            <div class="d-flex align-items-start">
-                                {% if discount.image %}
-                                <img src="{{ url_for('static', filename=discount.image) }}"
-                                     class="rounded me-3 discount-thumbnail"
-                                     onerror="this.style.display='none'">
-                                {% else %}
-                                <div class="discount-thumbnail-placeholder rounded me-3">
-                                    <i class="bi bi-percent"></i>
-                                </div>
-                                {% endif %}
-
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="mb-0 fw-semibold text-dark">{{ discount.title }}</h6>
-
-                                        <!-- Кнопки действий -->
-                                        <div class="btn-group btn-group-sm">
-                                            <!-- Кнопка редактирования -->
-                                            <button class="btn btn-admin-outline"
-                                                    onclick="editDiscount({{ discount.id }})"
-                                                    title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-
-                                            <!-- Кнопка удаления -->
-                                            <form method="POST"
-                                                  action="{{ url_for('delete_discount', id=discount.id) }}"
-                                                  class="d-inline">
-                                                <button type="submit"
-                                                        class="btn btn-admin-danger"
-                                                        onclick="return confirm('Удалить скидку \"{{ discount.title }}\"?')"
-                                                title="Удалить">
-                                                <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-
-                                    <p class="text-muted mb-2 small">{{ discount.description|truncate(80) }}</p>
-
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">
-                                            <i class="bi bi-calendar me-1"></i>
-                                            {{ discount.created_at.strftime('%d.%m.%Y') }}
-                                        </small>
-
-                                        {% if discount.expires_at %}
-                                        <small class="{% if discount.expires_at < now %}text-danger{% else %}text-success{% endif %} fw-semibold">
-                                            <i class="bi bi-clock me-1"></i>
-                                            {% if discount.expires_at < now %}
-                                            Просрочена
-                                            {% else %}
-                                            До: {{ discount.expires_at.strftime('%d.%m.%Y') }}
-                                            {% endif %}
-                                        </small>
-                                        {% else %}
-                                        <small class="text-success fw-semibold">
-                                            <i class="bi bi-infinity me-1"></i>Бессрочная
-                                        </small>
-                                        {% endif %}
-                                    </div>
-
-                                    <div class="mt-2">
-                                        <span class="badge {% if discount.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                            {% if discount.is_active %}Активна{% else %}Неактивна{% endif %}
-                                        </span>
-                                        {% if discount.expires_at and discount.expires_at < now %}
-                                        <span class="badge bg-danger ms-1">Просрочена</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
+        <!-- Сетка скидок -->
+        {% if discounts %}
+        <div class="row">
+            {% for discount in discounts %}
+            <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                <div class="card discount-card h-100 shadow-lg border-0">
+                    <!-- Изображение -->
+                    {% if discount.image %}
+                    <div class="discount-image-container" style="height: 250px; overflow: hidden;">
+                        <img src="{{ url_for('static', filename=discount.image) }}"
+                             class="card-img-top discount-image w-100 h-100"
+                             alt="{{ discount.title }}"
+                             style="object-fit: cover;">
+                        <div class="discount-overlay"></div>
                     </div>
                     {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-percent text-muted mb-3" style="font-size: 3rem;"></i>
-                        <p class="text-muted mb-2">Нет добавленных скидок</p>
-                        <p class="text-muted small">Добавьте первую скидку используя форму слева</p>
+                    <div class="discount-placeholder bg-gradient-primary d-flex align-items-center justify-content-center"
+                         style="height: 250px;">
+                        <i class="bi bi-percent display-1 text-white opacity-50"></i>
                     </div>
                     {% endif %}
+
+                    <!-- Тело карточки -->
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h3 class="card-title fw-bold text-dark mb-0">{{ discount.title }}</h3>
+                            <span class="badge bg-danger rounded-pill px-3">
+                                <i class="bi bi-lightning-fill me-1"></i>Акция
+                            </span>
+                        </div>
+
+                        <p class="card-text text-muted mb-4">{{ discount.description }}</p>
+                    </div>
+
+                    <!-- Футер карточки -->
+                    <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if discount.expires_at %}
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-clock text-danger me-2"></i>
+                                <small class="text-danger fw-semibold">
+                                    До {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                </small>
+                            </div>
+                            {% else %}
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-infinity text-success me-2"></i>
+                                <small class="text-success fw-semibold">Постоянная акция</small>
+                            </div>
+                            {% endif %}
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Сообщение об отсутствии скидок -->
+        <div class="row">
+            <div class="col-12 text-center py-5">
+                <div class="empty-state">
+                    <i class="bi bi-percent display-1 text-muted mb-4 opacity-50"></i>
+                    <h3 class="text-muted mb-3">Акций пока нет</h3>
+                    <p class="text-muted mb-4">Но мы готовим для вас специальные предложения!</p>
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
-</div>
+</section>
 
-<!-- Модальное окно редактирования -->
-<div class="modal fade" id="editDiscountModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+<!-- Модальное окно для подробностей -->
+<div class="modal fade" id="discountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-admin-primary text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-pencil me-2"></i>Редактирование скидки
-                </h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalTitle"></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="editDiscountBody">
-                <!-- Контент будет загружен через AJAX -->
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary">Записаться</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .admin-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
-        border: none;
-        margin-bottom: 2rem;
+    .discounts-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        min-height: 70vh;
+    }
+
+    .discount-card {
+        transition: all 0.3s ease;
+        border-radius: 20px;
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .admin-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .admin-card-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        padding: 1.5rem;
-        font-weight: 600;
-        font-size: 1.1rem;
-        border-bottom: none;
-    }
-
-    .alert-admin {
-        background: linear-gradient(135deg, #ecf0f1 0%, #dfe6e9 100%);
         border: none;
-        border-radius: 12px;
-        border-left: 4px solid #e74c3c;
-        color: #2c3e50;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 0;
-        font-weight: 500;
-        font-size: 1.1rem;
     }
 
-    .btn-admin-primary {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        border: none;
-        color: white;
-        border-radius: 10px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+    .discount-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
     }
 
-    .btn-admin-primary:hover {
-        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
-        color: white;
+    .discount-image-container {
+        position: relative;
     }
 
-    .btn-admin-secondary {
-        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-        border: none;
-        color: white;
-        border-radius: 8px;
-        font-weight: 500;
-        padding: 0.75rem 1.25rem;
-        transition: all 0.3s ease;
+    .discount-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%);
     }
 
-    .btn-admin-secondary:hover {
-        background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
-        transform: translateY(-2px);
-        color: white;
+    .discount-image {
+        transition: transform 0.5s ease;
     }
 
-    .btn-admin-outline {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        border: 2px solid #3498db;
-        color: #3498db;
-        border-radius: 6px;
-        padding: 0.35rem 0.6rem;
-        transition: all 0.3s ease;
+    .discount-card:hover .discount-image {
+        transform: scale(1.1);
     }
 
-    .btn-admin-outline:hover {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        transform: scale(1.05);
+    .discount-placeholder {
+        border-radius: 20px 20px 0 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    .btn-admin-danger {
-        background: transparent;
-        border: 2px solid #e74c3c;
-        color: #e74c3c;
-        border-radius: 6px;
-        padding: 0.35rem 0.6rem;
-        transition: all 0.3s ease;
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    .btn-admin-danger:hover {
-        background: #e74c3c;
-        color: white;
-        transform: scale(1.05);
+    .empty-state {
+        padding: 4rem 0;
     }
 
-    .discount-thumbnail {
-        width: 70px;
-        height: 70px;
-        object-fit: cover;
-        border: 2px solid #ecf0f1;
+    .loading-dots {
+        display: inline-flex;
+        gap: 4px;
     }
 
-    .discount-thumbnail-placeholder {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
+    .loading-dots span {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6c757d;
+        animation: bounce 1.5s infinite ease-in-out;
     }
 
-    .list-group-item {
-        border: none;
-        border-bottom: 1px solid #f8f9fa;
-        padding: 1.5rem;
-        transition: background-color 0.3s ease;
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
     }
 
-    .list-group-item:hover {
-        background-color: #f8f9fa !important;
+    .card-title {
+        min-height: auto;
+        line-height: 1.3;
     }
 
-    .list-group-item:last-child {
-        border-bottom: none;
-    }
-
-    .bg-expired {
-        background-color: #fff5f5 !important;
+    .card-text {
+        min-height: auto;
+        line-height: 1.5;
     }
 
     .badge {
-        font-weight: 500;
-        padding: 0.5rem 0.8rem;
-        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
     }
 
-    .form-control {
-        border-radius: 8px;
-        border: 2px solid #ecf0f1;
-        transition: all 0.3s ease;
-    }
-
-    .form-control:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-    }
-
-    .form-check-input:checked {
-        background-color: #2c3e50;
-        border-color: #2c3e50;
+    .divider {
+        margin-top: 1rem;
     }
 </style>
 
 <script>
-    function editDiscount(discountId) {
-        fetch(`/admin/discount/edit/${discountId}`)
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('editDiscountBody').innerHTML = html;
-                const modal = new bootstrap.Modal(document.getElementById('editDiscountModal'));
-                modal.show();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка при загрузке формы редактирования');
-            });
-    }
-
-    function cleanupExpired() {
-        if (confirm('Удалить все просроченные скидки?')) {
-            fetch('/admin/cleanup_expired', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Удалено ${data.deleted_count} просроченных скидок`);
-                    location.reload();
-                } else {
-                    alert('Ошибка при очистке: ' + data.error);
-                }
-            })
-            .catch(error => {
-                alert('Ошибка сети: ' + error);
-            });
-        }
+    function showDiscountDetails(discountId) {
+        // Здесь можно добавить AJAX запрос для получения деталей скидки
+        const modal = new bootstrap.Modal(document.getElementById('discountModal'));
+        document.getElementById('modalTitle').textContent = 'Детали акции';
+        document.getElementById('modalBody').innerHTML = `
+            <p>Здесь будет подробное описание акции #${discountId}</p>
+            <p>Для получения скидки обратитесь к нашему менеджеру!</p>
+        `;
+        modal.show();
     }
 </script>
 {% endblock %}
