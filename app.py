@@ -18,7 +18,9 @@ from apscheduler.triggers.interval import IntervalTrigger
 from functools import wraps
 from flask import abort
 from flask_login import current_user
-
+# Добавьте эти импорты для форм
+from wtforms import StringField, TextAreaField, SubmitField, DecimalField
+from wtforms.validators import DataRequired, NumberRange
 
 
 def admin_required(f):
@@ -153,6 +155,24 @@ class DiscountForm(FlaskForm):
     ])
     is_active = BooleanField('Активна', default=True)
     expires_at = DateField('Действует до', format='%Y-%m-%d')
+
+
+class ServicePrice(db.Model):
+    __tablename__ = 'service_prices'
+
+    id = db.Column(db.Integer, primary_key=True)
+    service_name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PriceForm(FlaskForm):
+    service_name = StringField('Название услуги', validators=[DataRequired()])
+    price = DecimalField('Цена', validators=[DataRequired()], places=2)
+    description = TextAreaField('Описание')
+    is_active = BooleanField('Активно', default=True)  # Добавьте это поле
+    submit = SubmitField('Добавить услугу')
 
 
 
@@ -778,15 +798,38 @@ def discounts():
 
 
 @app.route('/price')
-def prices():
-    return render_template('price.html')
+def price():
+    active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
+    print(f"Найдено цен: {len(active_prices)}")  # Для отладки
+    for price in active_prices:
+        print(f"Услуга: {price.service_name}, Цена: {price.price}")
+    return render_template('price.html', prices=active_prices)
 
-@app.route('/admin/price')
+@app.route('/admin/price', methods=['GET', 'POST'])
 @login_required
-@admin_required  # Теперь этот декоратор будет работать
+@admin_required
 def admin_price():
-    # Простая версия без формы (чтобы избежать ошибок)
-    return render_template('admin_price.html')
+    form = PriceForm()
+    prices = ServicePrice.query.order_by(ServicePrice.service_name).all()
+
+    if form.validate_on_submit():
+        # Проверяем, существует ли уже такая услуга
+        existing_service = ServicePrice.query.filter_by(service_name=form.service_name.data).first()
+
+        if existing_service:
+            flash('Услуга с таким названием уже существует!', 'danger')
+        else:
+            new_price = ServicePrice(
+                service_name=form.service_name.data,
+                description=form.description.data,
+                price=form.price.data
+            )
+            db.session.add(new_price)
+            db.session.commit()
+            flash('Услуга успешно добавлена!', 'success')
+            return redirect(url_for('admin_price'))
+
+    return render_template('admin_price.html', form=form, prices=prices)
 
 @app.route('/admin/discounts', methods=['GET', 'POST'])
 @login_required
@@ -946,10 +989,58 @@ def update_discount(id):
 
 
 
+# Найдите старую функцию price() и замените ее на эту:
+@app.route('/price', endpoint='price_main')
+def price():
+    active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
+
+    # Отладочная информация
+    print(f"Найдено активных цен: {len(active_prices)}")
+    for price in active_prices:
+        print(f"Услуга: {price.service_name}, Цена: {price.price}")
+
+    return render_template('price.html', prices=active_prices)
+
+@app.route('/service-prices')  # Измените URL
+def service_prices():          # Измените имя функции
+    active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
+    return render_template('price.html', prices=active_prices)
 
 
+@app.route('/admin/price/delete/<int:id>')
+@login_required
+@admin_required
+def delete_price(id):
+    price = ServicePrice.query.get_or_404(id)
+    db.session.delete(price)
+    db.session.commit()
+    flash('Услуга удалена!', 'success')
+    return redirect(url_for('admin_price'))
 
+@app.route('/admin/price/toggle/<int:id>')
+@login_required
+@admin_required
+def toggle_price(id):
+    price = ServicePrice.query.get_or_404(id)
+    price.is_active = not price.is_active
+    db.session.commit()
+    flash('Статус услуги изменен!', 'success')
+    return redirect(url_for('admin_price'))
 
+@app.route('/admin/price/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_price(id):
+    price = ServicePrice.query.get_or_404(id)
+    form = PriceForm(obj=price)
+
+    if form.validate_on_submit():
+        form.populate_obj(price)
+        db.session.commit()
+        flash('Цена успешно обновлена!', 'success')
+        return redirect(url_for('admin_price'))
+
+    return render_template('edit_price.html', form=form, price=price)
 
 
 

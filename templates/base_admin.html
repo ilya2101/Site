@@ -188,6 +188,10 @@
                href="{{ url_for('admin_price') }}">
                 <i class="bi bi-percent me-2"></i>Цены
             </a>
+            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
+               href="{{ url_for('index') }}">
+                <i class="bi bi-house me-2"></i>Главная страница (Пользователя)
+            </a>
         </div>
     </div>
 </nav>

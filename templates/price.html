@@ -1,16 +1,161 @@
 {% extends "base.html" %}
 
-{% block title %}Цены{% endblock %}
-
 {% block body %}
-<section class="discounts-section py-5">
-    <div class="container">
-        <!-- Заголовок -->
-        <div class="row mb-5">
-            <div class="col-12 text-center">
-                <h1 class="display-4 fw-bold text-primary mb-3">Стоимость услуг</h1>
-                <p class="lead text-muted">Цены на работы для наших клиентов</p>
-                <div class="divider mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
+<div class="container py-5">
+    <!-- Заголовок -->
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-gradient mb-3">Наши цены</h1>
+        <p class="lead text-muted">Качественные услуги по доступным ценам</p>
+    </div>
+
+    {% if prices %}
+    <!-- Карточки услуг -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for price in prices %}
+        <div class="col">
+            <div class="card h-100 price-card shadow-lg border-0">
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <h4 class="card-title mb-0 fw-bold">{{ price.service_name }}</h4>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    {% if price.description %}
+                    <p class="card-text flex-grow-1 text-muted mb-4">
+                        <i class="bi bi-info-circle me-2"></i>{{ price.description }}
+                    </p>
+                    {% endif %}
+
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-center align-items-center mb-3">
+                            <span class="h4 fw-bold text-muted mb-0 me-2">от</span>
+                            <span class="h2 fw-bold text-primary mb-0">{{ "%.2f"|format(price.price) }}</span>
+                            <span class="text-muted ms-2">руб.</span>
+                        </div>
+
+                        <div class="text-center text-success mb-3">
+                            <i class="bi bi-clock-history me-1"></i>
+                            <small>Гарантия качества</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center py-3">
+                    <button class="btn btn-primary btn-lg rounded-pill px-4"
+                            onclick="showContactModal('{{ price.service_name }}')">
+                        <i class="bi bi-telephone me-2"></i>Записаться
+                    </button>
+                </div>
             </div>
         </div>
-        {% endblock %}
+        {% endfor %}
+    </div>
+
+    <!-- Дополнительная информация -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="alert alert-info border-0 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                    <div>
+                        <h5 class="mb-1"></h5>
+                        <p class="mb-0">Все работы выполняются квалифицированными специалистами с использованием профессионального оборудования</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Сообщение об отсутствии цен -->
+    <div class="text-center py-5">
+        <div class="alert alert-warning border-0 shadow-lg mx-auto" style="max-width: 500px;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <h4 class="alert-heading">Цены временно недоступны</h4>
+            <p class="mb-0">Пожалуйста, зайдите позже или свяжитесь с нами для уточнения информации</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Модальное окно для записи -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title">Запись на услугу</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Для записи на <span id="serviceName" class="fw-bold text-primary"></span> свяжитесь с нами:</p>
+                <div class="d-grid gap-2">
+                    <a href="tel:+79999999999" class="btn btn-outline-primary">
+                        <i class="bi bi-telephone me-2"></i>+7 (999) 999-99-99
+                    </a>
+                    <a href="https://wa.me/79502259802" class="btn btn-outline-success">
+                        <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    <a href="https://t.me/ilya_21_01" class="btn btn-outline-info">
+                        <i class="bi bi-telegram me-2"></i>Telegram
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }
+
+    .price-card {
+        transition: all 0.3s ease;
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .price-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+    }
+
+    .price-card .card-header {
+        border-bottom: none;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00ff00 0%, #2e5d00 100%);
+        transform: translateY(-2px);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        color: white;
+        border-radius: 1rem;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        color: white;
+        border-radius: 1rem;
+    }
+</style>
+
+<script>
+    function showContactModal(serviceName) {
+        document.getElementById('serviceName').textContent = serviceName;
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+</script>
+{% endblock %}

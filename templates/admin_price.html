@@ -4,46 +4,95 @@
 <div class="container mt-4">
     <h2>Управление ценами</h2>
 
-    <div class="alert alert-info">
-        <h4>Страница управления ценами</h4>
-        <p>Здесь будет функционал для редактирования цен на услуги.</p>
-        <p>В разработке...</p>
-    </div>
-
-    <!-- Простая таблица для демонстрации -->
-    <div class="card">
+    <!-- Форма добавления новой услуги -->
+    <div class="card mb-4">
         <div class="card-header">
-            <h5>Текущие цены</h5>
+            <h5>Добавить новую услугу</h5>
         </div>
         <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            {{ form.service_name.label(class="form-label") }}
+                            {{ form.service_name(class="form-control") }}
+                            {% for error in form.service_name.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            {{ form.price.label(class="form-label") }}
+                            {{ form.price(class="form-control") }}
+                            {% for error in form.price.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows=3) }}
+                    {% for error in form.description.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {{ form.submit(class="btn btn-primary") }}
+            </form>
+        </div>
+    </div>
+
+    <!-- Таблица существующих цен -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Текущие цены на услуги</h5>
+        </div>
+        <div class="card-body">
+            {% if prices %}
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                     <tr>
                         <th>Услуга</th>
+                        <th>Описание</th>
                         <th>Цена</th>
                         <th>Статус</th>
+                        <th>Действия</th>
                     </tr>
                     </thead>
                     <tbody>
+                    {% for price in prices %}
                     <tr>
-                        <td>Базовая стирка</td>
-                        <td>500 руб.</td>
-                        <td><span class="badge bg-success">Активно</span></td>
+                        <td>{{ price.service_name }}</td>
+                        <td>{{ price.description or '-' }}</td>
+                        <td>{{ price.price }} руб.</td>
+                        <td>
+                            {% if price.is_active %}
+                            <span class="badge bg-success">Активно</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Неактивно</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('edit_price', id=price.id) }}" class="btn btn-sm btn-warning">✏️</a>
+                            <a href="{{ url_for('toggle_price', id=price.id) }}" class="btn btn-sm btn-{{ 'warning' if price.is_active else 'success' }}">
+                                {{ 'Скрыть' if price.is_active else 'Показать' }}
+                            </a>
+                            <a href="{{ url_for('delete_price', id=price.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Удалить услугу?')">🗑️</a>
+                        </td>
                     </tr>
-                    <tr>
-                        <td>Химчистка</td>
-                        <td>1200 руб.</td>
-                        <td><span class="badge bg-success">Активно</span></td>
-                    </tr>
-                    <tr>
-                        <td>Глажка</td>
-                        <td>300 руб.</td>
-                        <td><span class="badge bg-warning">На модерации</span></td>
-                    </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <p class="text-center">Нет добавленных услуг</p>
+            {% endif %}
         </div>
     </div>
 </div>
