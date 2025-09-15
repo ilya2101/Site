@@ -10,207 +10,80 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, DateField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileAllowed
-from datetime import datetime, timedelta  # Добавьте timedelta!
+from datetime import datetime, timedelta
 
+from admin_price import PriceForm
 from database.engine import db
 from forms import DiscountForm
-from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from functools import wraps
 from flask import abort
 from flask_login import current_user
-# Добавьте эти импорты для форм
 from wtforms import StringField, TextAreaField, SubmitField, DecimalField
 from wtforms.validators import DataRequired, NumberRange
+
+# Импорты моделей
 from database.models.user import User
-
-
+from database.models.application import Application
+from database.models.queue import Queue
+from database.models.inService import InService
+from database.models.discount import Discount
+from database.models.discountForm import DiscountForm
+from database.models.servicePrice import ServicePrice
+from database.models.priceForm import PriceForm
 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
-            abort(403)  # Forbidden
+            abort(403)
         return f(*args, **kwargs)
     return decorated_function
-
-
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ilya'
 
-# СНАЧАЛА устанавливаем конфигурацию БД
+# Конфигурация БД
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {
     'applications': 'sqlite:///applications.db'
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# ПОТОМ инициализируем базу данных
+# Инициализация базы данных
 db.init_app(app)
 
 # Настройка загрузки файлов
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'xls', 'xlsx', 'csv'}
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# УДАЛИТЕ этот второй вызов db.init_app(app)
-# db.init_app(app)  # <-- ЭТУ СТРОКУ НУЖНО УДАЛИТЬ
-# Создаем папку для загрузок, если ее нет
+# Создаем папку для загрузок
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
-
-
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Функция для проверки разрешенных расширений
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-# Модели должны быть определены перед импортом роутов
 
-
-class Application(db.Model):
-    __bind_key__ = 'applications'  # Указываем привязку к конкретной БД
-    __tablename__ = 'applications'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    car_brand = db.Column(db.String(50), nullable=False)
-    car_model = db.Column(db.String(50), nullable=False)
-    desired_date = db.Column(db.Date, nullable=False)
-    desired_time = db.Column(db.Time, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='new')
-    comment = db.Column(db.Text, default='')  # Добавляем поле для комментариев
-    def __repr__(self):
-        return f'<Application {self.id} - {self.name}>'
-
-# Создаем модель для очереди
-class Queue(db.Model):
-    __bind_key__ = 'applications'  # Используем ту же базу
-    __tablename__ = 'queue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    application_id = db.Column(db.Integer, db.ForeignKey('applications.id'))
-    name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    car_brand = db.Column(db.String(50), nullable=False)
-    car_model = db.Column(db.String(50), nullable=False)
-    desired_date = db.Column(db.Date, nullable=False)
-    desired_time = db.Column(db.Time, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='in_queue')
-    comment = db.Column(db.Text, default='')
-    moved_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    # Связь с оригинальной заявкой
-    application = db.relationship('Application', backref='queue_entries')
-
-    # Модель для автомобилей в ремонте
-class InService(db.Model):
-    __bind_key__ = 'applications'
-    __tablename__ = 'in_service'
-
-    id = db.Column(db.Integer, primary_key=True)
-    queue_id = db.Column(db.Integer, db.ForeignKey('queue.id'))
-    name = db.Column(db.String(100), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    car_brand = db.Column(db.String(50), nullable=False)
-    car_model = db.Column(db.String(50), nullable=False)
-    desired_date = db.Column(db.Date, nullable=False)
-    desired_time = db.Column(db.Time, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    estimated_completion = db.Column(db.Date, nullable=True)
-    estimated_cost = db.Column(db.String(100), nullable=True)
-    comment = db.Column(db.Text, default='')
-    work_list = db.Column(db.Text, default='')
-    excel_file = db.Column(db.String(255), nullable=True)  # Путь к Excel файлу
-    moved_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    queue_entry = db.relationship('Queue', backref='service_entries')
-
-
-class Discount(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(255), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    expires_at = db.Column(db.DateTime, nullable=True)
-
-
-class DiscountForm(FlaskForm):
-    title = StringField('Название акции', validators=[DataRequired()])
-    description = TextAreaField('Описание', validators=[DataRequired()])
-    image = FileField('Изображение', validators=[  # Исправлено: FileField вместо TextAreaField
-        FileAllowed(['jpg', 'jpeg', 'png', 'gif'], 'Только изображения!')
-    ])
-    is_active = BooleanField('Активна', default=True)
-    expires_at = DateField('Действует до', format='%Y-%m-%d')
-
-
-class ServicePrice(db.Model):
-    __tablename__ = 'service_prices'
-
-    id = db.Column(db.Integer, primary_key=True)
-    service_name = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PriceForm(FlaskForm):
-    service_name = StringField('Название услуги', validators=[DataRequired()])
-    price = DecimalField('Цена', validators=[DataRequired()], places=2)
-    description = TextAreaField('Описание')
-    is_active = BooleanField('Активно', default=True)  # Добавьте это поле
-    submit = SubmitField('Добавить услугу')
-
-
-
-
-# Создаем таблицы в обеих базах данных
-# Создаем таблицы в обеих базах данных
+# Создание таблиц
 with app.app_context():
-
-
-
-
-    # Создаем все таблицы заново
-    db.create_all()
-    db.create_all(bind_key='applications')
-
-    print("Все таблицы созданы успешно!")
-
-
-# Принудительное создание таблиц
-with app.app_context():
-    # Создаем таблицы по одной
     try:
-        # Основная база
+        # Создаем все таблицы в основной базе
+        db.create_all()
 
-        User.__table__.create(db.engine, checkfirst=True)
+        # Создаем все таблицы в привязанной базе applications
+        db.create_all(bind='applications')
 
-        # База applications
-        Application.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
-        Queue.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
-        InService.__table__.create(db.get_engine(bind='applications'), checkfirst=True)
-
-        print("Все таблицы созданы принудительно!")
+        print("Все таблицы созданы успешно!")
     except Exception as e:
         print(f"Ошибка при создании таблиц: {e}")
 
-
-
-
-
-# Создаем папки для загрузок при запуске приложения
+# Создаем папки для загрузок
 def create_upload_folders():
     folders = [
         'static/uploads/discounts',
@@ -220,8 +93,39 @@ def create_upload_folders():
         os.makedirs(folder, exist_ok=True)
         print(f"Папка создана: {folder}")
 
-# Вызываем создание папок при запуске
 create_upload_folders()
+
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(User, int(user_id))
+
+# Функция создания администратора
+def create_admin():
+    try:
+        admin_phone = "+71234567890"
+        admin_password = "secret123"
+
+        admin = User.query.filter_by(phone=admin_phone).first()
+        if not admin:
+            hashed_password = generate_password_hash(admin_password)
+            admin = User(
+                first_name="Admin",
+                last_name="Admin",
+                phone=admin_phone,
+                password=hashed_password,
+                is_admin=True
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print("Admin user created successfully!")
+        else:
+            print("Admin user already exists!")
+    except Exception as e:
+        print(f"Error creating admin: {e}")
+
+# Создаем администратора при запуске
+with app.app_context():
+    create_admin()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -231,26 +135,6 @@ def load_user(user_id):
 # Создаем таблицы (выполнить один раз)
 with app.app_context():
     db.create_all()
-
-def create_admin():
-    admin_phone = "+71234567890"
-    admin_password = "secret123"
-
-    admin = User.query.filter_by(phone=admin_phone).first()
-    if not admin:
-        hashed_password = generate_password_hash(admin_password)
-        admin = User(
-            first_name="Admin",
-            last_name="Admin",
-            phone=admin_phone,
-            password=hashed_password,
-            is_admin=True
-        )
-        db.session.add(admin)
-        db.session.commit()
-        print("Admin user created successfully!")
-
-# Импортируем роуты после определения моделей и app
 
 
 @app.route('/')
@@ -798,10 +682,8 @@ def discounts():
 
 @app.route('/price')
 def price():
+    # Если у вас есть модель ServicePrice
     active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
-    print(f"Найдено цен: {len(active_prices)}")  # Для отладки
-    for price in active_prices:
-        print(f"Услуга: {price.service_name}, Цена: {price.price}")
     return render_template('price.html', prices=active_prices)
 
 @app.route('/admin/price', methods=['GET', 'POST'])
@@ -809,7 +691,7 @@ def price():
 @admin_required
 def admin_price():
     form = PriceForm()
-    prices = ServicePrice.query.order_by(ServicePrice.service_name).all()
+    prices = ServicePrice.query.order_by(ServicePrice.service_name).all()  # Используйте имя класса
 
     if form.validate_on_submit():
         # Проверяем, существует ли уже такая услуга
@@ -818,7 +700,7 @@ def admin_price():
         if existing_service:
             flash('Услуга с таким названием уже существует!', 'danger')
         else:
-            new_price = ServicePrice(
+            new_price = ServicePrice(  # Используйте имя класса
                 service_name=form.service_name.data,
                 description=form.description.data,
                 price=form.price.data
@@ -1001,7 +883,7 @@ def price():
     return render_template('price.html', prices=active_prices)
 
 @app.route('/service-prices')  # Измените URL
-def service_prices():          # Измените имя функции
+def get_service_prices():        # Измените имя функции
     active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
     return render_template('price.html', prices=active_prices)
 
@@ -1010,10 +892,10 @@ def service_prices():          # Измените имя функции
 @login_required
 @admin_required
 def delete_price(id):
-    price = ServicePrice.query.get_or_404(id)
+    price = ServicePrice.query.get_or_404(id)  # Используйте имя модели ServicePrice
     db.session.delete(price)
     db.session.commit()
-    flash('Услуга удалена!', 'success')
+    flash('Услуга успешно удалена!', 'success')
     return redirect(url_for('admin_price'))
 
 @app.route('/admin/price/toggle/<int:id>')
