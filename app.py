@@ -11,6 +11,8 @@ from wtforms import StringField, TextAreaField, BooleanField, DateField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileAllowed
 from datetime import datetime, timedelta  # Добавьте timedelta!
+
+from database.engine import db
 from forms import DiscountForm
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -21,6 +23,8 @@ from flask_login import current_user
 # Добавьте эти импорты для форм
 from wtforms import StringField, TextAreaField, SubmitField, DecimalField
 from wtforms.validators import DataRequired, NumberRange
+from database.models.user import User
+
 
 
 def admin_required(f):
@@ -36,24 +40,27 @@ def admin_required(f):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ilya'
 
-# Конфигурация БД
+# СНАЧАЛА устанавливаем конфигурацию БД
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_BINDS'] = {
     'applications': 'sqlite:///applications.db'
 }
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# ПОТОМ инициализируем базу данных
+db.init_app(app)
+
 # Настройка загрузки файлов
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'xls', 'xlsx', 'csv'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# УДАЛИТЕ этот второй вызов db.init_app(app)
+# db.init_app(app)  # <-- ЭТУ СТРОКУ НУЖНО УДАЛИТЬ
 # Создаем папку для загрузок, если ее нет
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 
 login_manager = LoginManager(app)
@@ -64,16 +71,7 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 # Модели должны быть определены перед импортом роутов
-class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
 
-    def get_id(self):
-        return str(self.id)
 
 class Application(db.Model):
     __bind_key__ = 'applications'  # Указываем привязку к конкретной БД
@@ -196,6 +194,7 @@ with app.app_context():
     # Создаем таблицы по одной
     try:
         # Основная база
+
         User.__table__.create(db.engine, checkfirst=True)
 
         # База applications
