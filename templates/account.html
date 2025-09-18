@@ -6,6 +6,6 @@
         <p>Имя: {{ user.first_name }}</p>
         <p>Фамилия: {{ user.last_name }}</p>
         <p>Телефон: {{ user.phone }}</p>
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
+        <a href="{{ url_for('user.logout') }}" class="btn btn-danger">Выйти</a>
     </div>
 {% endblock %}

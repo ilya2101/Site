@@ -71,7 +71,7 @@
                                         </button>
 
                                         <!-- Подтверждение -->
-                                        <a href="{{ url_for('confirm_request', request_id=request.id) }}"
+                                        <a href="{{ url_for('admin_required.confirm_request', request_id=request.id) }}"
                                            class="btn btn-outline-success"
                                            onclick="return confirm('Перенести заявку в очередь?')"
                                            title="В очередь">
@@ -79,11 +79,11 @@
                                         </a>
 
                                         <!-- Удаление -->
-                                        <a href="{{ url_for('delete_request', request_id=request.id) }}"
+                                        <a href="{{ url_for('admin_required.delete_request', request_id=request.id) }}"
                                            class="btn btn-outline-danger"
                                            onclick="return confirm('Удалить заявку?')"
                                            title="Удалить">
-                                            <i class="bi bi-trash"></i>
+                                            Удалить
                                         </a>
                                     </div>
                                 </td>
@@ -106,8 +106,8 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('update_request', request_id=request.id) }}">
-                                <div class="modal-body">
+                            <form method="POST" action="{{ url_for('admin_required.update_request', request_id=request.id) }}">
+                            <div class="modal-body">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-medium">Имя клиента</label>

@@ -30,16 +30,16 @@
                             {% endif %}
                         {% endwith %}
 
-                        <form action="{{ url_for('login') }}" method="POST">
+                        <form action="{{ url_for('user.login') }}" method="POST">
                             <!-- Номер телефона -->
                             <div class="mb-4">
                                 <label for="phone" class="form-label fw-medium text-dark mb-2">
                                     <i class="bi bi-phone text-warning me-2"></i>Номер телефона
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="bi bi-telephone text-muted"></i>
-                                    </span>
+            <span class="input-group-text bg-light border-end-0">
+                <i class="bi bi-telephone text-muted"></i>
+            </span>
                                     <input type="tel"
                                            class="form-control"
                                            id="phone"
@@ -57,9 +57,9 @@
                                     <i class="bi bi-key text-warning me-2"></i>Пароль
                                 </label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="bi bi-shield-lock text-muted"></i>
-                                    </span>
+            <span class="input-group-text bg-light border-end-0">
+                <i class="bi bi-shield-lock text-muted"></i>
+            </span>
                                     <input type="password"
                                            class="form-control"
                                            id="password"

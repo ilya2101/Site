@@ -90,7 +90,7 @@
                                             </button>
 
                                             <!-- Удаление -->
-                                            <a href="{{ url_for('delete_queue', queue_id=entry.id) }}"
+                                            <a href="{{ url_for('admin_queue.delete_queue', queue_id=entry.id) }}"
                                                class="btn btn-outline-danger"
                                                onclick="return confirm('Удалить запись из очереди?')"
                                                title="Удалить">
@@ -118,7 +118,7 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('update_queue', queue_id=entry.id) }}">
+                            <form method="POST" action="{{ url_for('admin_queue.update_queue', queue_id=entry.id) }}">
                                 <div class="modal-body">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -185,7 +185,7 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('add_queue_comment', queue_id=entry.id) }}">
+                            <form method="POST" action="{{ url_for('admin_queue.add_queue_comment', queue_id=entry.id) }}">
                                 <div class="modal-body">
                                     {% if entry.comment %}
                                         <div class="mb-3">
@@ -224,7 +224,7 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('move_to_service', queue_id=entry.id) }}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ url_for('admin_queue.move_to_service', queue_id=entry.id) }}" enctype="multipart/form-data">
                                 <div class="modal-body">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -269,7 +269,7 @@
                     <i class="bi bi-clock-history text-muted mb-3" style="font-size: 3rem;"></i>
                     <h4 class="text-muted mb-3">Очередь пуста</h4>
                     <p class="text-muted">Нет автомобилей в очереди на сервис.</p>
-                    <a href="{{ url_for('view_requests') }}" class="btn btn-primary mt-2">
+                    <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-primary mt-2">
                         <i class="bi bi-clipboard-list me-1"></i>Посмотреть заявки
                     </a>
                 </div>

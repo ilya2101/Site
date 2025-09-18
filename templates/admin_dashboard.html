@@ -72,10 +72,10 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ url_for('view_requests') }}" class="btn btn-action mb-2">
+                        <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-action mb-2">
                             <i class="bi bi-clipboard-list me-2"></i>Управление заявками
                         </a>
-                        <a href="{{ url_for('view_queue') }}" class="btn btn-action mb-2">
+                        <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-action mb-2">
                             <i class="bi bi-list-check me-2"></i>Просмотр очереди
                         </a>
                         <a href="{{ url_for('view_service') }}" class="btn btn-action">

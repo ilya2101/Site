@@ -150,7 +150,7 @@
                     <i class="fas fa-user-circle me-1"></i>
                     {{ current_user.first_name }} {{ current_user.last_name }}
                 </span>
-                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light">
+                <a href="{{ url_for('user.logout') }}" class="btn btn-sm btn-outline-light">
                     <i class="fas fa-sign-out-alt me-1"></i>Выйти
                 </a>
             </div>
@@ -163,15 +163,15 @@
     <div class="container">
         <div class="nav nav-pills">
             <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"
-               href="{{ url_for('admin_dashboard') }}">
+               href="{{ url_for('admin.admin_dashboard') }}">
                 <i class="fas fa-tachometer-alt me-2"></i>Главная
             </a>
             <a class="nav-link {% if request.endpoint == 'view_requests' %}active{% endif %}"
-               href="{{ url_for('view_requests') }}">
+               href="{{ url_for('admin_required.view_requests') }}">
                 <i class="fas fa-clipboard-list me-2"></i>Заявки
             </a>
-            <a class="nav-link {% if request.endpoint == 'view_queue' %}active{% endif %}"
-               href="{{ url_for('view_queue') }}">
+            <a class="nav-link {% if request.endpoint == 'admin_queue.view_queue' %}active{% endif %}"
+               href="{{ url_for('admin_queue.view_queue') }}">
                 <i class="fas fa-clock me-2"></i>Очередь на сервис
             </a>
             <a class="nav-link {% if request.endpoint == 'view_service' %}active{% endif %}"
@@ -189,7 +189,7 @@
                 <i class="bi bi-percent me-2"></i>Цены
             </a>
             <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
-               href="{{ url_for('index') }}">
+               href="{{ url_for('index.index') }}">
                 <i class="bi bi-house me-2"></i>Главная страница (Пользователя)
             </a>
         </div>
