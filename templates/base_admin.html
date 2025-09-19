@@ -174,8 +174,8 @@
                href="{{ url_for('admin_queue.view_queue') }}">
                 <i class="fas fa-clock me-2"></i>Очередь на сервис
             </a>
-            <a class="nav-link {% if request.endpoint == 'view_service' %}active{% endif %}"
-               href="{{ url_for('view_service') }}">
+            <a class="nav-link {% if request.endpoint == 'admin_service.view_service' %}active{% endif %}"
+               href="{{ url_for('admin_service.view_service') }}">
                 <i class="fas fa-wrench me-2"></i>В работе
             </a>
             <!-- Кнопка Скидки вынесена на правильный уровень -->

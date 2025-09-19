@@ -1,4 +1,7 @@
 from datetime import datetime
+
+from sqlalchemy import Float
+
 from database.engine import db
 
 
@@ -16,10 +19,12 @@ class InService(db.Model):
     desired_time = db.Column(db.Time, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     estimated_completion = db.Column(db.Date, nullable=True)
-    estimated_cost = db.Column(db.String(100), nullable=True)
+    estimated_cost = db.Column(Float, nullable=True)
     comment = db.Column(db.Text, default='')
     work_list = db.Column(db.Text, default='')
     excel_file = db.Column(db.String(255), nullable=True)  # Путь к Excel файлу
     moved_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 
     queue_entry = db.relationship('Queue', backref='service_entries')

@@ -73,11 +73,12 @@
                                     <td>
                                         {% if entry.excel_file %}
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{{ url_for('view_service', filename=entry.excel_file) }}"
+                                                <a href="{{ url_for('admin_queue.view_excel', filename=entry.excel_file) }}"
                                                    class="btn btn-outline-info btn-sm" target="_blank"
                                                    title="Просмотр">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
+
                                                 <a href="{{ url_for('admin_queue.view_excel', filename=entry.excel_file) }}"
                                                    class="btn btn-outline-primary btn-sm"
                                                    title="Скачать">
@@ -104,19 +105,16 @@
                                             </button>
 
                                             <!-- Завершить ремонт -->
-                                            <a href="{{ url_for('delete_service', service_id=entry.id) }}"                                               class="btn btn-outline-success"
-                                               onclick="return confirm('Завершить ремонт?')"
-                                               title="Завершить ремонт">
-                                                <i class="bi bi-check-circle"></i>
-                                            </a>
+                                            <form action="{{ url_for('admin_service.complete_service', id=entry.id) }}" method="post">
+                                                <button type="submit" class="btn btn-success">Завершить</button>
+                                            </form>
 
-                                            <!-- Удаление -->
-                                            <a href="{{ url_for('delete_service', service_id=entry.id) }}"
-                                               class="btn btn-outline-danger"
-                                               onclick="return confirm('Удалить запись из ремонта?')"
-                                               title="Удалить">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
+
+
+
+
+
+
                                         </div>
                                     </td>
                                 </tr>
@@ -139,7 +137,7 @@
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('update_service', service_id=entry.id) }}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ url_for('admin_service.update_service', service_id=entry.id) }}" enctype="multipart/form-data">
                                 <div class="modal-body">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -173,9 +171,10 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-medium">Примерная стоимость</label>
-                                            <input type="text" class="form-control" name="estimated_cost"
+                                            <input type="number" class="form-control" name="estimated_cost"
                                                    value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
                                                    placeholder="Введите стоимость">
+
                                         </div>
                                     </div>
                                     <div class="mb-3">

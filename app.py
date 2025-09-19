@@ -4,10 +4,11 @@ from functools import wraps
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask import abort
-from flask_login import LoginManager, login_required, logout_user
+from flask_login import LoginManager, login_required
 from flask_login import current_user
+from flask_migrate import Migrate
 from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
@@ -17,24 +18,15 @@ from wtforms.validators import DataRequired
 
 from admin_price import PriceForm
 from database.engine import db
-from database.models.application import Application
-from database.models.discount import Discount
-from database.models.discountForm import DiscountForm
-from database.models.inService import InService
-from database.models.priceForm import PriceForm
-from database.models.queue import Queue
-from database.models.servicePrice import ServicePrice
 # Импорты моделей
 from database.models.user import User
 from forms import DiscountForm
-from routes.admin_routes.dashboard import admin_dashboard
-from routes.admin_routes.requests import admin_required_bp
-from routes.users_routes.index import index_route
-from routes.users_routes.login import user_bp
 from routes.admin_routes.dashboard import admin_bp
 from routes.admin_routes.queue import queue_bp
-
-
+from routes.admin_routes.requests import admin_required_bp
+from routes.admin_routes.service import service_bp
+from routes.users_routes.index import index_route
+from routes.users_routes.login import user_bp
 
 
 def admin_required(f):
@@ -44,6 +36,7 @@ def admin_required(f):
             abort(403)
         return f(*args, **kwargs)
     return decorated_function
+
 
 
 
@@ -65,9 +58,10 @@ app.register_blueprint(admin_required_bp)
 
 app.register_blueprint(queue_bp)
 
+app.register_blueprint(service_bp)
+
 
 app.config['SECRET_KEY'] = 'ilya'
-
 
 
 
@@ -96,6 +90,21 @@ login_manager.login_view = 'user.login'  # Исправлено на 'user.login
 db.init_app(app)
 login_manager.init_app(app)
 
+
+from database.models.discount import Discount
+from database.models.discountForm import DiscountForm
+from database.models.priceForm import PriceForm
+from database.models.servicePrice import ServicePrice
+
+migrate = Migrate(app, db)
+
+
+
+
+
+
+
+
 # Настройка загрузки файлов
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'xls', 'xlsx', 'csv'}
@@ -109,15 +118,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 # Регистрируем Blueprint
 
 
-# Создание таблиц
-with app.app_context():
-    try:
-        # УБРАТЬ параметр bind - создаем все таблицы
-        db.create_all()  # БЕЗ bind!
 
-        print("Все таблицы созданы успешно!")
-    except Exception as e:
-        print(f"Ошибка при создании таблиц: {e}")
 
 # Создаем папки для загрузок
 def create_upload_folders():
@@ -164,10 +165,6 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-# Создаем таблицы (выполнить один раз)
-with app.app_context():
-    db.create_all()
-
 
 
 
@@ -199,96 +196,7 @@ class ServiceRequest:
 
 
 
-@app.route('/admin/service')
-@login_required
-def view_service():
-    if not current_user.is_admin:
-        abort(403)
 
-    # Получаем все записи в ремонте
-    service_entries = InService.query.order_by(InService.moved_at.desc()).all()
-    return render_template('admin_service.html',
-                           service_entries=service_entries,
-                           user=current_user)
-
-@app.route('/admin/service/update/<int:service_id>', methods=['POST'])
-@login_required
-def update_service(service_id):
-    if not current_user.is_admin:
-        abort(403)
-
-    try:
-        service_entry = InService.query.get_or_404(service_id)
-
-        # Обработка загрузки нового файла
-        if 'excel_file' in request.files:
-            file = request.files['excel_file']
-            if file and file.filename and allowed_file(file.filename):
-                # Удаляем старый файл, если он есть
-                if service_entry.excel_file:
-                    try:
-                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], service_entry.excel_file))
-                    except:
-                        pass
-
-                # Создаем безопасное имя файла
-                filename = secure_filename(file.filename)
-                import time
-                timestamp = str(int(time.time()))
-                name, ext = os.path.splitext(filename)
-                filename = f"{name}_{timestamp}{ext}"
-
-                # Сохраняем новый файл
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                service_entry.excel_file = filename
-
-        # Обновляем данные
-        service_entry.name = request.form.get('name')
-        service_entry.phone = request.form.get('phone')
-        service_entry.car_brand = request.form.get('car_brand')
-        service_entry.car_model = request.form.get('car_model')
-        service_entry.estimated_completion = datetime.strptime(request.form.get('estimated_completion'), '%Y-%m-%d').date() if request.form.get('estimated_completion') else None
-        service_entry.estimated_cost = request.form.get('estimated_cost', '')
-        service_entry.comment = request.form.get('comment', '')
-        service_entry.work_list = request.form.get('work_list', '')
-
-        db.session.commit()
-        flash('Запись в ремонте успешно обновлена!', 'success')
-
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Ошибка при обновлении записи: {str(e)}', 'danger')
-
-    return redirect(url_for('view_service'))
-
-
-
-
-@app.route('/admin/service/delete/<int:service_id>')
-@login_required
-def delete_service(service_id):
-    if not current_user.is_admin:
-        abort(403)
-
-    try:
-        service_entry = InService.query.get_or_404(service_id)
-
-        # Удаляем файл, если он есть
-        if service_entry.excel_file:
-            try:
-                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], service_entry.excel_file))
-            except:
-                pass
-
-        db.session.delete(service_entry)
-        db.session.commit()
-        flash('Запись из ремонта удалена!', 'success')
-
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
-
-    return redirect(url_for('view_service'))
 
 @app.route('/about')
 def about():
@@ -623,23 +531,22 @@ with app.app_context():
 
 
 
-if __name__ == '__main__':
-    with app.app_context():
-        create_admin()
+
+
+
+if __name__ == "__main__":
+    # Запуск планировщика
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=cleanup_expired_discounts,
+        trigger=IntervalTrigger(hours=1),
+        id='cleanup_discounts',
+        name='Cleanup expired discounts',
+        replace_existing=True
+    )
+    scheduler.start()
+
+    import atexit
+    atexit.register(lambda: scheduler.shutdown())
+
     app.run(debug=True)
-
-
-    # Планировщик для автоматической очистки
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=cleanup_expired_discounts,
-    trigger=IntervalTrigger(hours=1),  # Проверка каждый час
-    id='cleanup_discounts',
-    name='Cleanup expired discounts',
-    replace_existing=True
-)
-scheduler.start()
-
-# Остановка планировщика при выходе
-import atexit
-atexit.register(lambda: scheduler.shutdown())
