@@ -17,16 +17,6 @@ queue_bp = Blueprint("admin_queue", __name__, url_prefix="/admin")
 
 
 
-
-
-
-
-
-
-
-
-
-
 @queue_bp.route('/admin/queue')
 @login_required
 def view_queue():
