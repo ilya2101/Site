@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from flask import send_from_directory
 
 from flask import Blueprint, abort, render_template, request, flash, url_for
 from flask_login import login_required, current_user
@@ -10,7 +11,8 @@ from database.engine import db
 from database.models.inService import InService
 from utils.allowed_file import allowed_file
 
-service_bp = Blueprint("admin_service", __name__, url_prefix="/admin")
+service_bp = Blueprint('admin_service', __name__, url_prefix='/admin/service')
+
 
 
 
@@ -109,20 +111,19 @@ def delete_service(service_id):
         db.session.rollback()
         flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
 
-    return redirect(url_for('view_service'))
+    return redirect(url_for('admin_service.view_service'))
+
 
 from database.models.inService import InService
 from database.models.completed_service import CompletedService
 from flask import redirect, url_for, flash
 
-@service_bp.route('/admin/admin/service/complete/<int:id>', methods=['POST'])
+@service_bp.route('/complete/<int:id>', methods=['POST'])
 @login_required
 def complete_service(id):
     service = InService.query.get_or_404(id)
 
     # Приведение стоимости к числу
-    # Приведение стоимости к числу
-# Приведение стоимости к числу
     estimated_cost = service.estimated_cost
     if estimated_cost == '' or estimated_cost is None:
         estimated_cost = None
@@ -140,18 +141,32 @@ def complete_service(id):
         desired_time=service.desired_time,
         created_at=service.created_at,
         estimated_completion=service.estimated_completion,
-        estimated_cost=estimated_cost,  # <- используем уже преобразованное значение
+        estimated_cost=estimated_cost,
         comment=service.comment,
         work_list=service.work_list,
         excel_file=service.excel_file,
-        moved_at=datetime.now()
+        moved_at=datetime.utcnow()
     )
 
-
-
     db.session.add(completed)
-    db.session.delete(service)  # удаляем из активных
+    db.session.delete(service)
     db.session.commit()
 
     flash('Услуга успешно завершена и перенесена в архив', 'success')
+
     return redirect(url_for('admin_service.view_service'))
+
+
+
+
+
+
+
+
+
+
+@service_bp.route('/admin/view/excel/<path:filename>')
+@login_required
+def view_excel(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=False)
+

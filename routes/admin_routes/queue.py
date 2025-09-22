@@ -54,7 +54,7 @@ def update_queue(queue_id):
         db.session.rollback()
         flash(f'Ошибка при обновлении записи: {str(e)}', 'danger')
 
-    return redirect(url_for('view_queue'))
+    return redirect(url_for('admin_queue.view_queue'))
 
 @queue_bp.route('/admin/queue/comment/<int:queue_id>', methods=['POST'])
 @login_required
@@ -81,7 +81,7 @@ def add_queue_comment(queue_id):
         db.session.rollback()
         flash(f'Ошибка при добавлении комментария: {str(e)}', 'danger')
 
-    return redirect(url_for('view_queue'))
+    return redirect(url_for('admin_queue.view_queue'))
 
 @queue_bp.route('/admin/queue/to_service/<int:queue_id>', methods=['POST'])
 @login_required
@@ -139,7 +139,7 @@ def move_to_service(queue_id):
         flash(f'Ошибка при перемещении в ремонт: {str(e)}', 'danger')
         raise e
 
-    return redirect(url_for('view_service'))
+    return redirect(url_for('admin_service.view_service'))
 
 @queue_bp.route('/admin/queue/delete/<int:queue_id>')
 @login_required
@@ -157,7 +157,7 @@ def delete_queue(queue_id):
         db.session.rollback()
         flash(f'Ошибка при удалении записи: {str(e)}', 'danger')
 
-    return redirect(url_for('view_queue'))
+    return redirect(url_for('admin_queue.view_queue'))
 
 
 @queue_bp.route('/view/excel/<filename>')

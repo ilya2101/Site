@@ -57,9 +57,10 @@
                         <div class="row">
                             <div class="col-md-7 mb-3">
                                 {{ form.expires_at.label(class="form-label") }}
-                                {{ form.expires_at(class="form-control", type="date") }}
-                                <div class="form-text">Оставьте пустым для бессрочной акции</div>
+                                {{ form.expires_at(class="form-control", type="date", required=True, min=current_date) }}
+                                <div class="form-text">Выберите дату не ранее сегодняшнего дня</div>
                             </div>
+
                             <div class="col-md-5 mb-3">
                                 <div class="form-check form-switch mt-4 pt-2">
                                     {{ form.is_active(class="form-check-input", checked=True) }}
@@ -110,7 +111,7 @@
 
                                             <!-- Кнопка удаления -->
                                             <form method="POST"
-                                                  action="{{ url_for('delete_discount', id=discount.id) }}"
+                                                  action="{{ url_for('admin_discounts.delete_discount', id=discount.id) }}"
                                                   class="d-inline">
                                                 <button type="submit"
                                                         class="btn btn-outline-danger btn-sm"
@@ -199,8 +200,7 @@
         <!-- Скрипт для редактирования -->
         <script>
             function editDiscount(discountId) {
-                // Загружаем форму редактирования через AJAX
-                fetch(`/admin/discount/edit/${discountId}`)
+                fetch("{{ url_for('admin_discounts.edit_discount_form', id=0) }}".replace('0', discountId))
                     .then(response => response.text())
                     .then(html => {
                         document.getElementById('editDiscountBody').innerHTML = html;
@@ -214,7 +214,8 @@
             }
         </script>
 
-<!-- Скрипт для очистки просроченных -->
+
+        <!-- Скрипт для очистки просроченных -->
 <script>
     function cleanupExpired() {
         if (confirm('Удалить все просроченные скидки?')) {
@@ -239,4 +240,31 @@
         }
     }
 </script>
-{% endblock %}
+
+        <script>
+            document.getElementById('discountForm').addEventListener('submit', function(e) {
+                const expiresAtInput = document.querySelector('input[name="expires_at"]');
+                const today = new Date();
+                today.setHours(0,0,0,0); // обнуляем время
+
+                if (!expiresAtInput.value) {
+                    alert('Пожалуйста, укажите дату окончания скидки!');
+                    e.preventDefault();
+                    return;
+                }
+
+                const selectedDate = new Date(expiresAtInput.value);
+                if (selectedDate < today) {
+                    alert('Нельзя выбрать прошедшую дату!');
+                    e.preventDefault();
+                    return;
+                }
+            });
+        </script>
+
+
+
+
+
+
+        {% endblock %}

@@ -3,7 +3,6 @@ from database.engine import db
 
 
 class Queue(db.Model):
-    __bind_key__ = 'applications'  # Используем ту же базу
     __tablename__ = 'queue'
 
     id = db.Column(db.Integer, primary_key=True)

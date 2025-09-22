@@ -5,6 +5,7 @@ from wtforms.validators import DataRequired
 
 
 class DiscountForm(FlaskForm):
+    __tablename__ = 'discountForm'
     title = StringField('Название акции', validators=[DataRequired()])
     description = TextAreaField('Описание', validators=[DataRequired()])
     image = FileField('Изображение', validators=[  # Исправлено: FileField вместо TextAreaField

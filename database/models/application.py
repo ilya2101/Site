@@ -4,7 +4,6 @@ from database.engine import db
 
 
 class Application(db.Model):
-    __bind_key__ = 'applications'  # Указываем привязку к конкретной БД
     __tablename__ = 'applications'
 
     id = db.Column(db.Integer, primary_key=True)

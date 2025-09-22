@@ -6,7 +6,6 @@ from database.engine import db
 
 
 class InService(db.Model):
-    __bind_key__ = 'applications'
     __tablename__ = 'in_service'
 
     id = db.Column(db.Integer, primary_key=True)

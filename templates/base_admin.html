@@ -179,15 +179,16 @@
                 <i class="fas fa-wrench me-2"></i>В работе
             </a>
             <!-- Кнопка Скидки вынесена на правильный уровень -->
-            <a class="nav-link {% if request.endpoint == 'admin_discounts' %}active{% endif %}"
-               href="{{ url_for('admin_discounts') }}">
+            <a class="nav-link {% if request.endpoint == 'admin_discounts.admin_discounts' %}active{% endif %}"
+               href="{{ url_for('admin_discounts.admin_discounts') }}">
                 <i class="bi bi-percent me-2"></i>Скидки
             </a>
 
-            <a class="nav-link {% if request.endpoint == 'admin_price' %}active{% endif %}"
-               href="{{ url_for('admin_price') }}">
-                <i class="bi bi-percent me-2"></i>Цены
+            <a class="nav-link {% if request.endpoint == 'admin_price.admin_price' %}active{% endif %}"
+               href="{{ url_for('admin_price.admin_price') }}">
+                <i class="bi bi-cash-stack me-2"></i>Цены
             </a>
+
             <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}"
                href="{{ url_for('index.index') }}">
                 <i class="bi bi-house me-2"></i>Главная страница (Пользователя)

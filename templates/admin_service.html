@@ -73,14 +73,16 @@
                                     <td>
                                         {% if entry.excel_file %}
                                             <div class="btn-group btn-group-sm">
-                                                <a href="{{ url_for('admin_queue.view_excel', filename=entry.excel_file) }}"
-                                                   class="btn btn-outline-info btn-sm" target="_blank"
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                                   class="btn btn-outline-info btn-sm"
+                                                   target="_blank"
                                                    title="Просмотр">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
 
-                                                <a href="{{ url_for('admin_queue.view_excel', filename=entry.excel_file) }}"
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
                                                    class="btn btn-outline-primary btn-sm"
+                                                   target="_blank"
                                                    title="Скачать">
                                                     <i class="bi bi-download"></i>
                                                 </a>
@@ -108,6 +110,7 @@
                                             <form action="{{ url_for('admin_service.complete_service', id=entry.id) }}" method="post">
                                                 <button type="submit" class="btn btn-success">Завершить</button>
                                             </form>
+
 
 
 
@@ -193,8 +196,9 @@
                                             <div class="alert alert-info mb-2">
                                                 <i class="bi bi-file-earmark-excel me-2"></i>
                                                 Текущий файл: {{ entry.excel_file }}
-                                                <a href="{{ url_for('admin_queue.view_excel', filename=entry.excel_file) }}"
-                                                   class="btn btn-sm btn-outline-primary ms-2">
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                                   class="btn btn-sm btn-outline-primary ms-2"
+                                                   target="_blank">
                                                     <i class="bi bi-download"></i>
                                                 </a>
                                             </div>
