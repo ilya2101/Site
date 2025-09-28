@@ -1,79 +1,82 @@
 {% extends "base.html" %}
 
 {% block body %}
-<div class="container py-5">
-    <!-- Заголовок -->
-    <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-gradient mb-3">Наши цены</h1>
-        <p class="lead text-muted">Качественные услуги по доступным ценам</p>
-        <div class="divider mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
-    </div>
+<!-- Добавляем градиентный фон как в других страницах -->
+<div class="background-wrapper">
+    <div class="container py-5">
+        <!-- Заголовок -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-gradient mb-3 animate-fade-in">Наши цены</h1>
+            <p class="lead text-muted animate-fade-in" style="animation-delay: 0.2s;">Качественные услуги по доступным ценам</p>
+            <div class="divider mx-auto animate-fade-in" style="animation-delay: 0.3s; width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
+        </div>
 
-    {% if prices %}
-    <!-- Карточки услуг -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for price in prices %}
-        <div class="col">
-            <div class="card h-100 price-card shadow-lg border-0">
-                <div class="card-header bg-gradient-primary text-white text-center py-4">
-                    <h4 class="card-title mb-0 fw-bold">{{ price.service_name }}</h4>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    {% if price.description %}
-                    <p class="card-text flex-grow-1 text-muted mb-4">
-                        <i class="bi bi-info-circle me-2"></i>{{ price.description }}
-                    </p>
-                    {% endif %}
+        {% if prices %}
+        <!-- Карточки услуг -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for price in prices %}
+            <div class="col">
+                <div class="card h-100 price-card shadow-lg border-0 animate-fade-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                    <div class="card-header bg-gradient-primary text-white text-center py-4">
+                        <h4 class="card-title mb-0 fw-bold">{{ price.service_name }}</h4>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        {% if price.description %}
+                        <p class="card-text flex-grow-1 text-muted mb-4">
+                            <i class="bi bi-info-circle me-2"></i>{{ price.description }}
+                        </p>
+                        {% endif %}
 
-                    <div class="mt-auto">
-                        <div class="d-flex justify-content-center align-items-center mb-3">
-                            <span class="h4 fw-bold text-muted mb-0 me-2">от</span>
-                            <span class="h2 fw-bold text-primary mb-0">{{ "%.2f"|format(price.price) }}</span>
-                            <span class="text-muted ms-2">руб.</span>
-                        </div>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-center align-items-center mb-3">
+                                <span class="h4 fw-bold text-muted mb-0 me-2">от</span>
+                                <span class="h2 fw-bold text-primary mb-0">{{ "%.2f"|format(price.price) }}</span>
+                                <span class="text-muted ms-2">руб.</span>
+                            </div>
 
-                        <div class="text-center text-success mb-3">
-                            <i class="bi bi-clock-history me-1"></i>
-                            <small>Гарантия качества</small>
+                            <div class="text-center text-success mb-3">
+                                <i class="bi bi-clock-history me-1"></i>
+                                <small>Гарантия качества</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-transparent border-0 text-center py-3">
-                    <button class="btn btn-primary btn-lg rounded-pill px-4"
-                            onclick="showContactModal('{{ price.service_name }}')">
-                        <i class="bi bi-telephone me-2"></i>Записаться
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Дополнительная информация -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="alert alert-info border-0 shadow-sm">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-                    <div>
-                        <h5 class="mb-1"></h5>
-                        <p class="mb-0">Для точного расчета стоимости и подтверждения информации, пожалуйста, уточняйте детали у наших менеджеров</p>
+                    <div class="card-footer bg-transparent border-0 text-center py-3">
+                        <button class="btn btn-primary btn-lg rounded-pill px-4"
+                                onclick="showContactModal('{{ price.service_name }}')">
+                            <i class="bi bi-telephone me-2"></i>Записаться
+                        </button>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-    </div>
 
-    {% else %}
-    <!-- Сообщение об отсутствии цен -->
-    <div class="text-center py-5">
-        <div class="alert alert-warning border-0 shadow-lg mx-auto" style="max-width: 500px;">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <h4 class="alert-heading">Цены временно недоступны</h4>
-            <p class="mb-0">Пожалуйста, зайдите позже или свяжитесь с нами для уточнения информации</p>
+        <!-- Дополнительная информация -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="alert alert-info border-0 shadow-sm animate-fade-in" style="animation-delay: 0.6s;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                        <div>
+                            <h5 class="mb-1"></h5>
+                            <p class="mb-0">Для точного расчета стоимости и подтверждения информации, пожалуйста, уточняйте детали у наших менеджеров</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        {% else %}
+        <!-- Сообщение об отсутствии цен -->
+        <div class="text-center py-5">
+            <div class="alert alert-warning border-0 shadow-lg mx-auto animate-fade-in" style="max-width: 500px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <h4 class="alert-heading">Цены временно недоступны</h4>
+                <p class="mb-0">Пожалуйста, зайдите позже или свяжитесь с нами для уточнения информации</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 
 <!-- Модальное окно для записи -->
@@ -103,6 +106,21 @@
 </div>
 
 <style>
+    /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+    :root {
+        /* Основные цвета */
+        --primary-color: #0032ff;
+        --primary-dark: #00ff07;
+        --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+    }
+
+    /* Градиентный фон как в about */
+    .background-wrapper {
+        background: var(--background-gradient);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
     .text-gradient {
         background: linear-gradient(135deg, #0c5fff 0%, #0c5fff 100%);
         -webkit-background-clip: text;
@@ -150,6 +168,35 @@
         background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
         color: white;
         border-radius: 1rem;
+    }
+
+    /* Анимации из about */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeIn 1s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeUp 0.8s forwards;
+    }
+
+    .animate-fade-up[style*="animation-delay"] {
+        animation-delay: inherit;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 

@@ -1,23 +1,25 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    Главная страница
+Главная страница
 {% endblock %}
 
 {% block body %}
+<!-- Добавляем градиентный фон как в about -->
+<div class="background-wrapper">
     <div class="container mt-5">
         <!-- Заголовок и описание -->
         <div class="row mb-5">
             <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-5 fw-bold mb-3" style="color: #2c3e50;">Профессиональный ремонт вашего автомобиля</h1>
-                <p class="lead" style="color: #7f8c8d;">Мы предоставляем полный спектр услуг по ремонту и обслуживанию автомобилей с гарантией качества</p>
+                <h1 class="display-5 fw-bold mb-3 animate-fade-in" style="color: #2c3e50;">Профессиональный ремонт вашего автомобиля</h1>
+                <p class="lead animate-fade-in" style="animation-delay: 0.2s; color: #7f8c8d;">Мы предоставляем полный спектр услуг по ремонту и обслуживанию автомобилей с гарантией качества</p>
             </div>
         </div>
 
         <!-- Плашка для заявки -->
         <div class="row justify-content-center mb-5">
             <div class="col-lg-10">
-                <div class="application-card">
+                <div class="application-card animate-fade-up">
                     <div class="application-header">
                         <h2><i class="bi bi-calendar-check"></i> Записаться на обслуживание</h2>
                         <p>Заполните форму и наш менеджер свяжется с вами для подтверждения времени</p>
@@ -97,7 +99,7 @@
         <!-- Блок с контактами и временем работы -->
         <div class="row mb-5">
             <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4">
+                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.2s;">
                     <div class="card-header bg-dark text-white py-3 rounded-top-4">
                         <h4 class="mb-0"><i class="bi bi-clock"></i> Контакты и время работы</h4>
                     </div>
@@ -135,7 +137,7 @@
         <!-- Карта с расположением сервиса -->
         <div class="row mb-5">
             <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4">
+                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.3s;">
                     <div class="card-header bg-dark text-white py-3 rounded-top-4">
                         <h4 class="mb-0"><i class="bi bi-geo-alt-fill"></i> Где мы находимся</h4>
                     </div>
@@ -162,7 +164,7 @@
         <!-- Раздел с фотографиями в карусели -->
         <div class="row">
             <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4">
+                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.4s;">
                     <div class="card-header bg-dark text-white py-3 rounded-top-4">
                         <h4 class="mb-0"><i class="bi bi-images"></i> Фотографии сервиса</h4>
                     </div>
@@ -241,275 +243,316 @@
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
-    <style>
-        body {
-            background-color: #f8f9fa;
+<style>
+    /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+    :root {
+        /* Основные цвета */
+        --primary-color: #0032ff;
+        --primary-dark: #00ff07;
+        --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+    }
+
+    /* Градиентный фон как в about */
+    .background-wrapper {
+        background: var(--background-gradient);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+
+    .application-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        padding: 0;
+        position: relative;
+        border: 1px solid #e9ecef;
+    }
+
+    .application-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #98ce5e, #2b6cc0);
+        border-radius: 20px 20px 0 0;
+    }
+
+    .application-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        padding: 2.5rem;
+        text-align: center;
+        border-bottom: none;
+        color: white;
+    }
+
+    .application-header h2 {
+        color: white;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .application-header p {
+        color: #ecf0f1;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+
+    .application-form {
+        padding: 2.5rem;
+        background: white;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 1.2rem 0.75rem;
+        border: 2px solid #dce4ec;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .form-control:focus {
+        border-color: #6ce73c;
+        box-shadow: 0 0 0 0.25rem rgba(102, 255, 0, 0.15);
+        background: #ffffff;
+    }
+
+    .form-floating label {
+        color: #7f8c8d;
+        padding: 1.2rem 0.75rem;
+    }
+
+    .btn-application {
+        background: linear-gradient(90deg, #248603 0%, #1349f3 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1.2rem 2.5rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-application:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        background: linear-gradient(90deg, #63d953 0%, #25a912 100%);
+    }
+
+    .application-success {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: white;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: #27ae60;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-danger {
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+
+    /* Стили для карточек */
+    .card {
+        border: none;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-header {
+        border: none;
+    }
+
+    /* Стили для карусели */
+    #photoCarousel {
+        border-radius: 15px;
+    }
+
+    .carousel-inner {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .carousel-item {
+        padding: 10px;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(44, 62, 80, 0.8);
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+    }
+
+    .carousel-indicators button {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin: 0 8px;
+        background-color: #bdc3c7;
+    }
+
+    .carousel-indicators .active {
+        background-color: #e74c3c;
+    }
+
+    /* Анимации из about */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeIn 1s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeUp 0.8s forwards;
+    }
+
+    .animate-fade-up[style*="animation-delay"] {
+        animation-delay: inherit;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
         }
+    }
 
-        .application-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            padding: 0;
-            position: relative;
-            border: 1px solid #e9ecef;
+    @keyframes fadeUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
+    }
 
-        .application-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #98ce5e, #2b6cc0);
-            border-radius: 20px 20px 0 0;
-        }
-
+    /* Адаптивность */
+    @media (max-width: 768px) {
         .application-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            padding: 2.5rem;
-            text-align: center;
-            border-bottom: none;
-            color: white;
-        }
-
-        .application-header h2 {
-            color: white;
-            font-weight: 700;
-            margin-bottom: 1rem;
-        }
-
-        .application-header p {
-            color: #ecf0f1;
-            margin-bottom: 0;
-            font-size: 1.1rem;
+            padding: 2rem 1.5rem;
         }
 
         .application-form {
-            padding: 2.5rem;
-            background: white;
+            padding: 2rem 1.5rem;
         }
 
-        .form-floating {
-            margin-bottom: 1.5rem;
+        .carousel-item .row {
+            flex-direction: column;
         }
 
-        .form-control {
-            border-radius: 12px;
-            padding: 1.2rem 0.75rem;
-            border: 2px solid #dce4ec;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+        .carousel-item .col-md-4 {
+            margin-bottom: 15px;
         }
 
-        .form-control:focus {
-            border-color: #6ce73c;
-            box-shadow: 0 0 0 0.25rem rgba(102, 255, 0, 0.15);
-            background: #ffffff;
-        }
-
-        .form-floating label {
-            color: #7f8c8d;
-            padding: 1.2rem 0.75rem;
+        .carousel-item img {
+            height: 200px !important;
         }
 
         .btn-application {
-            background: linear-gradient(90deg, #248603 0%, #1349f3 100%);
-            border: none;
-            border-radius: 12px;
-            padding: 1.2rem 2.5rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 1rem 2rem;
         }
+    }
 
-        .btn-application:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
-            background: linear-gradient(90deg, #63d953 0%, #25a912 100%);
-        }
+    /* Стили для карты */
+    .map-container {
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
 
-        .application-success {
-            text-align: center;
-            padding: 3rem 2rem;
-            background: white;
-            border-radius: 0 0 20px 20px;
-        }
+    .map-container iframe {
+        border: none;
+        display: block;
+    }
 
-        .success-icon {
-            font-size: 4rem;
-            color: #27ae60;
-            margin-bottom: 1.5rem;
-        }
+    .bg-light {
+        background: linear-gradient(135deg, #ecf0f1 0%, #dfe6e9 100%) !important;
+        border-top: 2px solid #bdc3c7;
+    }
+</style>
 
-        .alert-danger {
-            border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            color: white;
-        }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('applicationForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
 
-        /* Стили для карточек */
-        .card {
-            border: none;
-            transition: transform 0.3s ease;
-        }
+        // Установка минимальной даты (сегодня)
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('date').min = todayStr;
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+        // Автопрокрутка карусели каждые 5 секунд
+        var myCarousel = document.getElementById('photoCarousel');
+        var carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 5000,
+            wrap: true
+        });
 
-        .card-header {
-            border: none;
-        }
+        // Обработка отправки формы
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        /* Стили для карусели */
-        #photoCarousel {
-            border-radius: 15px;
-        }
+            const formData = new FormData(form);
 
-        .carousel-inner {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-
-        .carousel-item {
-            padding: 10px;
-        }
-
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 5%;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            background-color: rgba(44, 62, 80, 0.8);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-        }
-
-        .carousel-indicators button {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            margin: 0 8px;
-            background-color: #bdc3c7;
-        }
-
-        .carousel-indicators .active {
-            background-color: #e74c3c;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 768px) {
-            .application-header {
-                padding: 2rem 1.5rem;
-            }
-
-            .application-form {
-                padding: 2rem 1.5rem;
-            }
-
-            .carousel-item .row {
-                flex-direction: column;
-            }
-
-            .carousel-item .col-md-4 {
-                margin-bottom: 15px;
-            }
-
-            .carousel-item img {
-                height: 200px !important;
-            }
-
-            .btn-application {
-                padding: 1rem 2rem;
-            }
-        }
-
-        /* Стили для карты */
-        .map-container {
-            border-radius: 0 0 12px 12px;
-            overflow: hidden;
-        }
-
-        .map-container iframe {
-            border: none;
-            display: block;
-        }
-
-        .bg-light {
-            background: linear-gradient(135deg, #ecf0f1 0%, #dfe6e9 100%) !important;
-            border-top: 2px solid #bdc3c7;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('applicationForm');
-            const successMessage = document.getElementById('successMessage');
-            const errorMessage = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-
-            // Установка минимальной даты (сегодня)
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            const todayStr = `${yyyy}-${mm}-${dd}`;
-            document.getElementById('date').min = todayStr;
-
-            // Автопрокрутка карусели каждые 5 секунд
-            var myCarousel = document.getElementById('photoCarousel');
-            var carousel = new bootstrap.Carousel(myCarousel, {
-                interval: 5000,
-                wrap: true
-            });
-
-            // Обработка отправки формы
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const formData = new FormData(form);
-
-                try {
-                    const response = await fetch('/submit_application', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'Accept': 'application/json',
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        form.style.display = 'none';
-                        successMessage.style.display = 'block';
-                        errorMessage.style.display = 'none';
-                        successMessage.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        errorText.textContent = result.message;
-                        errorMessage.style.display = 'block';
-                        errorMessage.scrollIntoView({ behavior: 'smooth' });
+            try {
+                const response = await fetch('/submit_application', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
                     }
-                } catch (error) {
-                    errorText.textContent = 'Ошибка сети. Попробуйте еще раз.';
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    form.style.display = 'none';
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                    successMessage.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    errorText.textContent = result.message;
                     errorMessage.style.display = 'block';
                     errorMessage.scrollIntoView({ behavior: 'smooth' });
                 }
-            });
+            } catch (error) {
+                errorText.textContent = 'Ошибка сети. Попробуйте еще раз.';
+                errorMessage.style.display = 'block';
+                errorMessage.scrollIntoView({ behavior: 'smooth' });
+            }
         });
-    </script>
+    });
+</script>
 {% endblock %}
