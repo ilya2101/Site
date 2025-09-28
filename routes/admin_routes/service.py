@@ -1,14 +1,13 @@
 import os
 from datetime import datetime
-from flask import send_from_directory
 
-from flask import Blueprint, abort, render_template, request, flash, url_for
+from flask import Blueprint, abort, render_template, request
+from flask import current_app
+from flask import send_from_directory
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename, redirect
-from flask import current_app
 
 from database.engine import db
-from database.models.inService import InService
 from utils.allowed_file import allowed_file
 
 service_bp = Blueprint('admin_service', __name__, url_prefix='/admin/service')
@@ -53,6 +52,8 @@ def update_service(service_id, conf=None):
                         pass
 
                 # Создаем безопасное имя файла
+
+                # Создаем безопасное имя файла
                 filename = secure_filename(file.filename)
                 import time
                 timestamp = str(int(time.time()))
@@ -60,10 +61,11 @@ def update_service(service_id, conf=None):
                 filename = f"{name}_{timestamp}{ext}"
 
                 # Сохраняем новый файл
-                file.save(os.path.join(current_app.current_app.config['UPLOAD_FOLDER'], filename))
+                file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
                 service_entry.excel_file = filename
 
-        # Обновляем данные
+
+# Обновляем данные
         service_entry.name = request.form.get('name')
         service_entry.phone = request.form.get('phone')
         service_entry.car_brand = request.form.get('car_brand')

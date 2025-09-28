@@ -1,18 +1,15 @@
 import os
-
-from flask import Blueprint, abort, render_template, request, flash, redirect, url_for, current_app
-from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename, send_from_directory
 from datetime import datetime
 
-
-
-from utils.allowed_file import allowed_file
+from flask import Blueprint, abort, render_template, flash, redirect, url_for, request, current_app
+from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename, send_from_directory
 
 from database.engine import db
 from database.models.inService import InService
 from database.models.queue import Queue
-from flask import current_app
+from utils.allowed_file import allowed_file
+
 queue_bp = Blueprint("admin_queue", __name__, url_prefix="/admin")
 
 
@@ -23,11 +20,24 @@ def view_queue():
     if not current_user.is_admin:
         abort(403)
 
-    # Получаем все записи из очереди
-    queue_entries = Queue.query.order_by(Queue.moved_at.desc()).all()
-    return render_template('admin_queue.html',
-                           queue_entries=queue_entries,
-                           user=current_user)
+    # Получаем параметр сортировки
+    order = request.args.get('order', 'desc')  # по умолчанию новые записи сверху
+
+    # Сортировка по дате и времени записи
+    queue_entries = Queue.query
+    if order == 'asc':
+        queue_entries = queue_entries.order_by(Queue.desired_date.asc(), Queue.desired_time.asc())
+    else:
+        queue_entries = queue_entries.order_by(Queue.desired_date.desc(), Queue.desired_time.desc())
+
+    queue_entries = queue_entries.all()
+
+    # Функция для шаблона — меняет порядок сортировки при клике
+    def next_order():
+        return 'desc' if order == 'asc' else 'asc'
+
+    return render_template('admin_queue.html', queue_entries=queue_entries, user=current_user, next_order=next_order, current_order=order)
+
 
 @queue_bp.route('/admin/queue/update/<int:queue_id>', methods=['POST'])
 @login_required
@@ -109,6 +119,27 @@ def move_to_service(queue_id):
                 file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
                 excel_filename = filename
 
+        # Достаём данные из формы
+        raw_cost = request.form.get('estimated_cost')
+        raw_date = request.form.get('estimated_completion')
+
+        # обработка стоимости
+        if not raw_cost or raw_cost.strip() == "":
+            estimated_cost = None
+        else:
+            try:
+                estimated_cost = float(raw_cost)
+            except ValueError:
+                estimated_cost = None  # если вдруг введут ерунду
+
+        # обработка даты
+        if not raw_date or raw_date.strip() == "":
+            estimated_completion = None
+        else:
+            try:
+                estimated_completion = datetime.strptime(raw_date, '%Y-%m-%d').date()
+            except ValueError:
+                estimated_completion = None
 
         # Создаем запись в ремонте
         service_entry = InService(
@@ -121,8 +152,8 @@ def move_to_service(queue_id):
             desired_time=queue_entry.desired_time,
             created_at=queue_entry.created_at,
             comment=queue_entry.comment,
-            estimated_completion=datetime.strptime(request.form.get('estimated_completion'), '%Y-%m-%d').date() if request.form.get('estimated_completion') else None,
-            estimated_cost=request.form.get('estimated_cost', ''),
+            estimated_completion=estimated_completion,
+            estimated_cost=estimated_cost,
             work_list=request.form.get('work_list', ''),
             excel_file=excel_filename
         )
@@ -140,6 +171,7 @@ def move_to_service(queue_id):
         raise e
 
     return redirect(url_for('admin_service.view_service'))
+
 
 @queue_bp.route('/admin/queue/delete/<int:queue_id>')
 @login_required

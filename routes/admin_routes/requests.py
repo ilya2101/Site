@@ -1,29 +1,67 @@
 from datetime import datetime
 
-from flask import Blueprint, abort, render_template, request, flash, redirect, url_for
+from flask import Blueprint, abort, render_template, request, flash, redirect, url_for, Request
 from flask_login import login_required, current_user
+from flask import request, render_template
 
 from database.engine import db
 from database.models.application import Application
 from database.models.queue import Queue
 
+
 admin_required_bp = Blueprint("admin_required", __name__, url_prefix="/admin")
+
+
+
+
+
+
+
+
+def requests():
+    sort_by = request.args.get('sort_by', 'id')  # По умолчанию сортировка по ID
+    order = request.args.get('order', 'asc')     # По умолчанию по возрастанию
+
+    # Получаем список заявок
+    requests_list = Request.query  # если используешь SQLAlchemy
+
+    # Применяем сортировку
+    if order == 'asc':
+        requests_list = requests_list.order_by(getattr(Request, sort_by).asc())
+    else:
+        requests_list = requests_list.order_by(getattr(Request, sort_by).desc())
+
+    requests_list = requests_list.all()
+
+    # Функция для шаблона — определяет следующий порядок
+    def next_order(column):
+        if column == sort_by and order == 'asc':
+            return 'desc'
+        return 'asc'
+
+    return render_template('admin_requests.html', requests=requests_list, next_order=next_order)
 
 
 @admin_required_bp.route('/admin/requests')
 @login_required
 def view_requests():
-    if not current_user.is_admin:
-        abort(403)
+    order = request.args.get('order', 'asc')
 
-    # Получаем все заявки из базы данных
-    requests = Application.query.order_by(Application.created_at.desc()).all()
-    return render_template(
-        'admin_requests.html',
-        requests=requests,
-        user=current_user
-    )
+    # Сортировка по дате и времени записи
+    requests_list = Application.query
 
+    if order == 'asc':
+        requests_list = requests_list.order_by(Application.desired_date.asc(), Application.desired_time.asc())
+    else:
+        requests_list = requests_list.order_by(Application.desired_date.desc(), Application.desired_time.desc())
+
+    requests_list = requests_list.all()
+
+    # Функция для шаблона — определяет следующий порядок
+    def next_order():
+        return 'desc' if order == 'asc' else 'asc'
+
+    return render_template('admin_requests.html', requests=requests_list, next_order=next_order, current_order=order)
 
 @admin_required_bp.route('/admin/request/update/<int:request_id>', methods=['POST'])
 @login_required

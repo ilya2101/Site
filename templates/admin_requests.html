@@ -28,11 +28,24 @@
                             <th>ID</th>
                             <th>Клиент</th>
                             <th>Автомобиль</th>
-                            <th>Дата/Время</th>
+                            <th>
+                                <a href="{{ url_for('admin_required.view_requests', order=next_order()) }}"
+                                   class="text-white text-decoration-none">
+                                    Дата/Время
+                                    {% if current_order == 'asc' %}
+                                    &#9650; <!-- стрелка вверх -->
+                                    {% else %}
+                                    &#9660; <!-- стрелка вниз -->
+                                    {% endif %}
+                                </a>
+                            </th>
                             <th>Статус</th>
                             <th>Действия</th>
                         </tr>
                         </thead>
+
+
+
                         <tbody>
                         {% for request in requests %}
                             <tr class="align-middle">

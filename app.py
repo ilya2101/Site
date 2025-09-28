@@ -1,42 +1,25 @@
 import os
-from datetime import datetime
 from functools import wraps
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.interval import IntervalTrigger
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Blueprint
+from flask import Flask, render_template
 from flask import abort
 from flask_login import LoginManager, login_required
 from flask_login import current_user
 from flask_migrate import Migrate
-from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash
-from werkzeug.utils import secure_filename
-from wtforms import BooleanField, DateField
-from wtforms import StringField, TextAreaField
-from wtforms.validators import DataRequired
 
-from admin_price import PriceForm
 from database.engine import db
+from database.models.servicePrice import ServicePrice
 # Импорты моделей
 from database.models.user import User
-from forms import DiscountForm
-from routes.admin_routes.admin_discounts import admin_discounts
+from routes.admin_routes.admin_discounts import admin_discounts_bp
 from routes.admin_routes.dashboard import admin_bp
+from routes.admin_routes.price import price_bp
 from routes.admin_routes.queue import queue_bp
 from routes.admin_routes.requests import admin_required_bp
 from routes.admin_routes.service import service_bp
-from routes.admin_routes.price import price_bp
-from routes.admin_routes.admin_discounts import admin_discounts_bp
 from routes.users_routes.index import index_route
 from routes.users_routes.login import user_bp
-
-from database.models.application import Application
-from database.models.completed_service import CompletedService
-from database.models.discount import Discount
-from database.models.inService import InService
-from database.models.queue import Queue
-from database.models.servicePrice import ServicePrice
 
 
 def admin_required(f):
@@ -51,6 +34,10 @@ def admin_required(f):
 
 
 
+import os
+
+print("STATIC FOLDER:", os.path.join(os.getcwd(), "static", "img", "photo_for_about", "Chatgpt_mexanic.jpg"))
+print("EXISTS:", os.path.exists(os.path.join(os.getcwd(), "static", "img", "photo_for_about", "Chatgpt_mexanic.jpg")))
 
 
 
@@ -77,29 +64,9 @@ app.register_blueprint(admin_discounts_bp)
 
 
 
-
-
-
-
-
 app.config['SECRET_KEY'] = 'ilya'
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Конфигурация БД
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-
-
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -116,19 +83,7 @@ with app.app_context():
 
 login_manager.init_app(app)
 
-
-
-
-
-
 migrate = Migrate(app, db)
-
-
-
-
-
-
-
 
 # Настройка загрузки файлов
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
@@ -138,12 +93,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 # Создаем папку для загрузок
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
-
-
-# Регистрируем Blueprint
-
-
-
 
 # Создаем папки для загрузок
 def create_upload_folders():
@@ -185,18 +134,17 @@ def create_admin():
 with app.app_context():
     create_admin()
 
+
+
+import os
+from flask import Flask
+
+
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
-
-
-
-
-
-
-
-
-
 
 
 
@@ -212,117 +160,10 @@ class ServiceRequest:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-@app.route('/about')
-def about():
-    render_template('about.html')
-
-@app.route('/contacts')
-def contacts():
-    return render_template('contact.html')
-
-@app.route('/discounts')
-def discounts():
-    # Получаем только активные скидки
-    active_discounts = Discount.query.filter(
-        Discount.is_active == True,
-        (Discount.expires_at.is_(None)) | (Discount.expires_at >= datetime.now())
-    ).order_by(Discount.created_at.desc()).all()
-
-    return render_template('discounts.html',
-                           discounts=active_discounts,
-                           user=current_user)  # Добавьте эту строку
-
-
-@app.route('/price')
-def price():
-    # Если у вас есть модель ServicePrice
-    active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
-    return render_template('price.html', prices=active_prices)
-
-
-
-
-
-
-
-# Найдите старую функцию price() и замените ее на эту:
-@app.route('/price', endpoint='price_main')
-def price():
-    active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
-
-    # Отладочная информация
-    print(f"Найдено активных цен: {len(active_prices)}")
-    for price in active_prices:
-        print(f"Услуга: {price.service_name}, Цена: {price.price}")
-
-    return render_template('price.html', prices=active_prices)
-
 @app.route('/service-prices')  # Измените URL
 def get_service_prices():        # Измените имя функции
     active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
     return render_template('price.html', prices=active_prices)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
