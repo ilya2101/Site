@@ -12,14 +12,39 @@ from database.engine import db
 from database.models.servicePrice import ServicePrice
 # Импорты моделей
 from database.models.user import User
+from database.models.visit import Visit
 from routes.admin_routes.admin_discounts import admin_discounts_bp
 from routes.admin_routes.dashboard import admin_bp
 from routes.admin_routes.price import price_bp
 from routes.admin_routes.queue import queue_bp
 from routes.admin_routes.requests import admin_required_bp
 from routes.admin_routes.service import service_bp
+from routes.admin_routes.visit import visit_bp
 from routes.users_routes.index import index_route
 from routes.users_routes.login import user_bp
+
+
+
+app = Flask(__name__)
+
+app.register_blueprint(index_route)
+
+app.register_blueprint(user_bp)
+
+app.register_blueprint(admin_bp)
+
+app.register_blueprint(admin_required_bp)
+
+app.register_blueprint(queue_bp)
+
+app.register_blueprint(service_bp)
+
+app.register_blueprint(price_bp)
+
+app.register_blueprint(admin_discounts_bp)
+
+app.register_blueprint(visit_bp)
+
 
 
 def admin_required(f):
@@ -43,23 +68,6 @@ print("EXISTS:", os.path.exists(os.path.join(os.getcwd(), "static", "img", "phot
 
 
 
-app = Flask(__name__)
-
-app.register_blueprint(index_route)
-
-app.register_blueprint(user_bp)
-
-app.register_blueprint(admin_bp)
-
-app.register_blueprint(admin_required_bp)
-
-app.register_blueprint(queue_bp)
-
-app.register_blueprint(service_bp)
-
-app.register_blueprint(price_bp)
-
-app.register_blueprint(admin_discounts_bp)
 
 
 
@@ -138,7 +146,6 @@ with app.app_context():
 
 import os
 from flask import Flask
-
 
 
 

@@ -1,0 +1,17 @@
+{% extends "base_admin.html" %}
+{% block content %}
+<h2>Статистика посещений</h2>
+
+<table border="1" cellpadding="5">
+    <tr><th>Период</th><th>Всего визитов</th></tr>
+    <tr><td>Сегодня</td><td>{{ count_day }}</td></tr>
+    <tr><td>Этот месяц</td><td>{{ count_month }}</td></tr>
+    <tr><td>Этот год</td><td>{{ count_year }}</td></tr>
+</table>
+
+<h3>Сегодня:</h3>
+<ul>
+    <li>Гости: {{ count_day_guests }}</li>
+    <li>Зарегистрированные пользователи: {{ count_day_users }}</li>
+</ul>
+{% endblock %}
