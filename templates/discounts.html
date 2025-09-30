@@ -3,215 +3,259 @@
 {% block title %}Акции и скидки{% endblock %}
 
 {% block body %}
-<section class="discounts-section py-5">
-    <div class="container">
-        <!-- Заголовок -->
-        <div class="row mb-5">
-            <div class="col-12 text-center">
-                <h1 class="display-4 fw-bold text-primary mb-3">Акции и скидки</h1>
-                <p class="lead text-muted">Специальные предложения для наших клиентов</p>
-                <div class="divider mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
-            </div>
-        </div>
-
-        <!-- Сетка скидок -->
-        {% if discounts %}
-        <div class="row">
-            {% for discount in discounts %}
-            <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
-                <div class="card discount-card h-100 shadow-lg border-0">
-                    <!-- Изображение -->
-                    {% if discount.image %}
-                    <div class="discount-image-container" style="height: 250px; overflow: hidden;">
-                        <img src="{{ url_for('static', filename=discount.image) }}"
-                             class="card-img-top discount-image w-100 h-100"
-                             alt="{{ discount.title }}"
-                             style="object-fit: cover;">
-                        <div class="discount-overlay"></div>
-                    </div>
-                    {% else %}
-                    <div class="discount-placeholder bg-gradient-primary d-flex align-items-center justify-content-center"
-                         style="height: 250px;">
-                        <i class="bi bi-percent display-1 text-white opacity-50"></i>
-                    </div>
-                    {% endif %}
-
-                    <!-- Тело карточки -->
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h3 class="card-title fw-bold text-dark mb-0">{{ discount.title }}</h3>
-                            <span class="badge bg-danger rounded-pill px-3">
-                                <i class="bi bi-lightning-fill me-1"></i>Акция
-                            </span>
-                        </div>
-
-                        <p class="card-text text-muted mb-4">{{ discount.description }}</p>
-                    </div>
-
-                    <!-- Футер карточки -->
-                    <div class="card-footer bg-transparent border-0 pt-0 pb-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            {% if discount.expires_at %}
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-clock text-danger me-2"></i>
-                                <small class="text-danger fw-semibold">
-                                    До {{ discount.expires_at.strftime('%d.%m.%Y') }}
-                                </small>
-                            </div>
-                            {% else %}
-                            <div class="d-flex align-items-center">
-                                <i class="bi bi-infinity text-success me-2"></i>
-                                <small class="text-success fw-semibold">Постоянная акция</small>
-                            </div>
-                            {% endif %}
-
-
-                        </div>
+    <!-- Добавляем градиентный фон как в других страницах -->
+    <div class="background-wrapper">
+        <section class="discounts-section py-5">
+            <div class="container">
+                <!-- Заголовок -->
+                <div class="row mb-5">
+                    <div class="col-12 text-center">
+                        <h1 class="display-4 fw-bold text-primary mb-3 animate-fade-in">Акции и скидки</h1>
+                        <p class="lead text-muted animate-fade-in" style="animation-delay: 0.2s;">Специальные предложения для наших клиентов</p>
+                        <div class="divider mx-auto animate-fade-in" style="animation-delay: 0.3s; width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <!-- Сообщение об отсутствии скидок -->
-        <div class="row">
-            <div class="col-12 text-center py-5">
-                <div class="empty-state">
-                    <i class="bi bi-percent display-1 text-muted mb-4 opacity-50"></i>
-                    <h3 class="text-muted mb-3">Акций пока нет</h3>
-                    <p class="text-muted mb-4">Но мы готовим для вас специальные предложения!</p>
-                    <div class="loading-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+
+                <!-- Сетка скидок -->
+                {% if discounts %}
+                    <div class="row">
+                        {% for discount in discounts %}
+                            <div class="col-xl-4 col-lg-6 col-md-6 mb-4">
+                                <div class="card discount-card h-100 shadow-lg border-0 animate-fade-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                    <!-- Изображение -->
+                                    {% if discount.image %}
+                                        <div class="discount-image-container" style="height: 250px; overflow: hidden;">
+                                            <img src="{{ url_for('static', filename=discount.image) }}"
+                                                 class="card-img-top discount-image w-100 h-100"
+                                                 alt="{{ discount.title }}"
+                                                 style="object-fit: cover;">
+                                            <div class="discount-overlay"></div>
+                                        </div>
+                                    {% else %}
+                                        <div class="discount-placeholder bg-gradient-primary d-flex align-items-center justify-content-center"
+                                             style="height: 250px;">
+                                            <i class="bi bi-percent display-1 text-white opacity-50"></i>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Тело карточки -->
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h3 class="card-title fw-bold text-dark mb-0">{{ discount.title }}</h3>
+                                            <span class="badge bg-danger rounded-pill px-3">
+                                    <i class="bi bi-lightning-fill me-1"></i>Акция
+                                </span>
+                                        </div>
+
+                                        <p class="card-text text-muted mb-4">{{ discount.description }}</p>
+                                    </div>
+
+                                    <!-- Футер карточки -->
+                                    <div class="card-footer bg-transparent border-0 pt-0 pb-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            {% if discount.expires_at %}
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-clock text-danger me-2"></i>
+                                                    <small class="text-danger fw-semibold">
+                                                        До {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                                    </small>
+                                                </div>
+                                            {% else %}
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-infinity text-success me-2"></i>
+                                                    <small class="text-success fw-semibold">Постоянная акция</small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
+                {% else %}
+                    <!-- Сообщение об отсутствии скидок -->
+                    <div class="row">
+                        <div class="col-12 text-center py-5">
+                            <div class="empty-state animate-fade-in">
+                                <i class="bi bi-percent display-1 text-muted mb-4 opacity-50"></i>
+                                <h3 class="text-muted mb-3">Акций пока нет</h3>
+                                <p class="text-muted mb-4">Но мы готовим для вас специальные предложения!</p>
+                                <div class="loading-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <!-- Модальное окно для подробностей -->
+    <div class="modal fade" id="discountModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary">Записаться</button>
                 </div>
             </div>
         </div>
-        {% endif %}
     </div>
-</section>
 
-<!-- Модальное окно для подробностей -->
-<div class="modal fade" id="discountModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalTitle"></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                <button type="button" class="btn btn-primary">Записаться</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <style>
+        /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+        :root {
+            /* Основные цвета */
+            --primary-color: #0032ff;
+            --primary-dark: #00ff07;
+            --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+        }
 
-<style>
-    .discounts-section {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        min-height: 70vh;
-    }
+        /* Градиентный фон как в about */
+        .background-wrapper {
+            background: var(--background-gradient);
+            min-height: 100vh;
+        }
 
-    .discount-card {
-        transition: all 0.3s ease;
-        border-radius: 20px;
-        overflow: hidden;
-        border: none;
-    }
+        .discounts-section {
+            background: transparent;
+            min-height: 70vh;
+        }
 
-    .discount-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
-    }
+        .discount-card {
+            transition: all 0.3s ease;
+            border-radius: 20px;
+            overflow: hidden;
+            border: none;
+        }
 
-    .discount-image-container {
-        position: relative;
-    }
+        .discount-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+        }
 
-    .discount-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%);
-    }
+        .discount-image-container {
+            position: relative;
+        }
 
-    .discount-image {
-        transition: transform 0.5s ease;
-    }
+        .discount-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7) 100%);
+        }
 
-    .discount-card:hover .discount-image {
-        transform: scale(1.1);
-    }
+        .discount-image {
+            transition: transform 0.5s ease;
+        }
 
-    .discount-placeholder {
-        border-radius: 20px 20px 0 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
+        .discount-card:hover .discount-image {
+            transform: scale(1.1);
+        }
 
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
+        .discount-placeholder {
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-    .empty-state {
-        padding: 4rem 0;
-    }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
 
-    .loading-dots {
-        display: inline-flex;
-        gap: 4px;
-    }
+        .empty-state {
+            padding: 4rem 0;
+        }
 
-    .loading-dots span {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #6c757d;
-        animation: bounce 1.5s infinite ease-in-out;
-    }
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
 
-    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        .loading-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6c757d;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
 
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-    .card-title {
-        min-height: auto;
-        line-height: 1.3;
-    }
+        /* Анимации из about */
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
 
-    .card-text {
-        min-height: auto;
-        line-height: 1.5;
-    }
+        .animate-fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s forwards;
+        }
 
-    .badge {
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
+        .animate-fade-up[style*="animation-delay"] {
+            animation-delay: inherit;
+        }
 
-    .divider {
-        margin-top: 1rem;
-    }
-</style>
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
 
-<script>
-    function showDiscountDetails(discountId) {
-        // Здесь можно добавить AJAX запрос для получения деталей скидки
-        const modal = new bootstrap.Modal(document.getElementById('discountModal'));
-        document.getElementById('modalTitle').textContent = 'Детали акции';
-        document.getElementById('modalBody').innerHTML = `
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card-title {
+            min-height: auto;
+            line-height: 1.3;
+        }
+
+        .card-text {
+            min-height: auto;
+            line-height: 1.5;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .divider {
+            margin-top: 1rem;
+        }
+    </style>
+
+    <script>
+        function showDiscountDetails(discountId) {
+            // Здесь можно добавить AJAX запрос для получения деталей скидки
+            const modal = new bootstrap.Modal(document.getElementById('discountModal'));
+            document.getElementById('modalTitle').textContent = 'Детали акции';
+            document.getElementById('modalBody').innerHTML = `
             <p>Здесь будет подробное описание акции #${discountId}</p>
             <p>Для получения скидки обратитесь к нашему менеджеру!</p>
         `;
-        modal.show();
-    }
-</script>
+            modal.show();
+        }
+    </script>
 {% endblock %}

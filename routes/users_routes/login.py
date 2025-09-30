@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from database.engine import db
 from database.models.user import User
 
-# Создаем один Blueprint для пользователей
+# Создаем один Blueprint для пользователей (УБЕРИТЕ ПОВТОРНОЕ СОЗДАНИЕ)
 user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/login', methods=['GET', 'POST'])
@@ -72,4 +72,23 @@ def register():
     return render_template('register.html')
 
 
+# УБЕРИТЕ ЭТУ СТРОКУ: user_bp = Blueprint('user', __name__)
 
+@user_bp.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    if request.method == 'POST':
+        try:
+            user = current_user
+            user.first_name = request.form['first_name']
+            user.last_name = request.form['last_name']
+            user.phone = request.form['phone']
+
+            db.session.commit()
+            flash('Профиль успешно обновлен!', 'success')
+
+        except Exception as e:
+            db.session.rollback()
+            flash('Ошибка при обновлении профиля', 'error')
+
+    return redirect(url_for('account'))

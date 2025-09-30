@@ -1,156 +1,376 @@
-{% extends 'base.html' %}
-
-{% block title %}
-О нас
-{% endblock %}
-
-{% block body %}
-<main class="py-5">
-    <div class="container text-center">
-        <!-- Главный блок с фото -->
-        <h1 class="section-title mb-4">О нас</h1>
-        <p class="lead mb-4">Мы – команда профессионалов, предоставляющая полный спектр услуг по обслуживанию автомобилей.</p>
-        <img src="{{ url_for('static', filename='photo_for_about/mechanic.png') }}"
-             alt="Наша команда"
-             class="main-image img-fluid rounded shadow-lg mb-5 animate-fade-in">
-    </div>
-
-    <div class="container">
-        <!-- Карточки преимуществ -->
-        <div class="row mb-5">
-            <div class="col-md-4 mb-4">
-                <div class="contact-card p-4 text-center h-100 animate-fade-up">
-                    <div class="contact-icon mb-3">
-                        <i class="bi bi-gear-fill fs-1 text-primary"></i>
-                    </div>
-                    <h3>Качество</h3>
-                    <p>Используем только сертифицированные запчасти и современное оборудование для ремонта вашего авто.</p>
-                    <img src="{{ url_for('static', filename='photo_for_about/quality.png') }}"
-                         alt="Качество"
-                         class="card-img">
-                </div>
-            </div>
-
-            <div class="col-md-4 mb-4">
-                <div class="contact-card p-4 text-center h-100 animate-fade-up" style="animation-delay: 0.2s;">
-                    <div class="contact-icon mb-3">
-                        <i class="bi bi-clock-fill fs-1 text-success"></i>
-                    </div>
-                    <h3>Скорость</h3>
-                    <p>Скоростное обслуживание без потери качества – ремонтируем авто в минимальные сроки.</p>
-                    <img src="{{ url_for('static', filename='photo_for_about/speed.png') }}"
-                         alt="Скорость"
-                         class="card-img">
-                </div>
-            </div>
-
-            <div class="col-md-4 mb-4">
-                <div class="contact-card p-4 text-center h-100 animate-fade-up" style="animation-delay: 0.4s;">
-                    <div class="contact-icon mb-3">
-                        <i class="bi bi-people-fill fs-1 text-warning"></i>
-                    </div>
-                    <h3>Профессионализм</h3>
-                    <p>Наши специалисты имеют многолетний опыт и регулярно проходят обучение новым технологиям.</p>
-                    <img src="{{ url_for('static', filename='photo_for_about/professional.png') }}"
-                         alt="Профессионализм"
-                         class="card-img">
-                </div>
-            </div>
-        </div>
-
-        <!-- Миссия -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="contact-card p-4 animate-fade-in">
-                    <h3 class="mb-3">Наша миссия</h3>
-                    <p>Мы стремимся обеспечить максимальный комфорт и безопасность для владельцев автомобилей, предлагая качественный сервис и индивидуальный подход к каждому клиенту.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Оборудование и гарантия -->
-        <div class="row mb-5">
-            <div class="col-md-6">
-                <div class="contact-card p-4 text-center h-100 animate-fade-up">
-                    <i class="bi bi-tools contact-icon fs-1 text-info"></i>
-                    <h4>Современное оборудование</h4>
-                    <p>Используем новейшие технологии диагностики и ремонта автомобилей.</p>
-                    <img src="{{ url_for('static', filename='photo_for_about/equipment.jpg') }}"
-                         alt="Оборудование"
-                         class="card-img">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="contact-card p-4 text-center h-100 animate-fade-up" style="animation-delay: 0.2s;">
-                    <i class="bi bi-shield-check contact-icon fs-1 text-danger"></i>
-                    <h4>Гарантия на работы</h4>
-                    <p>Мы даем официальную гарантию на все виды выполненных работ и замененные запчасти.</p>
-                    <img src="{{ url_for('static', filename='photo_for_about/warranty.jpg') }}"
-                         alt="Гарантия"
-                         class="card-img">
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<style>
-    body {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-
-    .main-image {
-        max-height: 400px;
-        object-fit: cover;
-    }
-
-    .contact-card {
-        background: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-    }
-
-    .contact-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-
-    .card-img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 0.5rem;
-        margin-top: 1rem;
-    }
-
-    /* Анимации */
-    .animate-fade-in {
-        opacity: 0;
-        animation: fadeIn 1s forwards;
-    }
-
-    .animate-fade-up {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeUp 1s forwards;
-    }
-
-    .animate-fade-up[style*="animation-delay"] {
-        animation-delay: inherit;
-    }
-
-    @keyframes fadeIn {
-        to {
-            opacity: 1;
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты - Автосервис</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+        :root {
+            /* Основные цвета */
+            --primary-color: #0032ff;
+            --primary-dark: #00ff07;
+            --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
         }
-    }
 
-    @keyframes fadeUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        /* Градиентный фон как в about */
+        .background-wrapper {
+            background: var(--background-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
-    }
-</style>
-{% endblock %}
+
+        body {
+            background: var(--background-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #e74c3c !important;
+            transform: translateY(-1px);
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .dropdown-item {
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+            color: white !important;
+            transform: translateX(5px);
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #108510;
+        }
+
+        .social-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: #e74c3c;
+            transform: translateY(-3px);
+        }
+
+        .map-container {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: #01831c;
+        }
+
+        .contact-link {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: #e74c3c;
+        }
+
+        .social-contact {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .social-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Анимации из about */
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .animate-fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s forwards;
+        }
+
+        .animate-fade-up[style*="animation-delay"] {
+            animation-delay: inherit;
+        }
+
+        .animate-scale {
+            opacity: 0;
+            transform: scale(0.8);
+            animation: scaleIn 0.8s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Специфичные анимации для контактов */
+        .contact-card:nth-child(1) { animation-delay: 0.1s; }
+        .contact-card:nth-child(2) { animation-delay: 0.2s; }
+        .contact-card:nth-child(3) { animation-delay: 0.3s; }
+        .contact-card:nth-child(4) { animation-delay: 0.4s; }
+        .contact-card:nth-child(5) { animation-delay: 0.5s; }
+    </style>
+</head>
+<body>
+<!-- Обертка для градиентного фона -->
+<div class="background-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index.index') }}">
+                <i class="bi bi-tools me-2"></i>Автосервис
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.about') }}">
+                            <i class="bi bi-info-circle me-1"></i>О нас
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.discounts') }}">
+                            <i class="bi bi-percent me-1"></i>Скидки
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index.price') }}">
+                            <i class="bi bi-currency-dollar me-1"></i>Цены
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('index.contacts') }}">
+                            <i class="bi bi-telephone me-1"></i>Контакты
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.login') }}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user.register') }}">
+                            <i class="bi bi-person-plus me-1"></i>Регистрация
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="py-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h1 class="section-title animate-fade-in">Наши контакты</h1>
+                    <p class="lead animate-fade-in" style="animation-delay: 0.2s;">Свяжитесь с нами удобным для вас способом</p>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-md-4 mb-4">
+                    <div class="contact-card p-4 text-center animate-fade-up">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <h3>Телефон</h3>
+                        <p class="mb-0">
+                            <a href="tel:+74951234567" class="contact-link">
+                                +7 (495) 123-45-67
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="contact-card p-4 text-center animate-fade-up">
+                        <div class="contact-icon">
+                            <i class="bi bi-printer-fill"></i>
+                        </div>
+                        <h3>Факс</h3>
+                        <p class="mb-0">
+                            <a href="tel:+74951234568" class="contact-link">
+                                +7 (495) 123-45-68
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="contact-card p-4 text-center animate-fade-up">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope-fill"></i>
+                        </div>
+                        <h3>Email</h3>
+                        <p class="mb-0">
+                            <a href="mailto:info@autoservice.ru" class="contact-link">
+                                info@autoservice.ru
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-md-6 mb-4">
+                    <div class="contact-card p-4 animate-fade-up" style="animation-delay: 0.4s;">
+                        <h3 class="mb-4">Мы в соцсетях</h3>
+
+                        <div class="social-contact">
+                            <i class="bi bi-whatsapp social-icon"></i>
+                            <div class="social-info">
+                                <strong>WhatsApp</strong>
+                                <a href="https://wa.me/74951234567" class="contact-link">+7 (495) 123-45-67</a>
+                            </div>
+                        </div>
+
+                        <div class="social-contact">
+                            <i class="bi bi-telegram social-icon"></i>
+                            <div class="social-info">
+                                <strong>Telegram</strong>
+                                <a href="https://t.me/autoservice_help" class="contact-link">@autoservice_help</a>
+                            </div>
+                        </div>
+
+                        <div class="social-contact">
+                            <i class="bi bi-chat-dots-fill social-icon"></i>
+                            <div class="social-info">
+                                <strong>Max</strong>
+                                <a href="viber://chat?number=%2B74951234567" class="contact-link">+7 (495) 123-45-67</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="contact-card p-4 animate-fade-up" style="animation-delay: 0.5s;">
+                        <h3 class="mb-4">Режим работы</h3>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Понедельник - Пятница</span>
+                            <span>9:00 - 18:00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Суббота</span>
+                            <span>10:00 - 16:00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Воскресенье</span>
+                            <span>Выходной</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="map-container animate-fade-in" style="animation-delay: 0.6s;">
+                        <script src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A9c20f50e9518dd7930e556060867662e2ab6cf493012705865836a7c1961efad&amp;width=100%&amp;height=400&amp;lang=ru_RU&amp;scroll=true"></script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="contact-card p-4 text-center animate-fade-up" style="animation-delay: 0.7s;">
+                        <h3 class="mb-3">Адрес</h3>
+                        <p class="lead mb-0">
+                            г. Москва, ул. Автосервисная, д. 25<br>
+                            Бизнес-центр "АвтоПлаза", 3 этаж
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

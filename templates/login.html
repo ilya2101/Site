@@ -5,81 +5,84 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
-        <div class="row justify-content-center w-100">
-            <div class="col-md-6 col-lg-5">
-                <div class="card shadow-lg border-0 rounded-4">
-                    <!-- Заголовок карточки -->
-                    <div class="card-header bg-dark text-white py-4 rounded-top-4 text-center">
-                        <h3 class="mb-0">
-                            <i class="bi bi-lock-fill me-2"></i>Вход в систему
-                        </h3>
-                    </div>
+    <!-- Добавляем градиентный фон как в других страницах -->
+    <div class="background-wrapper">
+        <div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+            <div class="row justify-content-center w-100">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow-lg border-0 rounded-4 animate-fade-up">
+                        <!-- Заголовок карточки -->
+                        <div class="card-header bg-gradient-primary text-white py-4 rounded-top-4 text-center">
+                            <h3 class="mb-0">
+                                <i class="bi bi-lock-fill me-2"></i>Вход в систему
+                            </h3>
+                        </div>
 
-                    <div class="card-body p-4">
-                        <!-- Flash сообщения -->
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                {% for category, message in messages %}
-                                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show rounded-3 mb-4">
-                                        <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
-                                        {{ message }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <div class="card-body p-4">
+                            <!-- Flash сообщения -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show rounded-3 mb-4 animate-fade-in">
+                                            <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                                            {{ message }}
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+
+                            <form action="{{ url_for('user.login') }}" method="POST">
+                                <!-- Номер телефона -->
+                                <div class="mb-4">
+                                    <label for="phone" class="form-label fw-medium text-dark mb-2">
+                                        <i class="bi bi-phone text-primary me-2"></i>Номер телефона
+                                    </label>
+                                    <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-telephone text-muted"></i>
+                                    </span>
+                                        <input type="tel"
+                                               class="form-control"
+                                               id="phone"
+                                               name="phone"
+                                               required
+                                               placeholder="+7 (900) 123-45-67"
+                                               value="{{ request.form.phone if request.form.phone }}"
+                                               style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                     </div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endwith %}
-
-                        <form action="{{ url_for('user.login') }}" method="POST">
-                            <!-- Номер телефона -->
-                            <div class="mb-4">
-                                <label for="phone" class="form-label fw-medium text-dark mb-2">
-                                    <i class="bi bi-phone text-warning me-2"></i>Номер телефона
-                                </label>
-                                <div class="input-group">
-            <span class="input-group-text bg-light border-end-0">
-                <i class="bi bi-telephone text-muted"></i>
-            </span>
-                                    <input type="tel"
-                                           class="form-control"
-                                           id="phone"
-                                           name="phone"
-                                           required
-                                           placeholder="+7 (900) 123-45-67"
-                                           value="{{ request.form.phone if request.form.phone }}"
-                                           style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
                                 </div>
-                            </div>
 
-                            <!-- Пароль -->
-                            <div class="mb-4">
-                                <label for="password" class="form-label fw-medium text-dark mb-2">
-                                    <i class="bi bi-key text-warning me-2"></i>Пароль
-                                </label>
-                                <div class="input-group">
-            <span class="input-group-text bg-light border-end-0">
-                <i class="bi bi-shield-lock text-muted"></i>
-            </span>
-                                    <input type="password"
-                                           class="form-control"
-                                           id="password"
-                                           name="password"
-                                           required
-                                           placeholder="Введите ваш пароль"
-                                           style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                <!-- Пароль -->
+                                <div class="mb-4">
+                                    <label for="password" class="form-label fw-medium text-dark mb-2">
+                                        <i class="bi bi-key text-primary me-2"></i>Пароль
+                                    </label>
+                                    <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-shield-lock text-muted"></i>
+                                    </span>
+                                        <input type="password"
+                                               class="form-control"
+                                               id="password"
+                                               name="password"
+                                               required
+                                               placeholder="Введите ваш пароль"
+                                               style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                    </div>
                                 </div>
+
+                                <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-semibold">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                                </button>
+                            </form>
+
+                            <!-- Дополнительная информация -->
+                            <div class="text-center mt-4 pt-3 border-top">
+                                <p class="text-muted mb-0">
+                                    <small>Автосервис "ADRAuto"</small>
+                                </p>
                             </div>
-
-                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-semibold">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>Войти
-                            </button>
-                        </form>
-
-                        <!-- Дополнительная информация -->
-                        <div class="text-center mt-4 pt-3 border-top">
-                            <p class="text-muted mb-0">
-                                <small>Автосервис "ADRAuto"</small>
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -88,10 +91,18 @@
     </div>
 
     <style>
-        body {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            margin: 0;
-            padding: 0;
+        /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+        :root {
+            /* Основные цвета */
+            --primary-color: #0032ff;
+            --primary-dark: #00ff07;
+            --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+        }
+
+        /* Градиентный фон как в about */
+        .background-wrapper {
+            background: var(--background-gradient);
+            min-height: 100vh;
         }
 
         .min-vh-100 {
@@ -101,10 +112,16 @@
         .card {
             border: none;
             background: white;
+            transition: all 0.3s ease;
         }
 
-        .card-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #0630c0 0%, #000d42 100%) !important;
             border: none;
         }
 
@@ -117,8 +134,8 @@
         }
 
         .form-control:focus {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.15);
+            border-color: #6ce73c;
+            box-shadow: 0 0 0 0.25rem rgba(102, 255, 0, 0.15);
             background: white;
         }
 
@@ -131,7 +148,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+            background: linear-gradient(90deg, #248603 0%, #1349f3 100%);
             border: none;
             border-radius: 0.375rem;
             padding: 0.875rem;
@@ -142,7 +159,7 @@
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
-            background: linear-gradient(90deg, #c0392b 0%, #e74c3c 100%);
+            background: linear-gradient(90deg, #63d953 0%, #25a912 100%);
         }
 
         .alert {
@@ -161,14 +178,33 @@
             color: white;
         }
 
-        .btn-close {
+        .btn-close-white {
             filter: invert(1);
         }
 
-        /* Фиксируем ширину контейнера */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        /* Анимации из about */
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .animate-fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Адаптивность */
