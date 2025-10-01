@@ -1,17 +1,373 @@
 {% extends "base_admin.html" %}
 {% block content %}
-<h2>Статистика посещений</h2>
+    <div class="admin-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="page-title">Статистика посещений</h2>
+            <div class="period-selector">
+                <button class="btn btn-outline-primary active" data-period="day">Сегодня</button>
+                <button class="btn btn-outline-primary" data-period="month">Месяц</button>
+                <button class="btn btn-outline-primary" data-period="year">Год</button>
+            </div>
+        </div>
 
-<table border="1" cellpadding="5">
-    <tr><th>Период</th><th>Всего визитов</th></tr>
-    <tr><td>Сегодня</td><td>{{ count_day }}</td></tr>
-    <tr><td>Этот месяц</td><td>{{ count_month }}</td></tr>
-    <tr><td>Этот год</td><td>{{ count_year }}</td></tr>
-</table>
+        <!-- Основная статистика -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4">
+                <div class="stat-card today-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-day"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">{{ count_day }}</h3>
+                        <p class="stat-label">Визитов сегодня</p>
+                        <div class="stat-breakdown">
+                            <span class="badge guest-badge">Гости: {{ count_day_guests }}</span>
+                            <span class="badge user-badge">Пользователи: {{ count_day_users }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<h3>Сегодня:</h3>
-<ul>
-    <li>Гости: {{ count_day_guests }}</li>
-    <li>Зарегистрированные пользователи: {{ count_day_users }}</li>
-</ul>
+            <div class="col-md-4 mb-4">
+                <div class="stat-card month-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-month"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">{{ count_month }}</h3>
+                        <p class="stat-label">Визитов за месяц</p>
+                        <div class="stat-trend">
+                            <i class="bi bi-arrow-up-right trend-up"></i>
+                            <span>+12% с прошлого месяца</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="stat-card year-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-year"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-value">{{ count_year }}</h3>
+                        <p class="stat-label">Визитов за год</p>
+                        <div class="stat-trend">
+                            <i class="bi bi-arrow-up-right trend-up"></i>
+                            <span>+8% с прошлого года</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Детальная статистика по дням -->
+        <div class="row">
+            <div class="col-12">
+                <div class="detail-card">
+                    <h4 class="detail-title">Детальная статистика за сегодня</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="user-type-card guest-card">
+                                <div class="user-type-icon">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                <div class="user-type-content">
+                                    <h5 class="user-type-value">{{ count_day_guests }}</h5>
+                                    <p class="user-type-label">Гостей</p>
+                                    <span class="user-type-percent">{{ "%.1f"|format(count_day_guests / count_day * 100) if count_day > 0 else 0 }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="user-type-card user-card">
+                                <div class="user-type-icon">
+                                    <i class="bi bi-person-check"></i>
+                                </div>
+                                <div class="user-type-content">
+                                    <h5 class="user-type-value">{{ count_day_users }}</h5>
+                                    <p class="user-type-label">Пользователей</p>
+                                    <span class="user-type-percent">{{ "%.1f"|format(count_day_users / count_day * 100) if count_day > 0 else 0 }}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .admin-container {
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .period-selector .btn {
+            margin-left: 8px;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .period-selector .btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+
+        /* Карточки статистики */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        }
+
+        .today-card {
+            border-left: 4px solid #3498db;
+        }
+
+        .month-card {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .year-card {
+            border-left: 4px solid #9b59b6;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .today-card .stat-icon {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .month-card .stat-icon {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .year-card .stat-icon {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            margin: 8px 0;
+            font-weight: 500;
+        }
+
+        .stat-breakdown {
+            margin-top: 12px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .guest-badge {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .user-badge {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            color: #27ae60;
+            margin-right: 4px;
+        }
+
+        /* Детальная статистика */
+        .detail-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .detail-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        .user-type-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .user-type-card:hover {
+            transform: translateX(5px);
+        }
+
+        .guest-card {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(52, 152, 219, 0.02));
+            border: 1px solid rgba(52, 152, 219, 0.1);
+        }
+
+        .user-card {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.05), rgba(46, 204, 113, 0.02));
+            border: 1px solid rgba(46, 204, 113, 0.1);
+        }
+
+        .user-type-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 20px;
+            color: white;
+        }
+
+        .guest-card .user-type-icon {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .user-card .user-type-icon {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .user-type-content {
+            flex: 1;
+        }
+
+        .user-type-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .user-type-label {
+            color: #7f8c8d;
+            margin: 4px 0;
+            font-weight: 500;
+        }
+
+        .user-type-percent {
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .user-card .user-type-percent {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .stat-icon {
+                margin-right: 0;
+                margin-bottom: 16px;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .d-flex.justify-content-between {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .period-selector {
+                align-self: flex-start;
+            }
+        }
+    </style>
+
+    <script>
+        // Простая логика переключения периодов
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodButtons = document.querySelectorAll('.period-selector .btn');
+
+            periodButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Убираем активный класс у всех кнопок
+                    periodButtons.forEach(btn => btn.classList.remove('active'));
+                    // Добавляем активный класс текущей кнопке
+                    this.classList.add('active');
+
+                    // Здесь можно добавить логику загрузки данных для выбранного периода
+                    const period = this.getAttribute('data-period');
+                    console.log('Выбран период:', period);
+                    // loadStatistics(period); // Функция для загрузки данных
+                });
+            });
+        });
+    </script>
 {% endblock %}

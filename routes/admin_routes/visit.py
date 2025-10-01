@@ -16,10 +16,8 @@ def stats():
     now = datetime.now()
 
     count_day = Visit.query.filter_by(date=today).count()
-
     first_of_month = date(now.year, now.month, 1)
     count_month = Visit.query.filter(Visit.date >= first_of_month, Visit.date <= today).count()
-
     first_of_year = date(now.year, 1, 1)
     count_year = Visit.query.filter(Visit.date >= first_of_year, Visit.date <= today).count()
 
