@@ -1,14 +1,17 @@
-FROM python:3.11-slim
+FROM python:3.13-alpine
+
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONPATH="/app" \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY pyproject.toml uv.lock ./
 
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apk add --no-cache uv
+RUN uv sync --frozen --dev
 
 COPY . .
 
-EXPOSE 5000
-
-CMD ["python", "app.py"]
+CMD ["uv", "run", "python", "app.py"]
