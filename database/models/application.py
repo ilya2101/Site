@@ -14,7 +14,7 @@ class Application(db.Model):
     desired_date = db.Column(db.Date, nullable=False)
     desired_time = db.Column(db.Time, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(20), default='new')
+    status = db.Column(db.String(20), default='Новая')
     comment = db.Column(db.Text, default='')  # Добавляем поле для комментариев
     def __repr__(self):
         return f'<Application {self.id} - {self.name}>'

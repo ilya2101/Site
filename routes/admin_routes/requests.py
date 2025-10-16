@@ -128,6 +128,7 @@ def confirm_request(request_id):
 
     try:
         application = Application.query.get_or_404(request_id)
+        application.status = "Обработана"
 
         # Создаем запись в очереди
         queue_entry = Queue(
@@ -145,7 +146,6 @@ def confirm_request(request_id):
 
         # Добавляем в очередь и удаляем из заявок
         db.session.add(queue_entry)
-        db.session.delete(application)
         db.session.commit()
 
         flash('Заявка перемещена в очередь!', 'success')
