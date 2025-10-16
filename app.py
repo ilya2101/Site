@@ -68,13 +68,17 @@ print("EXISTS:", os.path.exists(os.path.join(os.getcwd(), "static", "img", "phot
 
 
 
-
 app.config['SECRET_KEY'] = 'ilya'
-# Конфигурация БД
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 
+# Конфигурация PostgreSQL
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0510@localhost/avtoservice_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Дополнительные настройки (опционально)
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_recycle': 300,
+    'pool_pre_ping': True
+}
 # СОЗДАЕМ login_manager ПЕРЕД инициализацией
 login_manager = LoginManager(app)
 login_manager.login_view = 'user.login'  # Исправлено на 'user.login'
