@@ -9,6 +9,7 @@ services:
       - DATABASE_URL=postgresql://user:password@db:5432/myapp
       - FLASK_ENV=production
     volumes:
+      - .:/app
       - ./static:/app/static
       - ./uploads:/app/uploads
     restart: unless-stopped

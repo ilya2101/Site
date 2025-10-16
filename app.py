@@ -23,25 +23,20 @@ from routes.users_routes.login import user_bp
 
 app = Flask(__name__)
 
-app.register_blueprint(index_route)
+blueprints = [
+    index_route,
+    user_bp,
+    admin_bp,
+    admin_required_bp,
+    queue_bp,
+    service_bp,
+    price_bp,
+    admin_discounts_bp,
+    visit_bp,
+]
 
-app.register_blueprint(user_bp)
-
-app.register_blueprint(admin_bp)
-
-app.register_blueprint(admin_required_bp)
-
-app.register_blueprint(queue_bp)
-
-app.register_blueprint(service_bp)
-
-app.register_blueprint(price_bp)
-
-app.register_blueprint(admin_discounts_bp)
-
-app.register_blueprint(visit_bp)
-
-
+for bp in blueprints:
+    app.register_blueprint(bp, url_prefix="/service")
 
 
 def admin_required(f):
