@@ -71,7 +71,7 @@ print("EXISTS:", os.path.exists(os.path.join(os.getcwd(), "static", "img", "phot
 app.config['SECRET_KEY'] = 'ilya'
 
 # Конфигурация PostgreSQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:0510@localhost/avtoservice_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Дополнительные настройки (опционально)
@@ -177,4 +177,4 @@ def get_service_prices():        # Измените имя функции
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
