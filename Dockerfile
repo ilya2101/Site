@@ -14,4 +14,10 @@ RUN uv sync --frozen --dev
 
 COPY . .
 
+
+
 CMD ["uv", "run", "python", "app.py"]
+#CMD ["tail", "-f", "/dev/null"]
+
+
+

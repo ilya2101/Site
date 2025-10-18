@@ -10,6 +10,7 @@ services:
       - FLASK_ENV=production
     volumes:
       - .:/app
+      - /app/.venv  # исключаем венв из монтирования
     restart: unless-stopped
 
   db:
