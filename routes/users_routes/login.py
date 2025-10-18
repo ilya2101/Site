@@ -87,7 +87,7 @@ def update_profile():
             db.session.commit()
             flash('Профиль успешно обновлен!', 'success')
 
-        except Exception as e:
+        except Exception:
             db.session.rollback()
             flash('Ошибка при обновлении профиля', 'error')
 

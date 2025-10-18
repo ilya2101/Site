@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, BooleanField, DateField, DecimalField, SubmitField
+from wtforms import StringField, TextAreaField, DecimalField, SubmitField
 from wtforms.validators import DataRequired, NumberRange
-from flask_wtf.file import FileField, FileAllowed
 
 
 class PriceForm(FlaskForm):

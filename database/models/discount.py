@@ -1,5 +1,4 @@
 from datetime import datetime
-from email.policy import default
 
 from database.engine import db
 

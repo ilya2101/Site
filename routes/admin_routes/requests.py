@@ -2,7 +2,6 @@ from datetime import datetime
 
 from flask import Blueprint, abort, render_template, request, flash, redirect, url_for, Request
 from flask_login import login_required, current_user
-from flask import request, render_template
 
 from database.engine import db
 from database.models.application import Application

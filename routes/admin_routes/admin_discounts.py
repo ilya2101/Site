@@ -8,7 +8,6 @@ from flask_wtf import FlaskForm
 from sqlalchemy.sql.functions import current_date
 from werkzeug.utils import secure_filename
 from wtforms import StringField, TextAreaField, BooleanField, DateField
-from datetime import datetime
 from wtforms.validators import DataRequired
 
 from database.engine import db
