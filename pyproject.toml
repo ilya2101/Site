@@ -1,0 +1,32 @@
+[project]
+name = "site"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "apscheduler>=3.11.0",
+    "flask>=3.1.2",
+    "flask-login>=0.6.3",
+    "flask-migrate>=4.1.0",
+    "flask-wtf>=1.2.2",
+    "psycopg2-binary>=2.9.11",
+]
+
+[dependency-groups]
+dev = [
+    "isort>=7.0.0",
+    "ruff>=0.14.1",
+]
+
+[tool.ruff]
+fix = true
+preview = true
+line-length = 120
+extend-exclude = ["**/migrations/"]
+
+[tool.isort]
+profile = "black"
+lines_after_imports = 2
+line_length = 120
+extend_skip = ["**/migrations/"]
