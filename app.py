@@ -21,6 +21,14 @@ from routes.admin_routes.visit import visit_bp, log_visit
 from routes.users_routes.index import index_route
 from routes.users_routes.login import user_bp
 
+
+
+
+from dotenv import load_dotenv
+load_dotenv()  # ← ДОБАВЬ ЭТУ СТРОКУ ПЕРЕД app.config
+
+
+
 app = Flask(__name__, static_url_path="/service/static", static_folder="static")
 
 blueprints = [

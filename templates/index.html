@@ -5,243 +5,436 @@
 {% endblock %}
 
 {% block body %}
-<!-- Добавляем градиентный фон как в about -->
-<div class="background-wrapper">
-    <div class="container mt-5">
-        <!-- Заголовок и описание -->
+<!-- Видео-бэкграунд -->
+<div class="video-hero-section">
+    <div class="video-container">
+        <video autoplay muted playsinline class="hero-video">
+            <source src="{{ url_for('static', filename='video/vecteezy_car-side-view-in-dark_34616002.mp4') }}" type="video/mp4">
+            Ваш браузер не поддерживает видео
+        </video>
+    </div>
+</div>
+
+<style>
+    .video-hero-section {
+        position: relative;
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .video-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: transparent;
+    }
+
+    .hero-video {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        background: transparent;
+    }
+
+
+</style>
+
+<!-- Основной контент -->
+<div class="main-content-wrapper">
+    <div class="container">
+        <!-- Преимущества -->
         <div class="row mb-5">
-            <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-5 fw-bold mb-3 animate-fade-in" style="color: #2c3e50;">Профессиональный ремонт вашего автомобиля</h1>
-                <p class="lead animate-fade-in" style="animation-delay: 0.2s; color: #7f8c8d;">Мы предоставляем полный спектр услуг по ремонту и обслуживанию автомобилей с гарантией качества</p>
+            <div class="col-12 text-center mb-4">
+                <h2 class="section-title">Почему выбирают нас</h2>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card animate-fade-up">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4>Гарантия качества</h4>
+                    <p>12 месяцев гарантии на все виды работ</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="feature-icon">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <h4>Опытные мастера</h4>
+                    <p>Сертифицированные специалисты с опытом от 5 лет</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card animate-fade-up" style="animation-delay: 0.2s;">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <h4>Быстрый ремонт</h4>
+                    <p>Большинство работ выполняем за 1-2 дня</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card animate-fade-up" style="animation-delay: 0.3s;">
+                    <div class="feature-icon">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <h4>Оригинальные запчасти</h4>
+                    <p>Работаем только с проверенными поставщиками</p>
+                </div>
             </div>
         </div>
 
-        <!-- Плашка для заявки -->
-        <div class="row justify-content-center mb-5">
-            <div class="col-lg-10">
-                <div class="application-card animate-fade-up">
-                    <div class="application-header">
-                        <h2><i class="bi bi-calendar-check"></i> Записаться на обслуживание</h2>
-                        <p>Заполните форму и наш менеджер свяжется с вами для подтверждения времени</p>
+        <!-- Форма заявки -->
+        <div class="row  mb-5" id="applicationSection">
+            <div class="col-lg-12">
+                <div class="modern-application-card animate-fade-up">
+                    <div class="application-header-modern">
+                        <h2><i class="bi bi-lightning-charge"></i> Быстрая онлайн-запись</h2>
+                        <p>Заполните форму и получите скидку 10% на первый визит</p>
                     </div>
 
-                    <form id="applicationForm" class="application-form">
+                    <form id="applicationForm" class="application-form-modern">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" name="name" required>
-                                    <label for="name">Ваше имя *</label>
+                                <div class="form-floating-modern">
+                                    <input type="text" class="form-control-modern" id="name" name="name" required>
+                                    <label for="name"><i class="bi bi-person"></i> Ваше имя *</label>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="tel" class="form-control" id="phone" name="phone" required>
-                                    <label for="phone">Номер телефона *</label>
+                                <div class="form-floating-modern">
+                                    <input type="tel" class="form-control-modern" id="phone" name="phone" required>
+                                    <label for="phone"><i class="bi bi-phone"></i> Номер телефона *</label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="carBrand" name="carBrand" required>
-                                    <label for="carBrand">Марка автомобиля *</label>
+                                <div class="form-floating-modern">
+                                    <input type="text" class="form-control-modern" id="carBrand" name="carBrand" required>
+                                    <label for="carBrand"><i class="bi bi-car-front"></i> Марка автомобиля *</label>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="carModel" name="carModel" required>
-                                    <label for="carModel">Модель автомобиля *</label>
+                                <div class="form-floating-modern">
+                                    <input type="text" class="form-control-modern" id="carModel" name="carModel" required>
+                                    <label for="carModel"><i class="bi bi-gear"></i> Модель автомобиля *</label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="date" class="form-control" id="date" name="date" required>
-                                    <label for="date">Желаемая дата *</label>
+                                <div class="form-floating-modern">
+                                    <input type="date" class="form-control-modern" id="date" name="date" required>
+                                    <label for="date"><i class="bi bi-calendar"></i> Желаемая дата *</label>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="time" class="form-control" id="time" name="time" required>
-                                    <label for="time">Желаемое время *</label>
+                                <div class="form-floating-modern">
+                                    <input type="time" class="form-control-modern" id="time" name="time" required>
+                                    <label for="time"><i class="bi bi-clock"></i> Желаемое время *</label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-application">
-                                <i class="bi bi-car-front"></i> Отправить заявку
+                            <button type="submit" class="btn-modern-primary">
+                                <i class="bi bi-send-check"></i> Получить скидку и записаться
                             </button>
                         </div>
                     </form>
 
                     <!-- Сообщение об успешной отправке -->
-                    <div id="successMessage" class="application-success" style="display: none;">
-                        <div class="success-icon">
+                    <div id="successMessage" class="modern-success-message" style="display: none;">
+                        <div class="success-icon-modern">
                             <i class="bi bi-check-circle"></i>
                         </div>
-                        <h3>Спасибо, что выбрали нас!</h3>
-                        <p>Ваша заявка успешно отправлена. Менеджер свяжется с вами в ближайшее время для согласования времени.</p>
-                        <button class="btn btn-outline-primary" onclick="location.reload()">Заполнить еще одну заявку</button>
+                        <h3>Отлично! Заявка принята!</h3>
+                        <p>Ваша скидка 10% активирована. Менеджер свяжется с вами в течение 15 минут.</p>
+                        <button class="btn-modern-outline" onclick="location.reload()">Записать другой автомобиль</button>
                     </div>
 
                     <!-- Сообщение об ошибке -->
-                    <div id="errorMessage" class="alert alert-danger mt-3" style="display: none;">
-                        <i class="bi bi-exclamation-triangle"></i> <span id="errorText">Произошла ошибка при отправке формы</span>
+                    <div id="errorMessage" class="modern-error-message" style="display: none;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="errorText">Произошла ошибка при отправке формы</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Блок с контактами и временем работы -->
+        <!-- Галерея сервиса -->
         <div class="row mb-5">
-            <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.2s;">
-                    <div class="card-header bg-dark text-white py-3 rounded-top-4">
-                        <h4 class="mb-0"><i class="bi bi-clock"></i> Контакты и время работы</h4>
+            <div class="col-12 text-center mb-4">
+                <h2 class="section-title">Наш сервис изнутри</h2>
+            </div>
+            <div class="col-md-8 mb-4">
+                <div class="main-gallery-image animate-fade-up">
+                    <img src="{{ url_for('static', filename='photo_for_index/photo_one.png') }}"
+                         alt="Основной зал сервиса" class="img-fluid rounded-3">
+                    <div class="gallery-overlay">
+                        <h5>Основной зал сервиса</h5>
+                        <p>Профессиональный подход к каждому автомобилю</p>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="bi bi-clock-history fs-4 text-warning me-3"></i>
-                                    <div>
-                                        <h5 class="mb-1" style="color: #2c3e50;">Время работы:</h5>
-                                        <p class="mb-0" style="color: #7f8c8d;">Пн-Пт: с 11:00 до 20:00</p>
-                                        <p class="mb-0" style="color: #7f8c8d;">Сб-Вс: выходной</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="bi bi-telephone fs-4 text-warning me-3"></i>
-                                    <div>
-                                        <h5 class="mb-1" style="color: #2c3e50;">Телефон:</h5>
-                                        <p class="mb-0">
-                                            <a href="tel:+79043367281" class="text-decoration-none fw-bold" style="color: #e74c3c;">
-                                                +7 (904) 336-72-81
-                                            </a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="row h-100">
+                    <div class="col-12 mb-4">
+                        <div class="side-gallery-image animate-fade-up" style="animation-delay: 0.1s;">
+                            <img src="{{ url_for('static', filename='photo_for_index/photo_four.png') }}"
+                                 alt="Работа специалистов" class="img-fluid rounded-3">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="side-gallery-image animate-fade-up" style="animation-delay: 0.2s;">
+                            <img src="{{ url_for('static', filename='photo_for_index/photo_two.png') }}"
+                                 alt="Компьютерная диагностика" class="img-fluid rounded-3">
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Карта с расположением сервиса -->
+        <!-- Контакты и карта -->
         <div class="row mb-5">
-            <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.3s;">
-                    <div class="card-header bg-dark text-white py-3 rounded-top-4">
-                        <h4 class="mb-0"><i class="bi bi-geo-alt-fill"></i> Где мы находимся</h4>
+            <div class="col-lg-12 mb-4">
+                <div class="contact-card animate-fade-up">
+                    <h3><i class="bi bi-geo-alt"></i> Контактная информация</h3>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-geo-fill"></i>
+                            <div>
+                                <strong>Адрес:</strong>
+                                <p>Санкт-Петербург, ул. Химиков, 2Ф</p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone"></i>
+                            <div>
+                                <strong>Телефон:</strong>
+                                <p><a href="tel:+79043367281">+7 (904) 336-72-81</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-clock"></i>
+                            <div>
+                                <strong>Время работы:</strong>
+                                <p>Пн-Пт: с 11:00 до 20:00</p>
+                                <p>Сб-Вс: выходной</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="map-container rounded-bottom-4" style="overflow: hidden;">
-                            <script
-                                    type="text/javascript"
-                                    charset="utf-8"
-                                    async
-                                    src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A9c20f50e9518dd7930e556060867662e2ab6cf493012705865836a7c1961efad&amp;width=100%&amp;height=400&amp;lang=ru_RU&amp;scroll=true">
-                            </script>
-                        </div>
-                        <div class="p-3 bg-light">
-                            <p class="mb-0 text-center fw-medium">
-                                <i class="bi bi-geo-fill text-warning"></i>
-                                Адрес: Санкт-Петербург, ул. Химиков, 2Ф
-                            </p>
-                        </div>
+                </div>
+            </div>
+            <div class="col-lg-12 mb-4">
+                <div class="map-card animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="map-container-modern">
+                        <script
+                                type="text/javascript"
+                                charset="utf-8"
+                                async
+                                src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A9c20f50e9518dd7930e556060867662e2ab6cf493012705865836a7c1961efad&amp;width=100%&amp;height=400&amp;lang=ru_RU&amp;scroll=true">
+                        </script>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Раздел с фотографиями в карусели -->
+        <!-- Дополнительная галерея -->
         <div class="row">
-            <div class="col-lg-10 mx-auto">
-                <div class="card shadow-sm border-0 rounded-4 animate-fade-up" style="animation-delay: 0.4s;">
-                    <div class="card-header bg-dark text-white py-3 rounded-top-4">
-                        <h4 class="mb-0"><i class="bi bi-images"></i> Фотографии сервиса</h4>
+            <div class="col-12 text-center mb-4">
+                <h2 class="section-title">Для нас главное - качество</h2>
+            </div>
+
+            <!-- Видео 1 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="work-example animate-fade-up">
+                    <div class="video-work-container">
+                        <video autoplay muted loop playsinline class="work-video">
+                            <source src="{{ url_for('static', filename='video/autogl.mp4') }}" type="video/mp4">
+                            Ваш браузер не поддерживает видео
+                        </video>
+                        <div class="video-overlay-work">
+                            <div class="play-icon">
+                                <i class="bi bi-play-circle"></i>
+                            </div>
+                            <h5>Диагностика двигателя</h5>
+                            <p>Профессиональная компьютерная диагностика</p>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <!-- Карусель -->
-                        <div id="photoCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <!-- Индикаторы -->
-                            <div class="carousel-indicators">
-                                <button type="button" data-bs-target="#photoCarousel" data-bs-slide-to="0" class="active"></button>
-                                <button type="button" data-bs-target="#photoCarousel" data-bs-slide-to="1"></button>
+                </div>
+            </div>
+
+            <!-- Видео 2 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="work-example animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="video-work-container">
+                        <video autoplay muted loop playsinline class="work-video">
+                            <source src="{{ url_for('static', filename='video/Timeline 11.mov') }}" type="video/mp4">
+                            Ваш браузер не поддерживает видео
+                        </video>
+                        <div class="video-overlay-work">
+                            <div class="play-icon">
+                                <i class="bi bi-play-circle"></i>
                             </div>
+                            <h5>Кузовной ремонт</h5>
+                            <p>Восстановление геометрии кузова</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <!-- Слайды -->
-                            <div class="carousel-inner rounded-3">
-                                <!-- Слайд 1 -->
-                                <div class="carousel-item active">
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_one.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 1"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_two.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 2"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_three.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 3"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Слайд 2 -->
-                                <div class="carousel-item">
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_four.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 4"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_five.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 5"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <img src="{{ url_for('static', filename='photo_for_index/photo_six.png') }}"
-                                                 class="d-block w-100 rounded-3"
-                                                 alt="Фото сервиса 6"
-                                                 style="height: 250px; object-fit: cover;">
-                                        </div>
-                                    </div>
-                                </div>
+            <!-- Видео 3 -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="work-example animate-fade-up" style="animation-delay: 0.2s;">
+                    <div class="video-work-container">
+                        <video autoplay muted loop playsinline class="work-video">
+                            <source src="{{ url_for('static', filename='video/Timeline 112.mp4') }}" type="video/mp4">
+                            Ваш браузер не поддерживает видео
+                        </video>
+                        <div class="video-overlay-work">
+                            <div class="play-icon">
+                                <i class="bi bi-play-circle"></i>
                             </div>
-
-                            <!-- Кнопки управления -->
-                            <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Предыдущий</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Следующий</span>
-                            </button>
+                            <h5>Техническое обслуживание</h5>
+                            <p>Комплексное ТО автомобиля</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <style>
+            .video-work-container {
+                position: relative;
+                width: 100%;
+                height: 280px;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+
+            .work-example:hover .video-work-container {
+                transform: translateY(-10px) scale(1.02);
+                box-shadow: 0 25px 50px rgba(255, 107, 53, 0.4);
+            }
+
+            .work-video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 20px;
+                transition: all 0.3s ease;
+            }
+
+            .video-overlay-work {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(
+                        to bottom,
+                        transparent 0%,
+                        rgba(255, 107, 53, 0.1) 50%,
+                        rgba(39, 174, 96, 0.3) 100%
+                );
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                padding: 2rem;
+                color: white;
+                opacity: 0;
+                transition: all 0.3s ease;
+                border-radius: 20px;
+            }
+
+            .video-work-container:hover .video-overlay-work {
+                opacity: 1;
+                background: linear-gradient(
+                        to bottom,
+                        transparent 0%,
+                        rgba(255, 107, 53, 0.3) 50%,
+                        rgba(39, 174, 96, 0.6) 100%
+                );
+            }
+
+            .video-work-container:hover .work-video {
+                transform: scale(1.05);
+            }
+
+            .play-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                opacity: 0.9;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+
+            .video-overlay-work h5 {
+                font-size: 1.3rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            }
+
+            .video-overlay-work p {
+                font-size: 0.9rem;
+                opacity: 0.9;
+                margin: 0;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            }
+
+            /* Индикатор воспроизведения */
+            .video-work-container::after {
+
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: rgba(255, 107, 53, 0.9);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                z-index: 2;
+            }
+
+            /* Адаптивность для видео */
+            @media (max-width: 768px) {
+                .video-work-container {
+                    height: 250px;
+                }
+
+                .video-overlay-work {
+                    padding: 1.5rem;
+                }
+
+                .video-overlay-work h5 {
+                    font-size: 1.1rem;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .video-work-container {
+                    height: 200px;
+                }
+
+                .play-icon {
+                    font-size: 2rem;
+                }
+            }
+        </style>
     </div>
 </div>
 
@@ -249,256 +442,602 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
 <style>
-    /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+    /* ОРАНЖЕВО-ЗЕЛЕНАЯ ЦВЕТОВАЯ ПАЛИТРА */
     :root {
-        /* Основные цвета */
-        --primary-color: #0032ff;
-        --primary-dark: #00ff07;
-        --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+        --primary-orange: #FF6B35;
+        --orange-dark: #E55A2B;
+        --orange-light: #FF8C42;
+        --accent-green: #27AE60;
+        --green-dark: #219653;
+        --green-light: #6FCF97;
+        --dark-bg: #1A1A1A;
+        --card-bg: #2D2D2D;
+        --text-light: #FFFFFF;
+        --text-muted: #B0B0B0;
+        --success-color: #27AE60;
+        --error-color: #EB5757;
+        --gradient-primary: linear-gradient(135deg, var(--primary-orange) 0%, var(--orange-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-green) 0%, var(--green-light) 100%);
+        --gradient-card: linear-gradient(145deg, #2D2D2D 0%, #3A3A3A 100%);
     }
 
-    /* Градиентный фон как в about */
-    .background-wrapper {
-        background: var(--background-gradient);
-        min-height: 100vh;
-        padding: 20px 0;
+    /* Базовые стили */
+    body {
+        background: var(--dark-bg);
+        color: var(--text-light);
     }
 
-    .application-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        padding: 0;
+    .main-content-wrapper {
+        background: var(--dark-bg);
+        padding: 80px 0;
+    }
+
+    /* Секционные заголовки */
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 3rem;
         position: relative;
-        border: 1px solid #e9ecef;
+        text-align: center;
     }
 
-    .application-card::before {
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Карточки преимуществ */
+    .feature-card {
+        background: var(--gradient-card);
+        padding: 2.5rem 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        border: 1px solid rgba(255, 107, 53, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .feature-card:hover::before {
+        left: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        border-color: rgba(255, 107, 53, 0.3);
+    }
+
+    .feature-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 2rem;
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: white;
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+        transform: rotateY(180deg);
+        background: var(--gradient-accent);
+    }
+
+    .feature-card h4 {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 1.3rem;
+    }
+
+    .feature-card p {
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* Модернизированная форма */
+    .modern-application-card {
+        background: var(--gradient-card);
+        border-radius: 25px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .modern-application-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 5px;
-        background: linear-gradient(90deg, #98ce5e, #2b6cc0);
-        border-radius: 20px 20px 0 0;
+        height: 6px;
+        background: var(--gradient-primary);
     }
 
-    .application-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        padding: 2.5rem;
+    .application-header-modern {
+        background: linear-gradient(135deg, var(--card-bg) 0%, #363636 100%);
+        padding: 3.5rem 2.5rem;
         text-align: center;
-        border-bottom: none;
-        color: white;
+        color: var(--text-light);
+        border-bottom: 1px solid rgba(255, 107, 53, 0.2);
     }
 
-    .application-header h2 {
-        color: white;
+    .application-header-modern h2 {
+        font-size: 2.4rem;
         font-weight: 700;
         margin-bottom: 1rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .application-header p {
-        color: #ecf0f1;
-        margin-bottom: 0;
-        font-size: 1.1rem;
+    .application-header-modern p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin: 0;
     }
 
-    .application-form {
-        padding: 2.5rem;
-        background: white;
+    .application-form-modern {
+        padding: 3.5rem 2.5rem;
+        background: transparent;
     }
 
-    .form-floating {
-        margin-bottom: 1.5rem;
+    .form-floating-modern {
+        position: relative;
+        margin-bottom: 2rem;
     }
 
-    .form-control {
-        border-radius: 12px;
-        padding: 1.2rem 0.75rem;
-        border: 2px solid #dce4ec;
+    .form-control-modern {
+        width: 100%;
+        padding: 1.6rem 1rem 1.6rem 3.5rem;
+        border: 2px solid #404040;
+        border-radius: 15px;
+        font-size: 1rem;
         transition: all 0.3s ease;
-        background: #f8f9fa;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-light);
+        backdrop-filter: blur(10px);
     }
 
-    .form-control:focus {
-        border-color: #6ce73c;
-        box-shadow: 0 0 0 0.25rem rgba(102, 255, 0, 0.15);
-        background: #ffffff;
+    .form-control-modern::placeholder {
+        color: var(--text-muted);
     }
 
-    .form-floating label {
-        color: #7f8c8d;
-        padding: 1.2rem 0.75rem;
+    .form-control-modern:focus {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.15);
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
     }
 
-    .btn-application {
-        background: linear-gradient(90deg, #248603 0%, #1349f3 100%);
+    .form-floating-modern label {
+        position: absolute;
+        left: 3.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        background: transparent;
+    }
+
+    .form-control-modern:focus + label,
+    .form-control-modern:not(:placeholder-shown) + label {
+        top: 0.8rem;
+        font-size: 0.8rem;
+        color: var(--primary-orange);
+        background: var(--card-bg);
+        padding: 0 0.8rem;
+    }
+
+    .form-floating-modern i {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        transition: color 0.3s ease;
+        z-index: 2;
+    }
+
+    .form-control-modern:focus ~ i {
+        color: var(--primary-orange);
+    }
+
+    .btn-modern-primary {
+        background: var(--gradient-primary);
         border: none;
-        border-radius: 12px;
-        padding: 1.2rem 2.5rem;
+        padding: 1.6rem 3rem;
+        border-radius: 15px;
+        color: white;
         font-weight: 600;
         font-size: 1.1rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-modern-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-modern-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(255, 107, 53, 0.4);
+        background: var(--gradient-primary);
+    }
+
+    /* Галерея */
+    .main-gallery-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        height: 100%;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    .main-gallery-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .main-gallery-image:hover img {
+        transform: scale(1.08);
+    }
+
+    .gallery-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(255, 107, 53, 0.9));
+        color: white;
+        padding: 2.5rem;
+        transform: translateY(100%);
+        transition: transform 0.4s ease;
+    }
+
+    .main-gallery-image:hover .gallery-overlay {
+        transform: translateY(0);
+    }
+
+    .side-gallery-image {
+        height: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .side-gallery-image:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(39, 174, 96, 0.3);
+    }
+
+    .side-gallery-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .side-gallery-image:hover img {
+        transform: scale(1.05);
+    }
+
+    .work-example {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+
+    .work-example::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--gradient-primary);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+    .work-example:hover::before {
+        opacity: 0.1;
+    }
+
+    .work-example:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 53, 0.3);
+    }
+
+    .work-example img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+    }
+
+    /* Контакты */
+    .contact-card {
+        background: var(--gradient-card);
+        padding: 3rem;
+        border-radius: 25px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        height: 100%;
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .contact-card h3 {
+        color: var(--text-light);
+        margin-bottom: 2.5rem;
+        font-weight: 600;
+        font-size: 1.8rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .contact-item:hover {
+        background: rgba(255, 107, 53, 0.1);
+        transform: translateX(10px);
+    }
+
+    .contact-item i {
+        font-size: 1.8rem;
+        color: var(--primary-orange);
+        margin-right: 1.5rem;
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    .contact-item strong {
+        color: var(--text-light);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .contact-item p {
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .contact-item a {
+        color: var(--primary-orange);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .contact-item a:hover {
+        color: var(--accent-green);
+    }
+
+    .map-card {
+        background: var(--gradient-card);
+        border-radius: 25px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        height: 100%;
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .map-container-modern {
+        height: 400px;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    /* Сообщения */
+    .modern-success-message {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: transparent;
+    }
+
+    .success-icon-modern {
+        font-size: 6rem;
+        color: var(--accent-green);
+        margin-bottom: 2.5rem;
+        animation: bounceIn 1s ease;
+    }
+
+    .modern-success-message h3 {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        font-size: 2rem;
+    }
+
+    .modern-success-message p {
+        color: var(--text-muted);
+        margin-bottom: 3rem;
+        font-size: 1.1rem;
+    }
+
+    .btn-modern-outline {
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+        background: transparent;
+        padding: 1.2rem 2.5rem;
+        border-radius: 15px;
+        font-weight: 600;
         transition: all 0.3s ease;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .btn-application:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
-        background: linear-gradient(90deg, #63d953 0%, #25a912 100%);
-    }
-
-    .application-success {
-        text-align: center;
-        padding: 3rem 2rem;
-        background: white;
-        border-radius: 0 0 20px 20px;
-    }
-
-    .success-icon {
-        font-size: 4rem;
-        color: #27ae60;
-        margin-bottom: 1.5rem;
-    }
-
-    .alert-danger {
-        border-radius: 12px;
-        border: none;
-        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    .btn-modern-outline:hover {
+        background: var(--primary-orange);
         color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
     }
 
-    /* Стили для карточек */
-    .card {
-        border: none;
-        transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-    }
-
-    .card-header {
-        border: none;
-    }
-
-    /* Стили для карусели */
-    #photoCarousel {
+    .modern-error-message {
+        background: linear-gradient(135deg, var(--error-color), #C44545);
+        color: white;
+        padding: 1.8rem;
         border-radius: 15px;
+        text-align: center;
+        margin: 2rem;
+        box-shadow: 0 10px 25px rgba(235, 87, 87, 0.3);
+        animation: shake 0.5s ease;
     }
 
-    .carousel-inner {
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 12px;
-    }
-
-    .carousel-item {
-        padding: 10px;
-    }
-
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 5%;
-    }
-
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        background-color: rgba(44, 62, 80, 0.8);
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-    }
-
-    .carousel-indicators button {
-        width: 15px;
-        height: 15px;
-        border-radius: 50%;
-        margin: 0 8px;
-        background-color: #bdc3c7;
-    }
-
-    .carousel-indicators .active {
-        background-color: #e74c3c;
-    }
-
-    /* Анимации из about */
+    /* Анимации */
     .animate-fade-in {
         opacity: 0;
-        animation: fadeIn 1s forwards;
+        animation: fadeInUp 1s forwards;
     }
 
     .animate-fade-up {
         opacity: 0;
         transform: translateY(30px);
-        animation: fadeUp 0.8s forwards;
+        animation: fadeInUp 0.8s forwards;
     }
 
-    .animate-fade-up[style*="animation-delay"] {
-        animation-delay: inherit;
-    }
-
-    @keyframes fadeIn {
-        to {
-            opacity: 1;
-        }
-    }
-
-    @keyframes fadeUp {
+    @keyframes fadeInUp {
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
 
+    @keyframes bounceIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        70% {
+            transform: scale(0.9);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
     /* Адаптивность */
     @media (max-width: 768px) {
-        .application-header {
-            padding: 2rem 1.5rem;
+        .section-title {
+            font-size: 2rem;
         }
 
-        .application-form {
-            padding: 2rem 1.5rem;
+        .application-header-modern {
+            padding: 2.5rem 1.5rem;
         }
 
-        .carousel-item .row {
-            flex-direction: column;
+        .application-header-modern h2 {
+            font-size: 2rem;
         }
 
-        .carousel-item .col-md-4 {
-            margin-bottom: 15px;
+        .application-form-modern {
+            padding: 2.5rem 1.5rem;
         }
 
-        .carousel-item img {
-            height: 200px !important;
+        .contact-card {
+            padding: 2rem;
         }
 
-        .btn-application {
-            padding: 1rem 2rem;
+        .feature-card {
+            padding: 2rem 1rem;
         }
+
     }
 
-    /* Стили для карты */
-    .map-container {
-        border-radius: 0 0 12px 12px;
-        overflow: hidden;
-    }
+    @media (max-width: 576px) {
+        .section-title {
+            font-size: 1.8rem;
+        }
 
-    .map-container iframe {
-        border: none;
-        display: block;
-    }
+        .application-header-modern h2 {
+            font-size: 1.7rem;
+        }
 
-    .bg-light {
-        background: linear-gradient(135deg, #ecf0f1 0%, #dfe6e9 100%) !important;
-        border-top: 2px solid #bdc3c7;
+        .btn-modern-primary {
+            padding: 1.4rem 2rem;
+            font-size: 1rem;
+        }
     }
 </style>
 
 <script>
+    function scrollToApplication() {
+        document.getElementById('applicationSection').scrollIntoView({
+            behavior: 'smooth'
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('applicationForm');
         const successMessage = document.getElementById('successMessage');
@@ -512,13 +1051,6 @@
         const dd = String(today.getDate()).padStart(2, '0');
         const todayStr = `${yyyy}-${mm}-${dd}`;
         document.getElementById('date').min = todayStr;
-
-        // Автопрокрутка карусели каждые 5 секунд
-        var myCarousel = document.getElementById('photoCarousel');
-        var carousel = new bootstrap.Carousel(myCarousel, {
-            interval: 5000,
-            wrap: true
-        });
 
         // Обработка отправки формы
         form.addEventListener('submit', async function(e) {
@@ -553,6 +1085,15 @@
                 errorMessage.scrollIntoView({ behavior: 'smooth' });
             }
         });
+
+        // Автоматическое скрытие видео после воспроизведения
+        const video = document.querySelector('.hero-video');
+        if (video) {
+            video.addEventListener('ended', function() {
+                video.style.opacity = '0.7';
+                video.style.transition = 'opacity 2s ease';
+            });
+        }
     });
 </script>
 {% endblock %}
