@@ -1,376 +1,360 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Контакты - Автосервис</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
-        :root {
-            /* Основные цвета */
-            --primary-color: #0032ff;
-            --primary-dark: #00ff07;
-            --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
-        }
+{% extends "base.html" %}
 
-        /* Градиентный фон как в about */
-        .background-wrapper {
-            background: var(--background-gradient);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
+{% block title %}
+Контакты
+{% endblock %}
 
-        body {
-            background: var(--background-gradient);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
+{% block body %}
+<main class="py-5">
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3 animate-fade-in">Наши контакты</h1>
+            <p class="lead text-muted animate-fade-in" style="animation-delay: 0.2s;">Свяжитесь с нами удобным для вас способом</p>
+        </div>
 
-        .navbar {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+        <!-- Основные контакты -->
+        <div class="row mb-5">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="contact-card animate-fade-up">
+                    <div class="contact-icon">
+                        <i class="bi bi-telephone-fill"></i>
+                    </div>
+                    <h3>Телефон</h3>
+                    <p class="mb-0">
+                        <a href="tel:+79043367281" class="contact-link">
+                            +7 (904) 336-72-81
+                        </a>
+                    </p>
+                </div>
+            </div>
 
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="contact-card animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="contact-icon">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <h3>Email</h3>
+                    <p class="mb-0">
+                        <a href="mailto:info@adrauto.ru" class="contact-link">
+                            info@adrauto.ru
+                        </a>
+                    </p>
+                </div>
+            </div>
 
-        .nav-link {
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="contact-card animate-fade-up" style="animation-delay: 0.2s;">
+                    <div class="contact-icon">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <h3>Адрес</h3>
+                    <p class="mb-0 contact-link">
+                        Санкт-Петербург,<br>ул. Химиков, 2Ф
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        .nav-link:hover {
-            color: #e74c3c !important;
-            transform: translateY(-1px);
-        }
+        <!-- Социальные сети и расписание -->
+        <div class="row mb-5">
+            <div class="col-lg-6 mb-4">
+                <div class="contact-card animate-fade-up" style="animation-delay: 0.3s;">
+                    <h3 class="mb-4">Мы в соцсетях</h3>
 
-        .dropdown-menu {
-            border: none;
-            border-radius: 0.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        }
+                    <div class="social-contact">
+                        <i class="bi bi-whatsapp social-icon"></i>
+                        <div class="social-info">
+                            <strong>WhatsApp</strong>
+                            <a href="https://wa.me/79502259802" class="contact-link">+7 (950) 225-98-02</a>
+                        </div>
+                    </div>
 
-        .dropdown-item {
-            transition: all 0.3s ease;
-        }
+                    <div class="social-contact">
+                        <i class="bi bi-chat-dots-fill social-icon"></i>
+                        <div class="social-info">
+                            <strong>Max</strong>
+                            <a href="https://max.ru/+79502259802" class="contact-link" target="_blank">+7 (950) 225-98-02</a>
+                        </div>
+                    </div>
 
-        .dropdown-item:hover {
-            background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
-            color: white !important;
-            transform: translateX(5px);
+                    <div class="social-contact">
+                        <i class="bi bi-telegram social-icon"></i>
+                        <div class="social-info">
+                            <strong>Telegram</strong>
+                            <a href="https://t.me/ilya_21_01" class="contact-link">@ilya_21_01</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="contact-card animate-fade-up" style="animation-delay: 0.4s;">
+                    <h3 class="mb-4">Режим работы</h3>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Понедельник - Пятница</span>
+                        <span class="schedule-time">11:00 - 20:00</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Суббота</span>
+                        <span class="schedule-time">11:00 - 18:00</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Воскресенье</span>
+                        <span class="schedule-time">Выходной</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карта -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="map-container animate-fade-in" style="animation-delay: 0.5s;">
+                    <script type="text/javascript" charset="utf-8" async
+                            src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A9c20f50e9518dd7930e556060867662e2ab6cf493012705865836a7c1961efad&amp;width=100%&amp;height=400&amp;lang=ru_RU&amp;scroll=true">
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    /* СТАНДАРТИЗИРОВАННЫЕ СТИЛИ ПО ДИЗАЙН-СИСТЕМЕ */
+
+    :root {
+        --primary-orange: #FF6B35;
+        --orange-dark: #E55A2B;
+        --orange-light: #FF8C42;
+        --accent-green: #27AE60;
+        --green-dark: #219653;
+        --green-light: #6FCF97;
+        --dark-bg: #1A1A1A;
+        --card-bg: #2D2D2D;
+        --text-light: #FFFFFF;
+        --text-muted: #B0B0B0;
+        --gradient-primary: linear-gradient(135deg, var(--primary-orange) 0%, var(--orange-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-green) 0%, var(--green-light) 100%);
+        --gradient-card: linear-gradient(145deg, #2D2D2D 0%, #3A3A3A 100%);
+    }
+
+    /* Секционные заголовки */
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        position: relative;
+    }
+
+    .display-4::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Карточки контактов */
+    .contact-card {
+        background: var(--gradient-card);
+        padding: 2.5rem 1.5rem;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        border: 1px solid rgba(255, 107, 53, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .contact-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .contact-card:hover::before {
+        left: 100%;
+    }
+
+    .contact-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        border-color: rgba(255, 107, 53, 0.3);
+    }
+
+    .contact-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .contact-card:hover .contact-icon {
+        transform: rotateY(180deg);
+        background: var(--gradient-accent);
+    }
+
+    .contact-card h3 {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 600;
+        font-size: 1.3rem;
+    }
+
+    .contact-link {
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .contact-link:hover {
+        color: var(--primary-orange);
+        text-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+    }
+
+    /* Социальные контакты */
+    .social-contact {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .social-contact:hover {
+        background: rgba(255, 107, 53, 0.1);
+        transform: translateX(10px);
+    }
+
+    .social-icon {
+        font-size: 1.8rem;
+        margin-right: 1rem;
+        color: var(--primary-orange);
+        flex-shrink: 0;
+    }
+
+    .social-info {
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .social-info strong {
+        color: var(--text-light);
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    /* Карта */
+    .map-container {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    /* Расписание */
+    .schedule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .schedule-item:last-child {
+        border-bottom: none;
+    }
+
+    .schedule-day {
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .schedule-time {
+        color: var(--text-muted);
+    }
+
+    /* Анимации */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 1s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
         }
 
         .contact-card {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-        }
-
-        .contact-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 2rem 1rem;
         }
 
         .contact-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #108510;
+            width: 70px;
+            height: 70px;
+            font-size: 1.8rem;
         }
+    }
 
-        .social-icon {
-            font-size: 1.5rem;
-            margin-right: 0.5rem;
-            color: #2c3e50;
-            transition: all 0.3s ease;
-        }
-
-        .social-icon:hover {
-            color: #e74c3c;
-            transform: translateY(-3px);
-        }
-
-        .map-container {
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .section-title {
-            position: relative;
-            padding-bottom: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .section-title:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: #01831c;
-        }
-
-        .contact-link {
-            color: #2c3e50;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .contact-link:hover {
-            color: #e74c3c;
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.8rem;
         }
 
         .social-contact {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .social-info {
-            display: flex;
             flex-direction: column;
+            text-align: center;
         }
 
-        /* Анимации из about */
-        .animate-fade-in {
-            opacity: 0;
-            animation: fadeIn 1s forwards;
+        .social-icon {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
         }
 
-        .animate-fade-up {
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeUp 0.8s forwards;
+        .schedule-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
         }
-
-        .animate-fade-up[style*="animation-delay"] {
-            animation-delay: inherit;
-        }
-
-        .animate-scale {
-            opacity: 0;
-            transform: scale(0.8);
-            animation: scaleIn 0.8s forwards;
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes scaleIn {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        /* Специфичные анимации для контактов */
-        .contact-card:nth-child(1) { animation-delay: 0.1s; }
-        .contact-card:nth-child(2) { animation-delay: 0.2s; }
-        .contact-card:nth-child(3) { animation-delay: 0.3s; }
-        .contact-card:nth-child(4) { animation-delay: 0.4s; }
-        .contact-card:nth-child(5) { animation-delay: 0.5s; }
-    </style>
-</head>
-<body>
-<!-- Обертка для градиентного фона -->
-<div class="background-wrapper">
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index.index') }}">
-                <i class="bi bi-tools me-2"></i>Автосервис
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index.about') }}">
-                            <i class="bi bi-info-circle me-1"></i>О нас
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index.discounts') }}">
-                            <i class="bi bi-percent me-1"></i>Скидки
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index.price') }}">
-                            <i class="bi bi-currency-dollar me-1"></i>Цены
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('index.contacts') }}">
-                            <i class="bi bi-telephone me-1"></i>Контакты
-                        </a>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user.login') }}">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Войти
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user.register') }}">
-                            <i class="bi bi-person-plus me-1"></i>Регистрация
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <main class="py-5">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-12">
-                    <h1 class="section-title animate-fade-in">Наши контакты</h1>
-                    <p class="lead animate-fade-in" style="animation-delay: 0.2s;">Свяжитесь с нами удобным для вас способом</p>
-                </div>
-            </div>
-
-            <div class="row mb-5">
-                <div class="col-md-4 mb-4">
-                    <div class="contact-card p-4 text-center animate-fade-up">
-                        <div class="contact-icon">
-                            <i class="bi bi-telephone-fill"></i>
-                        </div>
-                        <h3>Телефон</h3>
-                        <p class="mb-0">
-                            <a href="tel:+74951234567" class="contact-link">
-                                +7 (495) 123-45-67
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="contact-card p-4 text-center animate-fade-up">
-                        <div class="contact-icon">
-                            <i class="bi bi-printer-fill"></i>
-                        </div>
-                        <h3>Факс</h3>
-                        <p class="mb-0">
-                            <a href="tel:+74951234568" class="contact-link">
-                                +7 (495) 123-45-68
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="contact-card p-4 text-center animate-fade-up">
-                        <div class="contact-icon">
-                            <i class="bi bi-envelope-fill"></i>
-                        </div>
-                        <h3>Email</h3>
-                        <p class="mb-0">
-                            <a href="mailto:info@autoservice.ru" class="contact-link">
-                                info@autoservice.ru
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-5">
-                <div class="col-md-6 mb-4">
-                    <div class="contact-card p-4 animate-fade-up" style="animation-delay: 0.4s;">
-                        <h3 class="mb-4">Мы в соцсетях</h3>
-
-                        <div class="social-contact">
-                            <i class="bi bi-whatsapp social-icon"></i>
-                            <div class="social-info">
-                                <strong>WhatsApp</strong>
-                                <a href="https://wa.me/74951234567" class="contact-link">+7 (495) 123-45-67</a>
-                            </div>
-                        </div>
-
-                        <div class="social-contact">
-                            <i class="bi bi-telegram social-icon"></i>
-                            <div class="social-info">
-                                <strong>Telegram</strong>
-                                <a href="https://t.me/autoservice_help" class="contact-link">@autoservice_help</a>
-                            </div>
-                        </div>
-
-                        <div class="social-contact">
-                            <i class="bi bi-chat-dots-fill social-icon"></i>
-                            <div class="social-info">
-                                <strong>Max</strong>
-                                <a href="viber://chat?number=%2B74951234567" class="contact-link">+7 (495) 123-45-67</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 mb-4">
-                    <div class="contact-card p-4 animate-fade-up" style="animation-delay: 0.5s;">
-                        <h3 class="mb-4">Режим работы</h3>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Понедельник - Пятница</span>
-                            <span>9:00 - 18:00</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Суббота</span>
-                            <span>10:00 - 16:00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Воскресенье</span>
-                            <span>Выходной</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-5">
-                <div class="col-12">
-                    <div class="map-container animate-fade-in" style="animation-delay: 0.6s;">
-                        <script src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A9c20f50e9518dd7930e556060867662e2ab6cf493012705865836a7c1961efad&amp;width=100%&amp;height=400&amp;lang=ru_RU&amp;scroll=true"></script>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8 mx-auto">
-                    <div class="contact-card p-4 text-center animate-fade-up" style="animation-delay: 0.7s;">
-                        <h3 class="mb-3">Адрес</h3>
-                        <p class="lead mb-0">
-                            г. Москва, ул. Автосервисная, д. 25<br>
-                            Бизнес-центр "АвтоПлаза", 3 этаж
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    }
+</style>
+{% endblock %}

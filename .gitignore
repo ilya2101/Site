@@ -1,14 +1,41 @@
-# JetBrains IDE
-.idea/
-*.iml
-
 # Python
 __pycache__/
 *.py[cod]
-/create_admin.py
-
-/instance/
-/users.db
-
+*$py.class
+*.so
+.Python
+env/
 venv/
-.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database
+*.db
+*.sqlite3
+
+# Environment variables
+.env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
