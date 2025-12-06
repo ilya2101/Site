@@ -10,7 +10,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 RUN apk add --no-cache uv
-RUN uv sync --frozen --dev
+RUN uv sync  --dev
 
 COPY . .
 

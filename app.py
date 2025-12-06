@@ -21,11 +21,15 @@ from routes.admin_routes.visit import visit_bp, log_visit
 from routes.users_routes.index import index_route
 from routes.users_routes.login import user_bp
 
+from mobile_routes.mob_db import mob_db  # ← ИСПРАВЛЕННЫЙ ИМПОРТ
+from flask_cors import CORS
+
 load_dotenv()
 
 app = Flask(__name__, static_url_path="/service/static", static_folder="static")
+CORS(app)
 
-# Конфигурация ПЕРВОЙ
+# Конфигурация
 app.config['SECRET_KEY'] = 'ilya'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -34,17 +38,20 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_pre_ping': True
 }
 
-# Инициализация БД ВТОРОЙ (ВАЖНО!)
+# Инициализация БД
 db.init_app(app)
 
-# ПОТОМ миграции
+# Миграции
 migrate = Migrate(app, db)
 
-# ПОТОМ login_manager
+# Login manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'user.login'
 
-# Регистрация blueprints
+# Регистрация mobile blueprint ПЕРВЫМ
+app.register_blueprint(mob_db)  # ← Теперь mob_db это Blueprint
+
+# Регистрация остальных blueprints
 blueprints = [
     index_route,
     user_bp,
@@ -60,7 +67,7 @@ blueprints = [
 for bp in blueprints:
     app.register_blueprint(bp, url_prefix="/service")
 
-# Остальной код...
+# Остальной код без изменений...
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
