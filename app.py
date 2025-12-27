@@ -110,6 +110,6 @@ def get_service_prices():
     active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
     return render_template('price.html', prices=active_prices)
 
-if __name__ == "__main__":
+if True:
     app.run(host='0.0.0.0', port=8000, debug=True)
 
