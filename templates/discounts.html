@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}Акции и скидки{% endblock %}
+
+{% block body %}
+<main class="py-5">
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3 animate-fade-in">Акции и скидки</h1>
+            <p class="lead text-muted animate-fade-in" style="animation-delay: 0.2s;">Специальные предложения для наших клиентов</p>
+        </div>
+
+        <!-- Сетка скидок -->
+        {% if discounts %}
+        <div class="row">
+            {% for discount in discounts %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="discount-card animate-fade-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                    <!-- Изображение -->
+                    <div class="discount-image-container">
+                        {% if discount.image %}
+                        <img src="{{ url_for('static', filename=discount.image) }}"
+                             class="discount-image"
+                             alt="{{ discount.title }}">
+                        {% else %}
+                        <div class="discount-placeholder">
+                            <i class="bi bi-percent"></i>
+                        </div>
+                        {% endif %}
+                        <div class="discount-badge">
+                            <i class="bi bi-lightning-fill me-1"></i>Акция
+                        </div>
+                    </div>
+
+                    <!-- Тело карточки -->
+                    <div class="discount-card-body">
+                        <h3 class="discount-title">{{ discount.title }}</h3>
+                        <p class="discount-description">{{ discount.description }}</p>
+
+                        <div class="discount-footer">
+                            {% if discount.expires_at %}
+                            <div class="discount-timer">
+                                <i class="bi bi-clock me-2"></i>
+                                <span>До {{ discount.expires_at.strftime('%d.%m.%Y') }}</span>
+                            </div>
+                            {% else %}
+                            <div class="discount-permanent">
+                                <i class="bi bi-infinity me-2"></i>
+                                <span>Постоянная акция</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Сообщение об отсутствии скидок -->
+        <div class="text-center py-5">
+            <div class="modern-card empty-state p-5 mx-auto animate-fade-in" style="max-width: 500px;">
+                <div class="empty-icon mb-4">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <h4 class="mb-3">Акций пока нет</h4>
+                <p class="text-muted mb-0">Но мы готовим для вас специальные предложения!</p>
+                <div class="loading-dots mt-4">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Модальное окно для подробностей -->
+<div class="modal fade" id="discountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modern-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Детали акции</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Здесь будет подробное описание акции</p>
+                <p class="text-muted">Для получения скидки обратитесь к нашему менеджеру!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modern-outline" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn-modern-primary">Записаться</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* СТАНДАРТИЗИРОВАННЫЕ СТИЛИ ПО ДИЗАЙН-СИСТЕМЕ */
+
+    :root {
+        --primary-orange: #FF6B35;
+        --orange-dark: #E55A2B;
+        --orange-light: #FF8C42;
+        --accent-green: #27AE60;
+        --green-dark: #219653;
+        --green-light: #6FCF97;
+        --dark-bg: #1A1A1A;
+        --card-bg: #3e3e3e;
+        --text-light: #FFFFFF;
+        --text-muted: #B0B0B0;
+        --gradient-primary: linear-gradient(135deg, var(--primary-orange) 0%, var(--orange-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-green) 0%, var(--green-light) 100%);
+        --gradient-card: linear-gradient(145deg, #2D2D2D 0%, #3A3A3A 100%);
+    }
+
+    body {
+        background: var(--dark-bg);
+        color: var(--text-light);
+    }
+
+    /* Секционные заголовки */
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        position: relative;
+    }
+
+    .display-4::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Карточки скидок */
+    .discount-card {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 107, 53, 0.1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .discount-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .discount-card:hover::before {
+        left: 100%;
+    }
+
+    .discount-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        border-color: rgba(255, 107, 53, 0.3);
+    }
+
+    .discount-image-container {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .discount-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .discount-card:hover .discount-image {
+        transform: scale(1.1);
+    }
+
+    .discount-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 4rem;
+        opacity: 0.8;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: var(--gradient-primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+    }
+
+    .discount-card-body {
+        padding: 2rem 1.5rem;
+    }
+
+    .discount-title {
+        color: var(--text-light);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    .discount-description {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .discount-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1.5rem;
+    }
+
+    .discount-timer {
+        display: flex;
+        align-items: center;
+        color: var(--primary-orange);
+        font-weight: 500;
+    }
+
+    .discount-permanent {
+        display: flex;
+        align-items: center;
+        color: var(--accent-green);
+        font-weight: 500;
+    }
+
+    /* Состояние пустого списка */
+    .empty-state {
+        text-align: center;
+        background: var(--gradient-card);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto;
+    }
+
+    .loading-dots {
+        display: inline-flex;
+        gap: 6px;
+    }
+
+    .loading-dots span {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--primary-orange);
+        animation: bounce 1.5s infinite ease-in-out;
+    }
+
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Кнопки */
+    .btn-modern-primary {
+        background: var(--gradient-primary);
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-modern-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-modern-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-modern-outline {
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+        background: transparent;
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-modern-outline:hover {
+        background: var(--primary-orange);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+    }
+
+    /* Модальное окно */
+    .modern-modal {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .modern-modal .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+    }
+
+    .modern-modal .modal-title {
+        font-weight: 600;
+    }
+
+    .modern-modal .modal-body {
+        color: var(--text-light);
+    }
+
+    .modern-modal .btn-close {
+        filter: invert(1);
+    }
+
+    .modern-modal .modal-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Анимации */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 1s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .discount-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .discount-image-container {
+            height: 200px;
+        }
+
+        .discount-card-body {
+            padding: 1.5rem 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.8rem;
+        }
+
+        .discount-title {
+            font-size: 1.1rem;
+        }
+
+        .empty-state {
+            padding: 2rem 1.5rem !important;
+        }
+    }
+</style>
+
+<script>
+    function showDiscountDetails(discountId) {
+        const modal = new bootstrap.Modal(document.getElementById('discountModal'));
+        modal.show();
+    }
+</script>
+{% endblock %}

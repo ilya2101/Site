@@ -1,0 +1,321 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Статистика посещений{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <!-- Заголовок -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-admin">
+                    <i class="bi bi-bar-chart-line me-2"></i>
+                    Статистика посещений сайта
+                </div>
+            </div>
+        </div>
+
+        <!-- Основная статистика -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+                    <div class="stats-content">
+                        <div class="stats-number">{{ count_day }}</div>
+                        <div class="stats-label">Визитов сегодня</div>
+                        <div class="stats-details mt-2">
+                        <span class="badge bg-light text-dark me-2">
+                            <i class="bi bi-person me-1"></i>{{ count_day_guests }}
+                        </span>
+                            <span class="badge bg-light text-dark">
+                            <i class="bi bi-person-check me-1"></i>{{ count_day_users }}
+                        </span>
+                        </div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                    <div class="stats-content">
+                        <div class="stats-number">{{ count_month }}</div>
+                        <div class="stats-label">Визитов за месяц</div>
+                        <div class="stats-subtitle">Текущий месяц</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar2-month"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
+                    <div class="stats-content">
+                        <div class="stats-number">{{ count_year }}</div>
+                        <div class="stats-label">Визитов за год</div>
+                        <div class="stats-subtitle">Текущий год</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="bi bi-calendar2-week"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Детализация по типам пользователей -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="admin-card h-100">
+                    <div class="admin-card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-person me-2"></i>Гости</span>
+                        <span class="percentage-badge">{{ "%.1f"|format(count_day_guests / count_day * 100) if count_day > 0 else 0 }}%</span>
+                    </div>
+                    <div class="card-body text-center py-4">
+                        <div class="stats-number-large text-warning">{{ count_day_guests }}</div>
+                        <p class="stats-description">Неавторизованные посетители</p>
+                        <div class="progress mt-3" style="height: 12px;">
+                            <div class="progress-bar bg-warning" style="width: {{ (count_day_guests / count_day * 100) if count_day > 0 else 0 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="admin-card h-100">
+                    <div class="admin-card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-person-check me-2"></i>Пользователи</span>
+                        <span class="percentage-badge">{{ "%.1f"|format(count_day_users / count_day * 100) if count_day > 0 else 0 }}%</span>
+                    </div>
+                    <div class="card-body text-center py-4">
+                        <div class="stats-number-large text-info">{{ count_day_users }}</div>
+                        <p class="stats-description">Авторизованные пользователи</p>
+                        <div class="progress mt-3" style="height: 12px;">
+                            <div class="progress-bar bg-info" style="width: {{ (count_day_users / count_day * 100) if count_day > 0 else 0 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние визиты -->
+        <div class="row">
+            <div class="col-12">
+                <div class="admin-card">
+                    <div class="admin-card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clock-history me-2"></i>Последние визиты</span>
+                        <span class="badge bg-primary">Всего: {{ last_visits|length }}</span>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if last_visits %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 180px;">Дата и время</th>
+                                        <th style="width: 140px;">IP адрес</th>
+                                        <th style="width: 120px;">Тип пользователя</th>
+                                        <th>User Agent</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for visit in last_visits %}
+                                        <tr>
+                                            <td class="fw-semibold">{{ visit.date }}</td>
+                                            <td><code class="text-primary">{{ visit.ip }}</code></td>
+                                            <td>
+                                                {% if visit.user %}
+                                                    <span class="badge bg-success">
+                                            <i class="bi bi-person-check me-1"></i>{{ visit.user.username }}
+                                        </span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">
+                                            <i class="bi bi-person me-1"></i>Гость
+                                        </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small class="text-muted" title="{{ visit.user_agent }}">
+                                                    {{ visit.user_agent[:60] }}{% if visit.user_agent|length > 60 %}...{% endif %}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-eye-slash text-muted" style="font-size: 3rem;"></i>
+                                <p class="text-muted mt-3 fs-5">Нет данных о визитах</p>
+                                <small class="text-muted">Как только пользователи начнут посещать сайт, статистика появится здесь</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .admin-card-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stats-card {
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 140px;
+            border: none;
+        }
+
+        .stats-content {
+            text-align: left;
+        }
+
+        .stats-number {
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .stats-number-large {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .stats-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .stats-details {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stats-icon {
+            font-size: 3.5rem;
+            opacity: 0.9;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+        }
+
+        .stats-description {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .percentage-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .alert-admin {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            border-radius: 12px;
+            border-left: 4px solid #3498db;
+            color: #2c3e50;
+            padding: 1.25rem 1.5rem;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        .table th {
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 1rem 0.75rem;
+            background: #f8f9fa;
+        }
+
+        .table td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+        }
+
+        .progress {
+            border-radius: 10px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                min-height: 120px;
+            }
+
+            .stats-number {
+                font-size: 2.2rem;
+            }
+
+            .stats-icon {
+                font-size: 2.5rem;
+            }
+
+            .admin-card-header {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}

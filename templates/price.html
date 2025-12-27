@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block body %}
+<main class="py-5">
+    <div class="container">
+        <!-- Заголовок -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold mb-3 animate-fade-in">Наши цены</h1>
+            <p class="lead text-muted animate-fade-in" style="animation-delay: 0.2s;">Качественные услуги по доступным ценам</p>
+        </div>
+
+        {% if prices %}
+        <!-- Карточки услуг -->
+        <div class="row">
+            {% for price in prices %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="price-card animate-fade-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                    <div class="price-card-header">
+                        <h4 class="price-card-title">{{ price.service_name }}</h4>
+                    </div>
+                    <div class="price-card-body">
+                        {% if price.description %}
+                        <p class="price-card-description">
+                            <i class="bi bi-info-circle me-2"></i>{{ price.description }}
+                        </p>
+                        {% endif %}
+
+                        <div class="price-section">
+                            <span class="price-from">от</span>
+                            <span class="price-value">{{ "%.2f"|format(price.price) }}</span>
+                            <span class="price-currency">руб.</span>
+                        </div>
+
+                        <div class="guarantee-badge">
+                            <i class="bi bi-shield-check me-1"></i>
+                            <span>Гарантия качества</span>
+                        </div>
+                    </div>
+                    <div class="price-card-footer">
+                        <button class="btn-modern-primary"
+                                onclick="showContactModal('{{ price.service_name }}')">
+                            <i class="bi bi-calendar-check me-2"></i>Записаться
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Дополнительная информация -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="modern-card info-card p-4 animate-fade-in" style="animation-delay: 0.6s;">
+                    <div class="d-flex align-items-center">
+                        <div class="info-icon me-4">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-2">Уточняйте детали</h5>
+                            <p class="mb-0 text-muted">Для точного расчета стоимости и подтверждения информации, пожалуйста, уточняйте детали у наших менеджеров</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Сообщение об отсутствии цен -->
+        <div class="text-center py-5">
+            <div class="modern-card warning-card p-5 mx-auto animate-fade-in" style="max-width: 500px;">
+                <div class="warning-icon mb-4">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                <h4 class="mb-3">Цены временно недоступны</h4>
+                <p class="text-muted mb-0">Пожалуйста, зайдите позже или свяжитесь с нами для уточнения информации</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Модальное окно для записи -->
+<div class="modal fade" id="contactModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg modern-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">Запись на услугу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-4">Для записи на <span id="serviceName" class="fw-bold"></span> свяжитесь с нами:</p>
+                <div class="d-grid gap-3">
+                    <a href="tel:+79043367281" class="btn-modern-outline">
+                        <i class="bi bi-telephone me-2"></i>+7 (904) 336-72-81
+                    </a>
+                    <a href="https://wa.me/79502259802" class="btn-modern-outline whatsapp-btn">
+                        <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                    </a>
+                    <a href="https://t.me/ilya_21_01" class="btn-modern-outline telegram-btn">
+                        <i class="bi bi-telegram me-2"></i>Telegram
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* СТАНДАРТИЗИРОВАННЫЕ СТИЛИ ПО ДИЗАЙН-СИСТЕМЕ */
+
+    :root {
+        --primary-orange: #FF6B35;
+        --orange-dark: #E55A2B;
+        --orange-light: #FF8C42;
+        --accent-green: #27AE60;
+        --green-dark: #219653;
+        --green-light: #6FCF97;
+        --dark-bg: #000000;
+        --card-bg: #2D2D2D;
+        --text-light: #FFFFFF;
+        --text-muted: #B0B0B0;
+        --gradient-primary: linear-gradient(135deg, var(--primary-orange) 0%, var(--orange-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-green) 0%, var(--green-light) 100%);
+        --gradient-card: linear-gradient(145deg, #2D2D2D 0%, #3A3A3A 100%);
+    }
+
+    body {
+        background: var(--dark-bg);
+        color: var(--text-light);
+    }
+
+    /* Секционные заголовки */
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        position: relative;
+    }
+
+    .display-4::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Карточки цен */
+    .price-card {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 107, 53, 0.1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .price-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .price-card:hover::before {
+        left: 100%;
+    }
+
+    .price-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        border-color: rgba(255, 107, 53, 0.3);
+    }
+
+    .price-card-header {
+        background: var(--gradient-primary);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        color: white;
+    }
+
+    .price-card-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .price-card-body {
+        padding: 2rem 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .price-card-description {
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        flex-grow: 1;
+    }
+
+    .price-section {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .price-from {
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-right: 0.5rem;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .price-currency {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+    }
+
+    .guarantee-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-green);
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+
+    .price-card-footer {
+        padding: 1.5rem;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Кнопки */
+    .btn-modern-primary {
+        background: var(--gradient-primary);
+        border: none;
+        padding: 1.2rem 2rem;
+        border-radius: 15px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .btn-modern-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-modern-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-modern-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-modern-outline {
+        border: 2px solid var(--primary-orange);
+        color: var(--primary-orange);
+        background: transparent;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+    }
+
+    .btn-modern-outline:hover {
+        background: var(--primary-orange);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+    }
+
+    /* Информационные карточки */
+    .modern-card {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .info-card {
+        background: linear-gradient(135deg, #2D2D2D 0%, #363636 100%);
+    }
+
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--gradient-primary);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .warning-card {
+        text-align: center;
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-primary);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        margin: 0 auto;
+    }
+
+    /* Модальное окно */
+    .modern-modal {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .modern-modal .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+    }
+
+    .modern-modal .modal-title {
+        font-weight: 600;
+    }
+
+    .modern-modal .btn-close {
+        filter: invert(1);
+    }
+
+    /* Анимации */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 1s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
+
+        .price-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .price-value {
+            font-size: 2rem;
+        }
+
+        .info-card .d-flex {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .info-icon {
+            margin-bottom: 1rem;
+            margin-right: 0 !important;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .display-4 {
+            font-size: 1.8rem;
+        }
+
+        .price-card-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .price-card-body {
+            padding: 1.5rem 1rem;
+        }
+    }
+</style>
+
+<script>
+    function showContactModal(serviceName) {
+        document.getElementById('serviceName').textContent = serviceName;
+        new bootstrap.Modal(document.getElementById('contactModal')).show();
+    }
+</script>
+{% endblock %}

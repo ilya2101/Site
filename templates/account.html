@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Мой аккаунт{% endblock %}
+
+{% block body %}
+    <!-- Добавляем градиентный фон как в других страницах -->
+    <div class="background-wrapper">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <!-- Заголовок -->
+                    <div class="text-center mb-5 animate-fade-in">
+                        <h1 class="display-5 fw-bold text-primary mb-3">Мой аккаунт</h1>
+                        <p class="lead text-muted">Управление вашими личными данными</p>
+                        <div class="divider mx-auto" style="width: 100px; height: 3px; background: linear-gradient(90deg, #e74c3c, #3498db);"></div>
+                    </div>
+
+                    <!-- Flash сообщения -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show rounded-3 mb-4 animate-fade-in">
+                                    <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="row">
+                        <!-- Основная информация -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card shadow-lg border-0 rounded-4 h-100 animate-fade-up">
+                                <div class="card-header bg-gradient-primary text-white py-3 rounded-top-4">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-person-circle me-2"></i>Личная информация
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Измените эту строку -->
+                                    <form id="profileForm" action="{{ url_for('user.update_profile') }}" method="POST">
+                                        <div class="mb-3">
+                                            <label for="first_name" class="form-label fw-medium text-dark mb-2">
+                                                <i class="bi bi-person text-primary me-2"></i>Имя
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="first_name"
+                                                   name="first_name"
+                                                   value="{{ user.first_name }}"
+                                                   required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="last_name" class="form-label fw-medium text-dark mb-2">
+                                                <i class="bi bi-person-badge text-primary me-2"></i>Фамилия
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="last_name"
+                                                   name="last_name"
+                                                   value="{{ user.last_name }}"
+                                                   required>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="phone" class="form-label fw-medium text-dark mb-2">
+                                                <i class="bi bi-phone text-primary me-2"></i>Номер телефона
+                                            </label>
+                                            <input type="tel"
+                                                   class="form-control"
+                                                   id="phone"
+                                                   name="phone"
+                                                   value="{{ user.phone }}"
+                                                   pattern="\+?[0-9\s\-]+"
+                                                   required>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary w-100 py-2">
+                                            <i class="bi bi-check-circle me-2"></i>Сохранить изменения
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Дополнительная информация и действия -->
+                        <div class="col-md-6 mb-4">
+                            <!-- Статистика -->
+                            <div class="card shadow-lg border-0 rounded-4 mb-4 animate-fade-up" style="animation-delay: 0.1s;">
+                                <div class="card-header bg-gradient-info text-white py-3 rounded-top-4">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-graph-up me-2"></i>Статистика
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted">Заявок создано:</span>
+                                        <span class="fw-bold text-primary">{{ user.applications|length if user.applications else 0 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted">Дата регистрации:</span>
+                                        <span class="fw-bold text-primary">{{ user.created_at.strftime('%d.%m.%Y') if user.created_at else 'Н/Д' }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">Статус:</span>
+                                        <span class="badge bg-success rounded-pill">Активен</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Быстрые действия -->
+                            <div class="card shadow-lg border-0 rounded-4 animate-fade-up" style="animation-delay: 0.2s;">
+                                <div class="card-header bg-gradient-warning text-white py-3 rounded-top-4">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-lightning me-2"></i>Быстрые действия
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ url_for('index.index') }}" class="btn btn-outline-primary">
+                                            <i class="bi bi-plus-circle me-2"></i>Создать заявку
+                                        </a>
+                                        <a href="{{ url_for('user.logout') }}" class="btn btn-outline-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Выйти из аккаунта
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- История заявок -->
+                    {% if user.applications %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card shadow-lg border-0 rounded-4 animate-fade-up" style="animation-delay: 0.3s;">
+                                    <div class="card-header bg-gradient-success text-white py-3 rounded-top-4">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-clock-history me-2"></i>История заявок
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th>Дата</th>
+                                                    <th>Услуга</th>
+                                                    <th>Статус</th>
+                                                    <th>Действия</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for application in user.applications %}
+                                                    <tr>
+                                                        <td>{{ application.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                                        <td>{{ application.service_type }}</td>
+                                                        <td>
+                                                    <span class="badge bg-{{ 'success' if application.status == 'completed' else 'warning' if application.status == 'in_progress' else 'secondary' }} rounded-pill">
+                                                        {{ 'Завершено' if application.status == 'completed' else 'В работе' if application.status == 'in_progress' else 'Новое' }}
+                                                    </span>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* CSS ПЕРЕМЕННЫЕ ДЛЯ ЦВЕТОВ - ТАКИЕ ЖЕ КАК В ABOUT */
+        :root {
+            --primary-color: #0032ff;
+            --primary-dark: #00ff07;
+            --background-gradient: linear-gradient(135deg, #ffffff 0%, #b0b0b0 100%);
+        }
+
+        /* Градиентный фон */
+        .background-wrapper {
+            background: var(--background-gradient);
+            min-height: 100vh;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+        }
+
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #0630c0 0%, #000d42 100%) !important;
+        }
+
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%) !important;
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%) !important;
+        }
+
+        .form-control {
+            border: 2px solid #dce4ec;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            border-radius: 0.375rem;
+        }
+
+        .form-control:focus {
+            border-color: #6ce73c;
+            box-shadow: 0 0 0 0.25rem rgba(102, 255, 0, 0.15);
+            background: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #248603 0%, #1349f3 100%);
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.3);
+            background: linear-gradient(90deg, #63d953 0%, #25a912 100%);
+        }
+
+        .alert {
+            border: none;
+            border-radius: 0.375rem;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+
+        .btn-close-white {
+            filter: invert(1);
+        }
+
+        /* Анимации */
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+
+        .animate-fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s forwards;
+        }
+
+        .animate-fade-up[style*="animation-delay"] {
+            animation-delay: inherit;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+    </style>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <script>
+        // Обработка формы с подтверждением
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Можно добавить дополнительную валидацию здесь
+            if (confirm('Вы уверены, что хотите сохранить изменения?')) {
+                this.submit();
+            }
+        });
+
+        // Валидация номера телефона
+        document.getElementById('phone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.startsWith('7') || value.startsWith('8')) {
+                value = value.substring(1);
+            }
+
+            let formattedValue = '+7 (';
+            if (value.length > 0) formattedValue += value.substring(0, 3);
+            if (value.length > 3) formattedValue += ') ' + value.substring(3, 6);
+            if (value.length > 6) formattedValue += '-' + value.substring(6, 8);
+            if (value.length > 8) formattedValue += '-' + value.substring(8, 10);
+
+            e.target.value = formattedValue;
+        });
+    </script>
+{% endblock %}

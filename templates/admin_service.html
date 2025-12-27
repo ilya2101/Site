@@ -1,0 +1,321 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Автомобили в ремонте - Админ-панель{% endblock %}
+
+{% block content %}
+    <div class="container-fluid py-4">
+        <!-- Заголовок -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="bi bi-wrench me-2 text-primary"></i>Автомобили в ремонте
+            </h2>
+            <div>
+                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
+                    <i class="bi bi-tools me-1"></i>Всего в ремонте: {{ service_entries|length }}
+                </span>
+            </div>
+        </div>
+
+        {% if service_entries %}
+            <div class="admin-card">
+                <div class="admin-card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-check me-2"></i>Список автомобилей в ремонте</span>
+                    <small class="text-light">Отсортировано по дате поступления</small>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Клиент</th>
+                                <th>Автомобиль</th>
+                                <th>Окончание работ</th>
+                                <th>Стоимость</th>
+                                <th>Детализация</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for entry in service_entries %}
+                                <tr class="align-middle">
+                                    <td class="fw-bold text-primary">#{{ entry.id }}</td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <strong>{{ entry.name }}</strong>
+                                            <small class="text-muted">{{ entry.phone }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span>{{ entry.car_brand }}</span>
+                                            <small class="text-muted">{{ entry.car_model }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if entry.estimated_completion %}
+                                            <span class="fw-medium">{{ entry.estimated_completion.strftime('%d.%m.%Y') }}</span>
+                                        {% else %}
+                                            <span class="text-muted">не указано</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if entry.estimated_cost %}
+                                            <span class="badge bg-success rounded-pill">
+                                                {{ entry.estimated_cost }} ₽
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">не указана</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if entry.excel_file %}
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                                   class="btn btn-outline-info btn-sm"
+                                                   target="_blank"
+                                                   title="Просмотр">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                                   class="btn btn-outline-primary btn-sm"
+                                                   target="_blank"
+                                                   title="Скачать">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">нет файла</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info rounded-pill">
+                                            <i class="bi bi-wrench me-1"></i>В работе
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <!-- Редактирование -->
+                                            <button type="button" class="btn btn-outline-primary"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editModal{{ entry.id }}"
+                                                    title="Редактировать">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                            <!-- Завершить ремонт -->
+                                            <form action="{{ url_for('admin_service.complete_service', id=entry.id) }}" method="post">
+                                                <button type="submit" class="btn btn-success">Завершить</button>
+                                            </form>
+
+
+
+
+
+
+
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Модальные окна -->
+            {% for entry in service_entries %}
+                <!-- Редактирование -->
+                <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-dark text-white">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-pencil me-2"></i>Редактирование #{{ entry.id }}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('admin_service.update_service', service_id=entry.id) }}" enctype="multipart/form-data">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Имя клиента</label>
+                                            <input type="text" class="form-control" name="name"
+                                                   value="{{ entry.name }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Телефон</label>
+                                            <input type="tel" class="form-control" name="phone"
+                                                   value="{{ entry.phone }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Марка авто</label>
+                                            <input type="text" class="form-control" name="car_brand"
+                                                   value="{{ entry.car_brand }}" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Модель авто</label>
+                                            <input type="text" class="form-control" name="car_model"
+                                                   value="{{ entry.car_model }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Окончание работ</label>
+                                            <input type="date" class="form-control" name="estimated_completion"
+                                                   value="{{ entry.estimated_completion if entry.estimated_completion else '' }}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-medium">Примерная стоимость</label>
+                                            <input type="number" class="form-control" name="estimated_cost"
+                                                   value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
+                                                   placeholder="Введите стоимость">
+
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-medium">Список работ</label>
+                                        <textarea class="form-control" name="work_list" rows="3"
+                                                  placeholder="Замена масла, Диагностика, Ремонт тормозов...">{{ entry.work_list }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-medium">Комментарий</label>
+                                        <textarea class="form-control" name="comment" rows="3"
+                                                  placeholder="Дополнительная информация">{{ entry.comment }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-medium">Детализация (Excel файл)</label>
+                                        {% if entry.excel_file %}
+                                            <div class="alert alert-info mb-2">
+                                                <i class="bi bi-file-earmark-excel me-2"></i>
+                                                Текущий файл: {{ entry.excel_file }}
+                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                                   class="btn btn-sm btn-outline-primary ms-2"
+                                                   target="_blank">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                        <input type="file" class="form-control" name="excel_file"
+                                               accept=".xls,.xlsx,.csv">
+                                        <small class="text-muted">Оставьте пустым, чтобы сохранить текущий файл</small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="bi bi-x me-1"></i>Отмена
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check me-1"></i>Сохранить
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="admin-card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-wrench text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h4 class="text-muted mb-3">Ремонт пуст</h4>
+                    <p class="text-muted">Нет автомобилей в ремонте.</p>
+                    <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-primary mt-2">                        <i class="bi bi-clock-history me-1"></i>Посмотреть очередь
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: none;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .admin-card-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            font-weight: 500;
+            padding: 1rem 0.75rem;
+        }
+
+        .table td {
+            padding: 1rem 0.75rem;
+            vertical-align: middle;
+        }
+
+        .btn-group .btn {
+            border-radius: 6px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .modal-header {
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .badge {
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateX(2px);
+            transition: all 0.2s ease;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border: none;
+            border-radius: 8px;
+            color: #0c5460;
+        }
+    </style>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
