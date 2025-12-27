@@ -21,6 +21,18 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/Site
+
+            echo "Stopping old containers..."
+            docker compose down
+
+            echo "Pulling latest code..."
             git pull origin main
+
+            echo "Building new images..."
             docker compose build
+
+            echo "Starting containers..."
             docker compose up -d
+
+            echo "Deployment finished. Showing running containers..."
+            docker ps
