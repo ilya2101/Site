@@ -2,76 +2,149 @@
 
 {% block title %}Управление скидками - Админ-панель{% endblock %}
 
+{% block page_title %}Управление скидками{% endblock %}
+{% block page_subtitle %}Создание и управление акциями и специальными предложениями{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
+<div class="admin-content">
+    <!-- Заголовок с информацией -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1"><i class="fas fa-percent me-2 text-primary"></i>Управление скидками</h1>
+            <p class="text-muted mb-0">Создание и управление акциями и специальными предложениями</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-outline-primary btn-sm me-3" onclick="cleanupExpired()">
+                <i class="fas fa-trash-alt me-1"></i>Очистить просроченные
+            </button>
+            <span class="badge bg-primary rounded-pill px-3 py-2">
+                <i class="fas fa-tag me-1"></i>Всего: {{ discounts|length }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Статистика -->
     <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="alert alert-admin mb-0">
-                    <i class="bi bi-percent me-2"></i>
-                    Управление скидками и акциями
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4361ee, #3a56d4);">
+                    <i class="fas fa-tags"></i>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" onclick="cleanupExpired()">
-                    <i class="bi bi-trash me-1"></i>Очистить просроченные
-                </button>
+                <div class="stat-info">
+                    <h3>{{ discounts|length }}</h3>
+                    <p>Всего скидок</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #198754, #157347);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ discounts|selectattr('is_active')|list|length }}</h3>
+                    <p>Активные</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f8961e, #f3722c);">
+                    <i class="fas fa-hourglass-end"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ discounts|selectattr('expires_at', 'lt', now)|list|length }}</h3>
+                    <p>Просроченные</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #7209b7, #560bad);">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ discounts|selectattr('expires_at', 'none')|list|length }}</h3>
+                    <p>Бессрочные</p>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Форма добавления -->
+        <!-- Форма добавления новой скидки -->
         <div class="col-lg-5 mb-4">
             <div class="admin-card">
                 <div class="admin-card-header">
-                    <i class="bi bi-plus-circle me-2"></i>Добавить новую скидку
+                    <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Добавить новую скидку</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data" id="discountForm">
+                    <form method="POST" enctype="multipart/form-data" id="discountForm" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
 
                         <div class="mb-3">
-                            {{ form.title.label(class="form-label") }}
-                            {{ form.title(class="form-control", placeholder="Название акции") }}
-                            {% if form.title.errors %}
-                            <div class="text-danger small">{{ form.title.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form.description.label(class="form-label") }}
-                            {{ form.description(class="form-control", rows=4, placeholder="Описание акции...") }}
-                            {% if form.description.errors %}
-                            <div class="text-danger small">{{ form.description.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form.image.label(class="form-label") }}
-                            {{ form.image(class="form-control") }}
-                            <div class="form-text">Поддерживаемые форматы: JPG, PNG, GIF. Макс. размер: 5MB</div>
-                            {% if form.image.errors %}
-                            <div class="text-danger small">{{ form.image.errors[0] }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-7 mb-3">
-                                {{ form.expires_at.label(class="form-label") }}
-                                {{ form.expires_at(class="form-control", type="date", required=True, min=current_date) }}
-                                <div class="form-text">Выберите дату не ранее сегодняшнего дня</div>
+                            {{ form.title.label(class="form-label fw-medium") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                {{ form.title(class="form-control", placeholder="Например: Летняя акция -30%") }}
                             </div>
+                            {% for error in form.title.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Яркое название для привлечения внимания</small>
+                        </div>
 
-                            <div class="col-md-5 mb-3">
-                                <div class="form-check form-switch mt-4 pt-2">
-                                    {{ form.is_active(class="form-check-input", checked=True) }}
-                                    {{ form.is_active.label(class="form-check-label fw-bold") }}
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label fw-medium") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                {{ form.description(class="form-control", rows=4, placeholder="Подробное описание акции, условия, преимущества...") }}
+                            </div>
+                            {% for error in form.description.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Клиенты будут видеть это описание</small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.image.label(class="form-label fw-medium") }}
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                {{ form.image(class="form-control") }}
+                            </div>
+                            {% for error in form.image.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Поддерживаемые форматы: JPG, PNG, GIF. Макс. размер: 5MB</small>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form.expires_at.label(class="form-label fw-medium") }}
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                        {{ form.expires_at(class="form-control", type="date", required=True, min=current_date) }}
+                                    </div>
+                                    {% for error in form.expires_at.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                    <small class="text-muted">Выберите дату не ранее сегодняшнего дня</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch mt-4 pt-3">
+                                    {{ form.is_active(class="form-check-input", checked=True, style="width: 3em; height: 1.5em;") }}
+                                    {{ form.is_active.label(class="form-check-label fw-medium mt-1") }}
                                 </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-action w-100">
-                            <i class="bi bi-save me-2"></i>Сохранить скидку
-                        </button>
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="fas fa-save me-2"></i>Сохранить скидку
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -81,190 +154,380 @@
         <div class="col-lg-7 mb-4">
             <div class="admin-card">
                 <div class="admin-card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list me-2"></i>Список скидок ({{ discounts|length }})</span>
+                    <div>
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Список скидок</h5>
+                        <small class="text-white-50">Нажмите на скидку для просмотра деталей</small>
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control border-start-0" placeholder="Поиск..." id="searchDiscounts">
+                    </div>
                 </div>
+
                 <div class="card-body p-0">
                     {% if discounts %}
-                    <div class="list-group list-group-flush">
+                    <div class="list-group list-group-flush" id="discountsList">
                         {% for discount in discounts %}
-                        <div class="list-group-item {% if discount.expires_at and discount.expires_at < now %}bg-light{% endif %}">
-                            <div class="d-flex align-items-start">
+                        {% set is_expired = discount.expires_at and discount.expires_at < now %}
+                        <div class="list-group-item discount-item {% if is_expired %}list-group-item-light{% elif not discount.is_active %}list-group-item-secondary{% endif %}"
+                             data-title="{{ discount.title|lower }}"
+                             data-description="{{ discount.description|lower if discount.description else '' }}">
+                            <div class="d-flex align-items-start position-relative">
                                 {% if discount.image %}
-                                <img src="{{ url_for('static', filename=discount.image) }}"
-                                     class="rounded me-3"
-                                     style="width: 60px; height: 60px; object-fit: cover;"
-                                     onerror="this.style.display='none'">
+                                <div class="discount-image me-3">
+                                    <img src="{{ url_for('static', filename=discount.image) }}"
+                                         class="rounded"
+                                         style="width: 70px; height: 70px; object-fit: cover;"
+                                         onerror="this.src='{{ url_for('static', filename='img/default-discount.png') }}'"
+                                         alt="{{ discount.title }}">
+                                </div>
+                                {% else %}
+                                <div class="discount-placeholder me-3">
+                                    <div class="rounded d-flex align-items-center justify-content-center bg-light text-muted"
+                                         style="width: 70px; height: 70px;">
+                                        <i class="fas fa-percent fa-2x"></i>
+                                    </div>
+                                </div>
                                 {% endif %}
+
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="mb-0">{{ discount.title }}</h6>
+                                        <div>
+                                            <h6 class="mb-0">{{ discount.title }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-plus me-1"></i>
+                                                Создано: {{ discount.created_at.strftime('%d.%m.%Y') }}
+                                            </small>
+                                        </div>
 
-                                        <!-- Кнопки действий -->
                                         <!-- Кнопки действий -->
                                         <div class="btn-group btn-group-sm">
-                                            <!-- Кнопка редактирования -->
-                                            <button class="btn btn-outline-primary btn-sm"
+                                            <!-- Редактирование -->
+                                            <button class="btn btn-outline-primary"
                                                     onclick="editDiscount({{ discount.id }})"
                                                     title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
+                                                <i class="fas fa-edit"></i>
                                             </button>
 
-                                            <!-- Кнопка удаления -->
-                                            <form method="POST"
-                                                  action="{{ url_for('admin_discounts.delete_discount', id=discount.id) }}"
-                                                  class="d-inline">
-                                                <button type="submit"
-                                                        class="btn btn-outline-danger btn-sm"
-                                                        onclick="return confirm('Удалить скидку \"{{ discount.title }}\"?')"
-                                                title="Удалить">
-                                                <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                            <!-- Удаление -->
+                                            <button class="btn btn-outline-danger delete-discount-btn"
+                                                    data-id="{{ discount.id }}"
+                                                    data-title="{{ discount.title }}"
+                                                    title="Удалить">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <p class="text-muted mb-2 small">{{ discount.description|truncate(80) }}</p>
+                                    <p class="text-muted mb-2 small">{{ discount.description|truncate(100) }}</p>
 
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">
-                                            <i class="bi bi-calendar me-1"></i>
-                                            {{ discount.created_at.strftime('%d.%m.%Y') }}
-                                        </small>
-
-                                        {% if discount.expires_at %}
-                                        <small class="{% if discount.expires_at < now %}text-danger{% else %}text-success{% endif %}">
-                                            <i class="bi bi-clock me-1"></i>
-                                            {% if discount.expires_at < now %}
-                                            Просрочена
+                                        <div>
+                                            {% if discount.expires_at %}
+                                            <span class="badge {% if is_expired %}bg-danger{% else %}bg-success{% endif %} me-2">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {% if is_expired %}
+                                                Просрочена
+                                                {% else %}
+                                                До: {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                                {% endif %}
+                                            </span>
                                             {% else %}
-                                            До: {{ discount.expires_at.strftime('%d.%m.%Y') }}
+                                            <span class="badge bg-info me-2">
+                                                <i class="fas fa-infinity me-1"></i>Бессрочная
+                                            </span>
                                             {% endif %}
-                                        </small>
-                                        {% else %}
-                                        <small class="text-success">
-                                            <i class="bi bi-infinity me-1"></i>Бессрочная
-                                        </small>
-                                        {% endif %}
-                                    </div>
 
-                                    <div class="mt-2">
-                                <span class="badge {% if discount.is_active %}bg-success{% else %}bg-secondary{% endif %}">
-                                    {% if discount.is_active %}Активна{% else %}Неактивна{% endif %}
-                                </span>
-                                        {% if discount.expires_at and discount.expires_at < now %}
-                                        <span class="badge bg-danger ms-1">Просрочена</span>
-                                        {% endif %}
+                                            <span class="badge {% if discount.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if discount.is_active %}
+                                                <i class="fas fa-eye me-1"></i>Активна
+                                                {% else %}
+                                                <i class="fas fa-eye-slash me-1"></i>Скрыта
+                                                {% endif %}
+                                            </span>
+                                        </div>
+
+                                        <small class="text-muted">
+                                            ID: #{{ discount.id }}
+                                        </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
+
+                    <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Всего: {{ discounts|length }} |
+                                Активных: {{ discounts|selectattr('is_active')|list|length }} |
+                                Просроченных: {{ discounts|selectattr('expires_at', 'lt', now)|list|length }}
+                            </small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="exportDiscounts()">
+                                <i class="fas fa-download me-1"></i>Экспорт
+                            </button>
+                        </div>
+                    </div>
+
                     {% else %}
+                    <!-- Состояние пустого списка -->
                     <div class="text-center py-5">
-                        <i class="bi bi-percent text-muted" style="font-size: 3rem;"></i>
-                        <p class="text-muted mt-3">Нет добавленных скидок</p>
+                        <div class="empty-state">
+                            <i class="fas fa-percent fa-4x text-muted mb-4"></i>
+                            <h4 class="text-muted mb-3">Нет добавленных скидок</h4>
+                            <p class="text-muted mb-4">Добавьте первую скидку для привлечения клиентов</p>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-
-        <!-- Модальное окно редактирования -->
-        <div class="modal fade" id="editDiscountModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title">Редактирование скидки</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editDiscountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Редактирование скидки
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editDiscountBody">
+                <!-- Контент будет загружен через AJAX -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
                     </div>
-                    <div class="modal-body" id="editDiscountBody">
-                        <!-- Контент будет загружен через AJAX -->
-                    </div>
+                    <p class="mt-2">Загрузка формы редактирования...</p>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Стили для кнопок -->
-        <style>
-            .btn-group-sm .btn {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.875rem;
-            }
-            .btn-group-sm .btn i {
-                font-size: 0.9rem;
-            }
-        </style>
+<style>
+    /* Специальные стили для этой страницы */
+    .discount-item {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-left: 4px solid transparent;
+    }
 
-        <!-- Скрипт для редактирования -->
-        <script>
-            function editDiscount(discountId) {
-                fetch("{{ url_for('admin_discounts.edit_discount_form', id=0) }}".replace('0', discountId))
-                    .then(response => response.text())
-                    .then(html => {
-                        document.getElementById('editDiscountBody').innerHTML = html;
-                        const modal = new bootstrap.Modal(document.getElementById('editDiscountModal'));
-                        modal.show();
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Ошибка при загрузке формы редактирования');
-                    });
-            }
-        </script>
+    .discount-item:hover {
+        background-color: #f8fafc !important;
+        border-left-color: #4361ee;
+    }
 
+    .discount-item.list-group-item-light {
+        border-left-color: #dc3545;
+    }
 
-        <!-- Скрипт для очистки просроченных -->
+    .discount-item.list-group-item-secondary {
+        border-left-color: #6c757d;
+    }
+
+    .discount-image img {
+        transition: transform 0.3s ease;
+    }
+
+    .discount-item:hover .discount-image img {
+        transform: scale(1.05);
+    }
+
+    .discount-placeholder {
+        opacity: 0.7;
+    }
+
+    .empty-state {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #4361ee;
+        border-color: #4361ee;
+    }
+
+    .form-check-input:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    .btn-group .btn {
+        border-radius: 8px !important;
+        margin: 0 2px;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%) !important;
+    }
+</style>
+
 <script>
-    function cleanupExpired() {
-        if (confirm('Удалить все просроченные скидки?')) {
-            fetch('/admin/cleanup_expired', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(`Удалено ${data.deleted_count} просроченных скидок`);
-                    location.reload();
-                } else {
-                    alert('Ошибка при очистке: ' + data.error);
-                }
-            })
-            .catch(error => {
-                alert('Ошибка сети: ' + error);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Поиск по скидкам
+        const searchInput = document.getElementById('searchDiscounts');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const items = document.querySelectorAll('.discount-item');
+
+                items.forEach(item => {
+                    const title = item.dataset.title;
+                    const description = item.dataset.description;
+                    const text = title + ' ' + description;
+
+                    item.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
             });
         }
-    }
-</script>
 
-        <script>
-            document.getElementById('discountForm').addEventListener('submit', function(e) {
-                const expiresAtInput = document.querySelector('input[name="expires_at"]');
-                const today = new Date();
-                today.setHours(0,0,0,0); // обнуляем время
+        // Удаление скидки с подтверждением
+        document.querySelectorAll('.delete-discount-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Предотвращаем всплытие
+                const id = this.dataset.id;
+                const title = this.dataset.title;
 
-                if (!expiresAtInput.value) {
-                    alert('Пожалуйста, укажите дату окончания скидки!');
-                    e.preventDefault();
-                    return;
-                }
+                if (confirm(`Удалить скидку "${title}"? Это действие нельзя отменить.`)) {
+                    // Создаем скрытую форму для отправки POST запроса
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ url_for("admin_discounts.delete_discount", id=0) }}'.replace('0', id);
 
-                const selectedDate = new Date(expiresAtInput.value);
-                if (selectedDate < today) {
-                    alert('Нельзя выбрать прошедшую дату!');
-                    e.preventDefault();
-                    return;
+                    // Добавляем CSRF токен
+                    const csrfToken = document.querySelector('input[name="csrf_token"]');
+                    if (csrfToken) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = 'csrf_token';
+                        csrfInput.value = csrfToken.value;
+                        form.appendChild(csrfInput);
+                    }
+
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             });
-        </script>
+        });
 
+        // Клик по скидке для редактирования
+        document.querySelectorAll('.discount-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // Игнорируем клики по кнопкам
+                if (e.target.closest('button') ||
+                    e.target.closest('.btn-group')) {
+                    return;
+                }
 
+                // Находим ID скидки и открываем редактирование
+                const id = this.querySelector('small.text-muted:last-child').textContent.replace('ID: #', '');
+                editDiscount(id);
+            });
+        });
 
+        // Валидация формы добавления
+        const discountForm = document.getElementById('discountForm');
+        if (discountForm) {
+            discountForm.addEventListener('submit', function(e) {
+                const expiresAtInput = document.querySelector('input[name="expires_at"]');
+                const today = new Date().toISOString().split('T')[0];
 
+                if (expiresAtInput && expiresAtInput.value < today) {
+                    alert('Нельзя выбрать прошедшую дату!');
+                    expiresAtInput.focus();
+                    e.preventDefault();
+                    return false;
+                }
 
+                return true;
+            });
+        }
 
-        {% endblock %}
+        // Показываем уведомление о просроченных скидках
+        const expiredCount = {{ discounts|selectattr('expires_at', 'lt', now)|list|length }};
+        if (expiredCount > 0) {
+            setTimeout(() => {
+                const alertHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                            <div>
+                                <strong>Внимание!</strong> У вас есть ${expiredCount} просроченных скидок.
+                                <div class="mt-1">
+                                    <button class="btn btn-sm btn-warning" onclick="cleanupExpired()">Очистить просроченные</button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                const content = document.querySelector('.admin-content');
+                const firstChild = content.firstChild;
+                content.insertBefore(document.createRange().createContextualFragment(alertHTML), firstChild);
+            }, 1000);
+        }
+    });
+
+    // Функция редактирования скидки
+    function editDiscount(discountId) {
+        const editUrl = '{{ url_for("admin_discounts.edit_discount_form", id=0) }}'.replace('0', discountId);
+
+        fetch(editUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('editDiscountBody').innerHTML = html;
+                const modal = new bootstrap.Modal(document.getElementById('editDiscountModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при загрузке формы редактирования');
+            });
+    }
+
+    // Функция очистки просроченных скидок
+    function cleanupExpired() {
+        if (confirm('Удалить все просроченные скидки? Это действие нельзя отменить.')) {
+            fetch('{{ url_for("admin_discounts.admin_cleanup_expired") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Удалено ${data.deleted_count} просроченных скидок`);
+                        location.reload();
+                    } else {
+                        alert('Ошибка при очистке: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    alert('Ошибка сети: ' + error);
+                });
+        }
+    }
+
+    // Функция экспорта скидок
+    function exportDiscounts() {
+        alert('Функция экспорта в разработке');
+        // Здесь можно реализовать экспорт в CSV или Excel
+    }
+</script>
+{% endblock %}

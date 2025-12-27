@@ -2,164 +2,317 @@
 
 {% block title %}Главная - Админ-панель{% endblock %}
 
+{% block page_title %}Панель управления{% endblock %}
+{% block page_subtitle %}Обзор системы и ключевые показатели{% endblock %}
+
 {% block content %}
-    <div class="container-fluid py-4">
-        <!-- Заголовок -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-admin">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    Панель управления автосервисом
-                </div>
-            </div>
-        </div>
-
-        <!-- Статистика -->
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
-                    <div class="stats-content">
-                        <div class="stats-number">{{ new_requests_count }}</div>
-                        <div class="stats-label">Новые заявки</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="bi bi-clipboard-plus"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
-                    <div class="stats-content">
-                        <div class="stats-number">{{ queue_count }}</div>
-                        <div class="stats-label">В очереди</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="bi bi-clock"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                    <div class="stats-content">
-                        <div class="stats-number">5</div>
-                        <div class="stats-label">В работе</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="bi bi-wrench"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 mb-3">
-                <div class="admin-card stats-card" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%);">
-                    <div class="stats-content">
-                        <div class="stats-number">23</div>
-                        <div class="stats-label">Завершено</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="bi bi-check-circle"></i>
+<div class="admin-content">
+    <!-- Заголовок с информацией -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info border-0 shadow-sm">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle fa-2x me-3 text-primary"></i>
+                    <div>
+                        <h5 class="mb-1">Добро пожаловать в панель управления автосервиса!</h5>
+                        <p class="mb-0">Сегодня {{ now.strftime('%d %B %Y') }}, {{ now.strftime('%H:%M') }}</p>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Основной контент -->
-        <div class="row">
-            <!-- Быстрые действия -->
-            <div class="col-lg-6 mb-4">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <i class="bi bi-lightning me-2"></i>Быстрые действия
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4361ee, #3a56d4);">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ new_requests_count }}</h3>
+                    <p>Новые заявки</p>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up text-success me-1"></i>За сегодня
                     </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-action mb-2">
-                                <i class="bi bi-clipboard-list me-2"></i>Управление заявками
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f8961e, #f3722c);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ queue_count }}</h3>
+                    <p>В очереди</p>
+                    <div class="stat-change">
+                        <i class="fas fa-users me-1"></i>Ожидают ремонта
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4cc9f0, #00b4d8);">
+                    <i class="fas fa-wrench"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ service_count }}</h3>
+                    <p>В работе</p>
+                    <div class="stat-change">
+                        <i class="fas fa-tools me-1"></i>На ремонте
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #198754, #157347);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ completed_count }}</h3>
+                    <p>Завершено</p>
+                    <div class="stat-change">
+                        <i class="fas fa-calendar-week me-1"></i>За неделю
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="row">
+        <!-- Быстрые действия -->
+        <div class="col-lg-5 mb-4">
+            <div class="admin-card">
+                <div class="admin-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Быстрые действия</h5>
+                    <small class="text-white-50">Часто используемые функции</small>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-primary btn-action">
+                            <div class="d-flex align-items-center">
+                                <div class="action-icon me-3">
+                                    <i class="fas fa-clipboard-list fa-2x"></i>
+                                </div>
+                                <div class="text-start">
+                                    <strong>Управление заявками</strong>
+                                    <small class="d-block text-white-50">Просмотр и обработка новых заявок</small>
+                                </div>
+                                <i class="fas fa-arrow-right ms-auto"></i>
+                            </div>
+                        </a>
+
+                        <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-warning btn-action">
+                            <div class="d-flex align-items-center">
+                                <div class="action-icon me-3">
+                                    <i class="fas fa-list-check fa-2x"></i>
+                                </div>
+                                <div class="text-start">
+                                    <strong>Просмотр очереди</strong>
+                                    <small class="d-block text-white-50">{{ queue_count }} автомобилей ожидают</small>
+                                </div>
+                                <i class="fas fa-arrow-right ms-auto"></i>
+                            </div>
+                        </a>
+
+                        <a href="{{ url_for('admin_service.view_service') }}" class="btn btn-info btn-action">
+                            <div class="d-flex align-items-center">
+                                <div class="action-icon me-3">
+                                    <i class="fas fa-wrench fa-2x"></i>
+                                </div>
+                                <div class="text-start">
+                                    <strong>Автомобили в ремонте</strong>
+                                    <small class="d-block text-white-50">Текущие работы и их статус</small>
+                                </div>
+                                <i class="fas fa-arrow-right ms-auto"></i>
+                            </div>
+                        </a>
+
+                        <a href="{{ url_for('admin_price.admin_price') }}" class="btn btn-success btn-action">
+                            <div class="d-flex align-items-center">
+                                <div class="action-icon me-3">
+                                    <i class="fas fa-tags fa-2x"></i>
+                                </div>
+                                <div class="text-start">
+                                    <strong>Управление ценами</strong>
+                                    <small class="d-block text-white-50">Настройка услуг и цен</small>
+                                </div>
+                                <i class="fas fa-arrow-right ms-auto"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние заявки и очередь -->
+        <div class="col-lg-7 mb-4">
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="admin-card">
+                        <div class="admin-card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Последние заявки</h5>
+                            <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-sm btn-outline-light">
+                                Все заявки <i class="fas fa-arrow-right ms-1"></i>
                             </a>
-                            <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-action mb-2">
-                                <i class="bi bi-list-check me-2"></i>Просмотр очереди
+                        </div>
+                        <div class="card-body p-0">
+                            {% if recent_requests %}
+                            <div class="list-group list-group-flush">
+                                {% for request in recent_requests %}
+                                <div class="list-group-item request-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="d-flex align-items-center mb-1">
+                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    {{ request.name[:1]|upper }}
+                                                </div>
+                                                <strong class="d-block">{{ request.name }}</strong>
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-car me-1"></i>
+                                                {{ request.car_brand }} {{ request.car_model }}
+                                            </small>
+                                            <small class="text-muted ms-3">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                {{ request.desired_date.strftime('%d.%m') }}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning rounded-pill px-3 py-2">
+                                                Новый
+                                            </span>
+                                            <small class="d-block text-muted mt-1">
+                                                {{ request.desired_time.strftime('%H:%M') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted mb-2">Нет новых заявок</h5>
+                                <p class="text-muted">Все заявки обработаны</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="admin-card">
+                        <div class="admin-card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-car me-2"></i>Ближайшие в очереди</h5>
+                            <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-sm btn-outline-light">
+                                Вся очередь <i class="fas fa-arrow-right ms-1"></i>
                             </a>
-                            <a href="{{ url_for('admin_service.view_service') }}" class="btn btn-action">
-                                <i class="bi bi-wrench me-2"></i>Автомобили в ремонте
-                            </a>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if upcoming_queue %}
+                            <div class="list-group list-group-flush">
+                                {% for entry in upcoming_queue %}
+                                <div class="list-group-item queue-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong class="d-block">{{ entry.name }}</strong>
+                                            <small class="text-muted">
+                                                <i class="fas fa-car me-1"></i>
+                                                {{ entry.car_brand }} {{ entry.car_model }}
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge {% if entry.desired_date == today %}bg-info{% else %}bg-secondary{% endif %} rounded-pill px-3 py-2">
+                                                {% if entry.desired_date == today %}
+                                                Сегодня
+                                                {% else %}
+                                                {{ entry.desired_date.strftime('%d.%m') }}
+                                                {% endif %}
+                                            </span>
+                                            <small class="d-block text-muted mt-1">
+                                                {{ entry.desired_time.strftime('%H:%M') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted mb-2">Очередь пуста</h5>
+                                <p class="text-muted">Нет автомобилей в очереди</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Последние заявки -->
-            <div class="col-lg-6 mb-4">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <i class="bi bi-clock me-2"></i>Последние заявки
-                    </div>
-                    <div class="card-body p-0">
-                        {% if recent_requests %}
-                            <div class="list-group list-group-flush">
-                                {% for request in recent_requests %}
-                                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                                        <div>
-                                            <strong class="d-block">{{ request.name }}</strong>
-                                            <small class="text-muted">{{ request.car_brand }} {{ request.car_model }}</small>
-                                        </div>
-                                        <span class="badge bg-warning rounded-pill">
-                                            Новый
-                                        </span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <div class="text-center py-4">
-                                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-                                <p class="text-muted mt-2">Нет заявок</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
         </div>
+    </div>
 
-        <!-- Системная информация -->
-        <div class="row">
-            <div class="col-12">
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <i class="bi bi-info-circle me-2"></i>Системная информация
+    <!-- Системная информация -->
+    <div class="row">
+        <div class="col-12">
+            <div class="admin-card">
+                <div class="admin-card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Системная информация</h5>
+                    <small class="text-white-50">Статус системы и аналитика</small>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="system-info-item">
+                                <div class="info-icon mb-3">
+                                    <i class="fas fa-calendar-alt fa-2x text-primary"></i>
+                                </div>
+                                <h4 class="mb-1">{{ now.strftime('%d.%m.%Y') }}</h4>
+                                <p class="text-muted mb-0">Текущая дата</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="system-info-item">
+                                <div class="info-icon mb-3">
+                                    <i class="fas fa-user fa-2x text-primary"></i>
+                                </div>
+                                <h4 class="mb-1">{{ user.first_name }}</h4>
+                                <p class="text-muted mb-0">Администратор</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="system-info-item">
+                                <div class="info-icon mb-3">
+                                    <i class="fas fa-shield-alt fa-2x text-success"></i>
+                                </div>
+                                <h4 class="mb-1">Активна</h4>
+                                <p class="text-muted mb-0">Статус системы</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-4">
+                            <div class="system-info-item">
+                                <div class="info-icon mb-3">
+                                    <i class="fas fa-chart-bar fa-2x text-primary"></i>
+                                </div>
+                                <h4 class="mb-1">{{ total_requests }}</h4>
+                                <p class="text-muted mb-0">Всего заявок</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-md-3 mb-3">
-                                <div class="system-info-item">
-                                    <i class="bi bi-calendar text-primary fs-4 mb-2"></i>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-light border">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle fa-lg text-primary me-3"></i>
                                     <div>
-                                        <div class="fw-bold text-dark">{{ now.strftime('%d.%m.%Y') }}</div>
-                                        <small class="text-muted">Дата</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="system-info-item">
-                                    <i class="bi bi-person text-primary fs-4 mb-2"></i>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ user.first_name }}</div>
-                                        <small class="text-muted">Пользователь</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="system-info-item">
-                                    <i class="bi bi-shield-check text-success fs-4 mb-2"></i>
-                                    <div>
-                                        <div class="fw-bold text-dark">Активна</div>
-                                        <small class="text-muted">Статус</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="system-info-item">
-                                    <i class="bi bi-clipboard-data text-primary fs-4 mb-2"></i>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ total_requests }}</div>
-                                        <small class="text-muted">Всего заявок</small>
+                                        <small class="text-muted">
+                                            <strong>Совет дня:</strong> Регулярно проверяйте статусы ремонтов и обновляйте информацию о скидках для привлечения клиентов.
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -169,119 +322,199 @@
             </div>
         </div>
     </div>
+</div>
 
-    <style>
-        .admin-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: none;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
+<style>
+    /* Специальные стили для этой страницы */
+    .alert-info {
+        background: linear-gradient(135deg, rgba(13, 202, 240, 0.1), rgba(13, 202, 240, 0.05));
+        border: none;
+        border-left: 4px solid #0dcaf0;
+        border-radius: 12px;
+    }
+
+    .btn-action {
+        border: none;
+        padding: 1.25rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        text-align: left;
+        display: block;
+        width: 100%;
+        color: white;
+        margin-bottom: 0;
+    }
+
+    .btn-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        color: white;
+    }
+
+    .btn-primary.btn-action {
+        background: linear-gradient(135deg, #4361ee, #3a56d4);
+    }
+
+    .btn-warning.btn-action {
+        background: linear-gradient(135deg, #f8961e, #f3722c);
+    }
+
+    .btn-info.btn-action {
+        background: linear-gradient(135deg, #4cc9f0, #00b4d8);
+    }
+
+    .btn-success.btn-action {
+        background: linear-gradient(135deg, #198754, #157347);
+    }
+
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .request-item, .queue-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+
+    .request-item:hover, .queue-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .request-item:last-child, .queue-item:last-child {
+        border-bottom: none;
+    }
+
+    .system-info-item {
+        padding: 1.5rem;
+    }
+
+    .info-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.1), rgba(58, 86, 212, 0.2));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #f8961e, #f3722c) !important;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #4cc9f0, #00b4d8) !important;
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #6c757d, #495057) !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация статистики
+        const statNumbers = document.querySelectorAll('.stat-card h3');
+        statNumbers.forEach(number => {
+            const finalValue = parseInt(number.textContent);
+            let currentValue = 0;
+            const increment = Math.ceil(finalValue / 50);
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    currentValue = finalValue;
+                    clearInterval(timer);
+                }
+                number.textContent = currentValue;
+            }, 20);
+        });
+
+        // Обновление времени в реальном времени
+        function updateTime() {
+            const now = new Date();
+            const dateElement = document.querySelector('.alert-info p.mb-0');
+            if (dateElement) {
+                dateElement.textContent = `Сегодня ${now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}, ${now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`;
+            }
         }
 
-        .admin-card-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
+        setInterval(updateTime, 60000); // Обновлять каждую минуту
+        updateTime(); // Первоначальное обновление
+
+        // Интерактивность для карточек заявок
+        document.querySelectorAll('.request-item, .queue-item').forEach(item => {
+            item.style.cursor = 'pointer';
+            item.addEventListener('click', function() {
+                const name = this.querySelector('strong').textContent;
+                const car = this.querySelector('small.text-muted').textContent;
+
+                // Здесь можно добавить функционал, например открытие деталей
+                // console.log(`Выбрано: ${name} - ${car}`);
+            });
+        });
+
+        // Автоматическое обновление статистики каждые 5 минут
+        setInterval(() => {
+            // Здесь можно добавить AJAX запрос для обновления статистики
+            // fetch('/admin/refresh_stats')
+            //     .then(response => response.json())
+            //     .then(data => updateStats(data));
+        }, 300000);
+
+        // Функция обновления статистики (заглушка)
+        function updateStats(data) {
+            // Реализация обновления статистики
         }
 
-        .stats-card {
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 120px;
+        // Показываем уведомление о новых заявках, если есть
+        if ({{ new_requests_count }} > 0) {
+            setTimeout(() => {
+                const alertHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-bell me-3 fa-lg"></i>
+                            <div>
+                                <strong>Новые заявки!</strong> У вас есть {{ new_requests_count }} новых заявок, требующих обработки.
+                                <div class="mt-1">
+                                    <a href="{{ url_for('admin_required.view_requests') }}" class="alert-link">Перейти к заявкам</a>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                const content = document.querySelector('.admin-content');
+                const firstChild = content.firstChild;
+                content.insertBefore(document.createRange().createContextualFragment(alertHTML), firstChild);
+            }, 2000);
         }
-
-        .stats-content {
-            text-align: left;
-        }
-
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .stats-label {
-            font-size: 1rem;
-            opacity: 0.9;
-        }
-
-        .stats-icon {
-            font-size: 3rem;
-            opacity: 0.8;
-        }
-
-        .btn-action {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            border: none;
-            color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .btn-action:hover {
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
-            color: white;
-        }
-
-        .alert-admin {
-            background: linear-gradient(135deg, #ecf0f1 0%, #dfe6e9 100%);
-            border: none;
-            border-radius: 12px;
-            border-left: 4px solid #e74c3c;
-            color: #2c3e50;
-            padding: 1.25rem 1.5rem;
-            margin-bottom: 0;
-            font-weight: 500;
-        }
-
-        .system-info-item {
-            padding: 1.5rem 1rem;
-            border-right: 1px solid #f1f2f6;
-        }
-
-        .system-info-item:last-child {
-            border-right: none;
-        }
-
-        .list-group-item {
-            border: none;
-            border-bottom: 1px solid #f1f2f6;
-            padding: 1.25rem;
-            transition: background-color 0.2s ease;
-        }
-
-        .list-group-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .list-group-item:last-child {
-            border-bottom: none;
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
-        }
-
-        .text-muted {
-            color: #6c757d !important;
-        }
-    </style>
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    });
+</script>
 {% endblock %}

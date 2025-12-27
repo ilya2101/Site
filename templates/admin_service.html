@@ -2,320 +2,689 @@
 
 {% block title %}Автомобили в ремонте - Админ-панель{% endblock %}
 
+{% block page_title %}Автомобили в ремонте{% endblock %}
+{% block page_subtitle %}Управление текущими ремонтными работами и статусами{% endblock %}
+
 {% block content %}
-    <div class="container-fluid py-4">
-        <!-- Заголовок -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">
-                <i class="bi bi-wrench me-2 text-primary"></i>Автомобили в ремонте
-            </h2>
+<div class="admin-content">
+    <!-- Заголовок с фильтрами -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1"><i class="fas fa-wrench me-2 text-gradient-primary"></i>Автомобили в ремонте</h1>
+            <p class="text-muted mb-0">Управление текущими ремонтными работами и отслеживание прогресса</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="input-group input-group-sm me-3" style="width: 250px;">
+                <span class="input-group-text bg-light border-end-0"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Поиск по клиенту или авто..." id="searchInput">
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-1"></i>Фильтры
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" data-filter="all">Все автомобили</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-filter="week">Заканчиваются на этой неделе</a></li>
+                    <li><a class="dropdown-item" href="#" data-filter="overdue">Просроченные</a></li>
+                    <li><a class="dropdown-item" href="#" data-filter="no-date">Без даты окончания</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4361ee, #3a56d4);">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ service_entries|length }}</h3>
+                    <p>Всего в ремонте</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f8961e, #f3722c);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="overdueCount">0</h3>
+                    <p>Просроченные</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4cc9f0, #00b4d8);">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <div class="stat-info">
+                    <h3 id="weekCount">0</h3>
+                    <p>Заканчиваются на неделе</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #7209b7, #560bad);">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ service_entries|selectattr('excel_file')|list|length }}</h3>
+                    <p>С детализацией</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основная таблица -->
+    {% if service_entries %}
+    <div class="admin-card fade-in">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
             <div>
-                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
-                    <i class="bi bi-tools me-1"></i>Всего в ремонте: {{ service_entries|length }}
-                </span>
+                <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Список автомобилей в ремонте</h5>
+                <small class="text-white-50">Нажмите на строку для подробной информации</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="badge bg-light text-dark me-2" id="filterBadge">Показано: {{ service_entries|length }}</span>
+                <button class="btn btn-sm btn-outline-light" id="toggleDetails">
+                    <i class="fas fa-expand-alt me-1"></i>Развернуть все
+                </button>
             </div>
         </div>
 
-        {% if service_entries %}
-            <div class="admin-card">
-                <div class="admin-card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list-check me-2"></i>Список автомобилей в ремонте</span>
-                    <small class="text-light">Отсортировано по дате поступления</small>
-                </div>
-
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Клиент</th>
-                                <th>Автомобиль</th>
-                                <th>Окончание работ</th>
-                                <th>Стоимость</th>
-                                <th>Детализация</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for entry in service_entries %}
-                                <tr class="align-middle">
-                                    <td class="fw-bold text-primary">#{{ entry.id }}</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <strong>{{ entry.name }}</strong>
-                                            <small class="text-muted">{{ entry.phone }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span>{{ entry.car_brand }}</span>
-                                            <small class="text-muted">{{ entry.car_model }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {% if entry.estimated_completion %}
-                                            <span class="fw-medium">{{ entry.estimated_completion.strftime('%d.%m.%Y') }}</span>
-                                        {% else %}
-                                            <span class="text-muted">не указано</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if entry.estimated_cost %}
-                                            <span class="badge bg-success rounded-pill">
-                                                {{ entry.estimated_cost }} ₽
-                                            </span>
-                                        {% else %}
-                                            <span class="text-muted">не указана</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if entry.excel_file %}
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
-                                                   class="btn btn-outline-info btn-sm"
-                                                   target="_blank"
-                                                   title="Просмотр">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-
-                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
-                                                   class="btn btn-outline-primary btn-sm"
-                                                   target="_blank"
-                                                   title="Скачать">
-                                                    <i class="bi bi-download"></i>
-                                                </a>
-                                            </div>
-                                        {% else %}
-                                            <span class="text-muted">нет файла</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info rounded-pill">
-                                            <i class="bi bi-wrench me-1"></i>В работе
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <!-- Редактирование -->
-                                            <button type="button" class="btn btn-outline-primary"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editModal{{ entry.id }}"
-                                                    title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-
-                                            <!-- Завершить ремонт -->
-                                            <form action="{{ url_for('admin_service.complete_service', id=entry.id) }}" method="post">
-                                                <button type="submit" class="btn btn-success">Завершить</button>
-                                            </form>
-
-
-
-
-
-
-
-
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Модальные окна -->
-            {% for entry in service_entries %}
-                <!-- Редактирование -->
-                <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-pencil me-2"></i>Редактирование #{{ entry.id }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="admin-table" id="repairTable">
+                    <thead>
+                    <tr>
+                        <th width="70">ID</th>
+                        <th>Клиент</th>
+                        <th>Автомобиль</th>
+                        <th>Окончание работ</th>
+                        <th>Стоимость</th>
+                        <th>Детализация</th>
+                        <th>Статус</th>
+                        <th width="180">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for entry in service_entries %}
+                    {% set is_overdue = entry.estimated_completion and entry.estimated_completion.date() < today %}
+                    {% set is_week = entry.estimated_completion and (entry.estimated_completion.date() - today).days <= 7 and (entry.estimated_completion.date() - today).days >= 0 %}
+                    <tr class="repair-row {% if is_overdue %}table-danger-light{% elif is_week %}table-warning-light{% endif %}"
+                        data-id="{{ entry.id }}"
+                        data-overdue="{{ 'true' if is_overdue else 'false' }}"
+                        data-week="{{ 'true' if is_week else 'false' }}"
+                        data-date="{{ entry.estimated_completion.strftime('%Y-%m-%d') if entry.estimated_completion else '' }}">
+                        <td class="fw-bold">
+                            <span class="badge bg-dark rounded-pill">#{{ entry.id }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    {{ entry.name[:1] }}
+                                </div>
+                                <div>
+                                    <strong class="d-block">{{ entry.name }}</strong>
+                                    <small class="text-muted">{{ entry.phone }}</small>
+                                </div>
                             </div>
-                            <form method="POST" action="{{ url_for('admin_service.update_service', service_id=entry.id) }}" enctype="multipart/form-data">
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Имя клиента</label>
-                                            <input type="text" class="form-control" name="name"
-                                                   value="{{ entry.name }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Телефон</label>
-                                            <input type="tel" class="form-control" name="phone"
-                                                   value="{{ entry.phone }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Марка авто</label>
-                                            <input type="text" class="form-control" name="car_brand"
-                                                   value="{{ entry.car_brand }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Модель авто</label>
-                                            <input type="text" class="form-control" name="car_model"
-                                                   value="{{ entry.car_model }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Окончание работ</label>
-                                            <input type="date" class="form-control" name="estimated_completion"
-                                                   value="{{ entry.estimated_completion if entry.estimated_completion else '' }}">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Примерная стоимость</label>
-                                            <input type="number" class="form-control" name="estimated_cost"
-                                                   value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
-                                                   placeholder="Введите стоимость">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-car text-muted me-2"></i>
+                                <div>
+                                    <span class="d-block">{{ entry.car_brand }} {{ entry.car_model }}</span>
+                                    {% if entry.car_year %}
+                                    <small class="text-muted">Год: {{ entry.car_year }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if entry.estimated_completion %}
+                            <div class="d-flex flex-column">
+                                    <span class="fw-medium {% if is_overdue %}text-danger{% elif is_week %}text-warning{% endif %}">
+                                        {{ entry.estimated_completion.strftime('%d.%m.%Y') }}
+                                    </span>
+                                {% if is_overdue %}
+                                <small class="text-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Просрочено
+                                </small>
+                                {% elif is_week %}
+                                <small class="text-warning">
+                                    <i class="fas fa-clock me-1"></i>Через {{ (entry.estimated_completion.date() - today).days }} дн.
+                                </small>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted"><i class="fas fa-minus me-1"></i>не указано</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.estimated_cost %}
+                            <div class="d-flex align-items-center">
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="fas fa-ruble-sign me-1"></i>{{ "{:,.0f}".format(entry.estimated_cost).replace(',', ' ') }}
+                                    </span>
+                            </div>
+                            {% else %}
+                            <span class="text-muted"><i class="fas fa-minus me-1"></i>не указана</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if entry.excel_file %}
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                   class="btn btn-sm btn-outline-info"
+                                   target="_blank"
+                                   title="Просмотр детализации">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}?download=1"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Скачать Excel">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-secondary" disabled>
+                                <i class="fas fa-times"></i> Нет файла
+                            </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                                <span class="status-badge status-in-progress">
+                                    <i class="fas fa-wrench me-1"></i>В работе
+                                </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <!-- Редактирование -->
+                                <button type="button" class="btn btn-outline-primary edit-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal{{ entry.id }}"
+                                        title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
 
+                                <!-- Детали -->
+                                <button type="button" class="btn btn-outline-info details-btn"
+                                        data-id="{{ entry.id }}"
+                                        title="Подробнее">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+
+                                <!-- Завершить ремонт -->
+                                <form action="{{ url_for('admin_service.complete_service', id=entry.id) }}"
+                                      method="post"
+                                      class="d-inline"
+                                      onsubmit="return confirm('Завершить ремонт автомобиля #{{ entry.id }}?');">
+                                    <button type="submit" class="btn btn-success" title="Завершить ремонт">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Детальная информация (скрытая строка) -->
+                    <tr class="detail-row d-none" id="detail-{{ entry.id }}">
+                        <td colspan="8" class="p-0">
+                            <div class="detail-content p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="mb-3"><i class="fas fa-clipboard-list me-2"></i>Список работ</h6>
+                                        {% if entry.work_list %}
+                                        <div class="bg-light rounded p-3 mb-3">
+                                            {{ entry.work_list|replace('\n', '<br>')|safe }}
+                                        </div>
+                                        {% else %}
+                                        <p class="text-muted">Список работ не указан</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="mb-3"><i class="fas fa-comment me-2"></i>Комментарий</h6>
+                                        {% if entry.comment %}
+                                        <div class="bg-light rounded p-3">
+                                            {{ entry.comment|replace('\n', '<br>')|safe }}
+                                        </div>
+                                        {% else %}
+                                        <p class="text-muted">Комментарий отсутствует</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-plus me-1"></i>
+                                            Поступил: {{ entry.created_at.strftime('%d.%m.%Y %H:%M') if entry.created_at else 'Не указано' }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <button class="btn btn-sm btn-outline-primary edit-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editModal{{ entry.id }}">
+                                            <i class="fas fa-edit me-1"></i>Редактировать
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Для редактирования нажмите на кнопку <i class="fas fa-edit text-primary"></i>, для завершения ремонта — <i class="fas fa-check text-success"></i>
+                </small>
+            </div>
+            <div>
+                <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-clock me-1"></i>Перейти в очередь
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна для редактирования -->
+    {% for entry in service_entries %}
+    <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Редактирование #{{ entry.id }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_service.update_service', service_id=entry.id) }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Имя клиента *</label>
+                                <input type="text" class="form-control" name="name" value="{{ entry.name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Телефон *</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ entry.phone }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Марка авто *</label>
+                                <input type="text" class="form-control" name="car_brand" value="{{ entry.car_brand }}" required>
+                                <small class="text-muted">Пример: Toyota, BMW, Mercedes</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Модель авто *</label>
+                                <input type="text" class="form-control" name="car_model" value="{{ entry.car_model }}" required>
+                                <small class="text-muted">Пример: Camry, X5, E-Class</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Окончание работ</label>
+                                <input type="date" class="form-control" name="estimated_completion"
+                                       value="{{ entry.estimated_completion.strftime('%Y-%m-%d') if entry.estimated_completion else '' }}">
+                                <small class="text-muted">Планируемая дата завершения ремонта</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Примерная стоимость</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="estimated_cost"
+                                           value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
+                                           placeholder="0">
+                                    <span class="input-group-text">₽</span>
+                                </div>
+                                <small class="text-muted">Предварительная стоимость работ</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Список работ</label>
+                                <textarea class="form-control" name="work_list" rows="3"
+                                          placeholder="Укажите перечень работ, например:&#10;1. Замена масла двигателя&#10;2. Диагностика подвески&#10;3. Ремонт тормозной системы">{{ entry.work_list if entry.work_list else '' }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Комментарий</label>
+                                <textarea class="form-control" name="comment" rows="3"
+                                          placeholder="Дополнительная информация, заметки, особенности ремонта...">{{ entry.comment if entry.comment else '' }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Детализация (Excel файл)</label>
+                                {% if entry.excel_file %}
+                                <div class="alert alert-info d-flex align-items-center mb-3">
+                                    <i class="fas fa-file-excel me-3 fa-2x"></i>
+                                    <div class="flex-grow-1">
+                                        <strong>Текущий файл:</strong> {{ entry.excel_file }}
+                                        <div class="mt-1">
+                                            <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
+                                               class="btn btn-sm btn-outline-primary me-2"
+                                               target="_blank">
+                                                <i class="fas fa-eye me-1"></i>Просмотр
+                                            </a>
+                                            <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}?download=1"
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-download me-1"></i>Скачать
+                                            </a>
                                         </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Список работ</label>
-                                        <textarea class="form-control" name="work_list" rows="3"
-                                                  placeholder="Замена масла, Диагностика, Ремонт тормозов...">{{ entry.work_list }}</textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Комментарий</label>
-                                        <textarea class="form-control" name="comment" rows="3"
-                                                  placeholder="Дополнительная информация">{{ entry.comment }}</textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Детализация (Excel файл)</label>
-                                        {% if entry.excel_file %}
-                                            <div class="alert alert-info mb-2">
-                                                <i class="bi bi-file-earmark-excel me-2"></i>
-                                                Текущий файл: {{ entry.excel_file }}
-                                                <a href="{{ url_for('admin_service.view_excel', filename=entry.excel_file) }}"
-                                                   class="btn btn-sm btn-outline-primary ms-2"
-                                                   target="_blank">
-                                                    <i class="bi bi-download"></i>
-                                                </a>
-                                            </div>
-                                        {% endif %}
-                                        <input type="file" class="form-control" name="excel_file"
-                                               accept=".xls,.xlsx,.csv">
-                                        <small class="text-muted">Оставьте пустым, чтобы сохранить текущий файл</small>
-                                    </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x me-1"></i>Отмена
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-check me-1"></i>Сохранить
-                                    </button>
-                                </div>
-                            </form>
+                                {% endif %}
+                                <input type="file" class="form-control" name="excel_file" accept=".xls,.xlsx,.csv">
+                                <small class="text-muted">Загрузите новый Excel файл или оставьте поле пустым для сохранения текущего файла</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Отмена
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 
-        {% else %}
-            <div class="admin-card">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-wrench text-muted mb-3" style="font-size: 3rem;"></i>
-                    <h4 class="text-muted mb-3">Ремонт пуст</h4>
-                    <p class="text-muted">Нет автомобилей в ремонте.</p>
-                    <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-primary mt-2">                        <i class="bi bi-clock-history me-1"></i>Посмотреть очередь
+    {% else %}
+    <!-- Состояние пустого списка -->
+    <div class="admin-card text-center py-5">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="fas fa-wrench fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted mb-3">Нет автомобилей в ремонте</h3>
+                <p class="text-muted mb-4">Все автомобили отремонтированы или ожидают постановки в ремонт из очереди</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-primary">
+                        <i class="fas fa-clock me-2"></i>Перейти в очередь
+                    </a>
+                    <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-clipboard-list me-2"></i>Просмотреть заявки
                     </a>
                 </div>
             </div>
-        {% endif %}
+        </div>
     </div>
+    {% endif %}
+</div>
 
-    <style>
-        .admin-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: none;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
+<style>
+    /* Специальные стили для этой страницы */
+    .table-danger-light {
+        background-color: rgba(248, 215, 218, 0.3) !important;
+    }
+
+    .table-warning-light {
+        background-color: rgba(255, 243, 205, 0.3) !important;
+    }
+
+    .repair-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .repair-row:hover {
+        background-color: #f8fafc !important;
+        transform: translateX(3px);
+    }
+
+    .detail-row {
+        background-color: #f8fafc;
+    }
+
+    .detail-content {
+        border-top: 2px solid #e9ecef;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .avatar-sm {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .text-gradient-primary {
+        background: linear-gradient(90deg, #4361ee, #3a56d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%) !important;
+    }
+
+    .empty-state {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .form-control:focus {
+        border-color: #4361ee;
+        box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+    }
+
+    .btn-group .btn {
+        border-radius: 8px !important;
+        margin: 0 2px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Подсчет статистики
+        function updateStats() {
+            const overdueCount = document.querySelectorAll('[data-overdue="true"]').length;
+            const weekCount = document.querySelectorAll('[data-week="true"]').length;
+
+            document.getElementById('overdueCount').textContent = overdueCount;
+            document.getElementById('weekCount').textContent = weekCount;
         }
 
-        .admin-card-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
+        // Поиск по таблице
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.repair-row');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+
+                    // Скрываем детали если скрыта основная строка
+                    const detailRow = document.getElementById('detail-' + row.dataset.id);
+                    if (detailRow) {
+                        detailRow.style.display = row.style.display;
+                    }
+                });
+
+                updateFilterBadge();
+            });
         }
 
-        .table th {
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-            color: white;
-            font-weight: 500;
-            padding: 1rem 0.75rem;
+        // Фильтрация
+        const filterLinks = document.querySelectorAll('[data-filter]');
+        filterLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filter = this.dataset.filter;
+                const rows = document.querySelectorAll('.repair-row');
+
+                rows.forEach(row => {
+                    let show = false;
+
+                    switch(filter) {
+                        case 'all':
+                            show = true;
+                            break;
+                        case 'week':
+                            show = row.dataset.week === 'true';
+                            break;
+                        case 'overdue':
+                            show = row.dataset.overdue === 'true';
+                            break;
+                        case 'no-date':
+                            show = !row.dataset.date;
+                            break;
+                    }
+
+                    row.style.display = show ? '' : 'none';
+
+                    // Скрываем детали если скрыта основная строка
+                    const detailRow = document.getElementById('detail-' + row.dataset.id);
+                    if (detailRow) {
+                        detailRow.style.display = show ? '' : 'none';
+                    }
+                });
+
+                updateFilterBadge();
+                updateStats();
+
+                // Обновляем текст кнопки фильтра
+                document.getElementById('filterDropdown').innerHTML =
+                    '<i class="fas fa-filter me-1"></i>' + this.textContent +
+                    ' <span class="caret"></span>';
+            });
+        });
+
+        // Развернуть/свернуть детали
+        const toggleBtn = document.getElementById('toggleDetails');
+        let allExpanded = false;
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                const detailRows = document.querySelectorAll('.detail-row');
+                const detailsBtns = document.querySelectorAll('.details-btn');
+
+                if (allExpanded) {
+                    // Сворачиваем все
+                    detailRows.forEach(row => row.classList.add('d-none'));
+                    detailsBtns.forEach(btn => {
+                        btn.innerHTML = '<i class="fas fa-info-circle"></i>';
+                        btn.title = 'Подробнее';
+                    });
+                    toggleBtn.innerHTML = '<i class="fas fa-expand-alt me-1"></i>Развернуть все';
+                } else {
+                    // Разворачиваем все
+                    detailRows.forEach(row => row.classList.remove('d-none'));
+                    detailsBtns.forEach(btn => {
+                        btn.innerHTML = '<i class="fas fa-compress-alt"></i>';
+                        btn.title = 'Свернуть';
+                    });
+                    toggleBtn.innerHTML = '<i class="fas fa-compress-alt me-1"></i>Свернуть все';
+                }
+
+                allExpanded = !allExpanded;
+            });
         }
 
-        .table td {
-            padding: 1rem 0.75rem;
-            vertical-align: middle;
+        // Клик по строке для показа деталей
+        const repairRows = document.querySelectorAll('.repair-row');
+        repairRows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Игнорируем клики по кнопкам
+                if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) {
+                    return;
+                }
+
+                const detailRow = document.getElementById('detail-' + this.dataset.id);
+                const detailsBtn = this.querySelector('.details-btn');
+
+                if (detailRow) {
+                    detailRow.classList.toggle('d-none');
+
+                    if (detailsBtn) {
+                        if (detailRow.classList.contains('d-none')) {
+                            detailsBtn.innerHTML = '<i class="fas fa-info-circle"></i>';
+                            detailsBtn.title = 'Подробнее';
+                        } else {
+                            detailsBtn.innerHTML = '<i class="fas fa-compress-alt"></i>';
+                            detailsBtn.title = 'Свернуть';
+                        }
+                    }
+                }
+            });
+        });
+
+        // Кнопки деталей
+        const detailsBtns = document.querySelectorAll('.details-btn');
+        detailsBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.dataset.id;
+                const detailRow = document.getElementById('detail-' + id);
+
+                if (detailRow) {
+                    detailRow.classList.toggle('d-none');
+
+                    if (detailRow.classList.contains('d-none')) {
+                        this.innerHTML = '<i class="fas fa-info-circle"></i>';
+                        this.title = 'Подробнее';
+                    } else {
+                        this.innerHTML = '<i class="fas fa-compress-alt"></i>';
+                        this.title = 'Свернуть';
+                    }
+                }
+            });
+        });
+
+        // Обновление бейджа фильтра
+        function updateFilterBadge() {
+            const visibleRows = document.querySelectorAll('.repair-row[style=""]').length +
+                document.querySelectorAll('.repair-row:not([style])').length;
+            document.getElementById('filterBadge').textContent = 'Показано: ' + visibleRows;
         }
 
-        .btn-group .btn {
-            border-radius: 6px;
-            margin: 0 2px;
-            transition: all 0.3s ease;
-        }
+        // Автоматическое закрытие модальных окон после успешного сохранения
+        const forms = document.querySelectorAll('form[action*="update_service"]');
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                setTimeout(() => {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        const modalInstance = bootstrap.Modal.getInstance(modal);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+                }, 1000);
+            });
+        });
 
-        .btn-group .btn:hover {
-            transform: translateY(-2px);
-        }
+        // Инициализация
+        updateStats();
+        updateFilterBadge();
 
-        .modal-header {
-            border-bottom: none;
-            border-radius: 12px 12px 0 0;
+        // Показываем уведомления о просроченных работах
+        const overdueCount = document.querySelectorAll('[data-overdue="true"]').length;
+        if (overdueCount > 0) {
+            setTimeout(() => {
+                const alertHTML = `
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Внимание!</strong> У вас есть ${overdueCount} просроченных ремонта. Проверьте их статус.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                document.querySelector('.admin-content').insertAdjacentHTML('afterbegin', alertHTML);
+            }, 1000);
         }
-
-        .modal-content {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5rem 0.75rem;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: translateX(2px);
-            transition: all 0.2s ease;
-        }
-
-        .alert-info {
-            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
-            border: none;
-            border-radius: 8px;
-            color: #0c5460;
-        }
-    </style>
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    });
+</script>
 {% endblock %}

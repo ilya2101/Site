@@ -2,367 +2,590 @@
 
 {% block title %}Очередь на сервис - Админ-панель{% endblock %}
 
+{% block page_title %}Очередь на сервис{% endblock %}
+{% block page_subtitle %}Управление очередью автомобилей на ремонт и обслуживание{% endblock %}
+
 {% block content %}
-    <div class="container-fluid py-4">
-        <!-- Заголовок -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">
-                <i class="bi bi-clock-history me-2 text-primary"></i>Очередь на сервис
-            </h2>
+<div class="admin-content">
+    <!-- Заголовок с фильтрами -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1"><i class="fas fa-clock me-2 text-primary"></i>Очередь на сервис</h1>
+            <p class="text-muted mb-0">Управление очередью автомобилей на ремонт и обслуживание</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <div class="input-group input-group-sm me-3" style="width: 250px;">
+                <span class="input-group-text bg-light border-end-0"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Поиск в очереди..." id="searchInput">
+            </div>
             <div>
-                <span class="badge bg-primary rounded-pill fs-6 px-3 py-2">
-                    <i class="bi bi-car-front me-1"></i>Всего в очереди: {{ queue_entries|length }}
+                <span class="badge bg-primary rounded-pill px-3 py-2">
+                    <i class="fas fa-car me-1"></i>Всего в очереди: {{ queue_entries|length }}
                 </span>
             </div>
         </div>
+    </div>
 
-        {% if queue_entries %}
-            <div class="admin-card">
-                <div class="admin-card-header d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-list-check me-2"></i>Список автомобилей в очереди</span>
-                    <small class="text-light">Отсортировано по дате записи</small>
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4361ee, #3a56d4);">
+                    <i class="fas fa-car"></i>
                 </div>
-
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Клиент</th>
-                                <th>Автомобиль</th>
-                                <th>
-                                    <a href="{{ url_for('admin_queue.view_queue', order=next_order()) }}" class="text-white text-decoration-none">
-                                        Дата/Время
-                                        {% if current_order == 'asc' %}
-                                        &#9650; <!-- стрелка вверх -->
-                                        {% else %}
-                                        &#9660; <!-- стрелка вниз -->
-                                        {% endif %}
-                                    </a>
-                                </th>
-                                <th>Статус</th>
-                                <th>Действия</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            {% for entry in queue_entries %}
-                                <tr class="align-middle">
-                                    <td class="fw-bold text-primary">#{{ entry.id }}</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <strong>{{ entry.name }}</strong>
-                                            <small class="text-muted">{{ entry.phone }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span>{{ entry.car_brand }}</span>
-                                            <small class="text-muted">{{ entry.car_model }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-medium">{{ entry.desired_date.strftime('%d.%m.%Y') }}</span>
-                                            <small class="text-muted">{{ entry.desired_time.strftime('%H:%M') }}</small>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-warning rounded-pill">
-                                            <i class="bi bi-clock me-1"></i>В очереди
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <!-- Редактирование -->
-                                            <button type="button" class="btn btn-outline-primary"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editModal{{ entry.id }}"
-                                                    title="Редактировать">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-
-                                            <!-- Комментарий -->
-                                            <button type="button" class="btn btn-outline-info"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#commentModal{{ entry.id }}"
-                                                    title="Добавить комментарий">
-                                                <i class="bi bi-chat"></i>
-                                            </button>
-
-                                            <!-- В ремонт -->
-                                            <button type="button" class="btn btn-outline-success"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#serviceModal{{ entry.id }}"
-                                                    title="Переместить в ремонт">
-                                                <i class="bi bi-wrench"></i>
-                                            </button>
-
-                                            <!-- Удаление -->
-                                            <a href="{{ url_for('admin_queue.delete_queue', queue_id=entry.id) }}"
-                                               class="btn btn-outline-danger"
-                                               onclick="return confirm('Удалить запись из очереди?')"
-                                               title="Удалить">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="stat-info">
+                    <h3>{{ queue_entries|length }}</h3>
+                    <p>Всего в очереди</p>
                 </div>
             </div>
-
-            <!-- Модальные окна -->
-            {% for entry in queue_entries %}
-                <!-- Редактирование -->
-                <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-pencil me-2"></i>Редактирование #{{ entry.id }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <form method="POST" action="{{ url_for('admin_queue.update_queue', queue_id=entry.id) }}">
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Имя клиента</label>
-                                            <input type="text" class="form-control" name="name"
-                                                   value="{{ entry.name }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Телефон</label>
-                                            <input type="tel" class="form-control" name="phone"
-                                                   value="{{ entry.phone }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Марка авто</label>
-                                            <input type="text" class="form-control" name="car_brand"
-                                                   value="{{ entry.car_brand }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Модель авто</label>
-                                            <input type="text" class="form-control" name="car_model"
-                                                   value="{{ entry.car_model }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Дата записи</label>
-                                            <input type="date" class="form-control" name="desired_date"
-                                                   value="{{ entry.desired_date }}" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Время записи</label>
-                                            <input type="time" class="form-control" name="desired_time"
-                                                   value="{{ entry.desired_time.strftime('%H:%M') }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Комментарий</label>
-                                        <textarea class="form-control" name="comment" rows="3"
-                                                  placeholder="Дополнительная информация">{{ entry.comment }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x me-1"></i>Отмена
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-check me-1"></i>Сохранить
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f8961e, #f3722c);">
+                    <i class="fas fa-calendar-day"></i>
                 </div>
+                <div class="stat-info">
+                    <h3>{{ queue_entries|selectattr('desired_date', 'equalto', today)|list|length if today else 0 }}</h3>
+                    <p>На сегодня</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4cc9f0, #00b4d8);">
+                    <i class="fas fa-comment"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ queue_entries|selectattr('comment', 'ne', '')|selectattr('comment', 'ne', None)|list|length }}</h3>
+                    <p>С комментариями</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #7209b7, #560bad);">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>{{ (queue_entries|selectattr('priority', 'equalto', 'high')|list|length) }}</h3>
+                    <p>Высокий приоритет</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Комментарий -->
-                <div class="modal fade" id="commentModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-chat me-2"></i>Комментарий #{{ entry.id }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    {% if queue_entries %}
+    <!-- Основная таблица -->
+    <div class="admin-card fade-in">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Список автомобилей в очереди</h5>
+                <small class="text-white-50">Нажмите на строку для подробной информации</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <a href="{{ url_for('admin_queue.view_queue', order=next_order()) }}"
+                   class="btn btn-sm btn-outline-light me-2">
+                    <i class="fas fa-sort me-1"></i>
+                    {% if current_order == 'asc' %}
+                    Сначала старые
+                    {% else %}
+                    Сначала новые
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-sm btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i>К заявкам
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="admin-table" id="queueTable">
+                    <thead>
+                    <tr>
+                        <th width="80">ID</th>
+                        <th>Клиент</th>
+                        <th>Автомобиль</th>
+                        <th>Дата/Время</th>
+                        <th>Приоритет</th>
+                        <th width="200">Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for entry in queue_entries %}
+                    {% set is_today = entry.desired_date == today %}
+                    {% set has_comment = entry.comment and entry.comment|trim %}
+                    <tr class="queue-row align-middle {% if is_today %}table-info-light{% endif %} {% if has_comment %}table-warning-light{% endif %}"
+                        data-name="{{ entry.name|lower }}"
+                        data-phone="{{ entry.phone }}"
+                        data-car="{{ entry.car_brand|lower }} {{ entry.car_model|lower }}"
+                        data-comment="{{ 'true' if has_comment else 'false' }}">
+                        <td>
+                            <span class="badge bg-dark rounded-pill">#{{ entry.id }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                     style="width: 36px; height: 36px; font-size: 0.9rem;">
+                                    {{ entry.name[:1]|upper }}
+                                </div>
+                                <div>
+                                    <strong class="d-block">{{ entry.name }}</strong>
+                                    <small class="text-muted">
+                                        <i class="fas fa-phone me-1"></i>{{ entry.phone }}
+                                    </small>
+                                </div>
                             </div>
-                            <form method="POST" action="{{ url_for('admin_queue.add_queue_comment', queue_id=entry.id) }}">
-                                <div class="modal-body">
-                                    {% if entry.comment %}
-                                        <div class="mb-3">
-                                            <label class="form-label fw-medium">Текущий комментарий:</label>
-                                            <div class="alert alert-light border">
-                                                {{ entry.comment }}
-                                            </div>
-                                        </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-car text-muted me-3"></i>
+                                <div>
+                                    <span class="d-block fw-medium">{{ entry.car_brand }} {{ entry.car_model }}</span>
+                                    {% if entry.car_year %}
+                                    <small class="text-muted">Год: {{ entry.car_year }}</small>
                                     {% endif %}
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Новый комментарий:</label>
-                                        <textarea class="form-control" name="comment" rows="4"
-                                                  placeholder="Введите ваш комментарий..." required></textarea>
-                                    </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x me-1"></i>Отмена
-                                    </button>
-                                    <button type="submit" class="btn btn-info text-white">
-                                        <i class="bi bi-chat me-1"></i>Добавить
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Перемещение в ремонт -->
-                <div class="modal fade" id="serviceModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-success text-white">
-                                <h5 class="modal-title">
-                                    <i class="bi bi-wrench me-2"></i>Переместить в ремонт #{{ entry.id }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-                            <form method="POST" action="{{ url_for('admin_queue.move_to_service', queue_id=entry.id) }}" enctype="multipart/form-data">
-                                <div class="modal-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Примерное окончание работ</label>
-                                            <input type="date" class="form-control" name="estimated_completion">
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-medium">Примерная стоимость</label>
-                                            <input type="number" class="form-control" name="estimated_cost"
-                                                   value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
-                                                   placeholder="Введите стоимость">
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                    <span class="fw-medium {% if is_today %}text-primary{% endif %}">
+                                        {{ entry.desired_date.strftime('%d.%m.%Y') }}
+                                    </span>
+                                <div class="d-flex align-items-center mt-1">
+                                    <i class="fas fa-clock me-1 text-muted" style="font-size: 0.8rem;"></i>
+                                    <small class="text-muted">{{ entry.desired_time.strftime('%H:%M') }}</small>
+                                </div>
+                                {% if is_today %}
+                                <small class="text-primary mt-1">
+                                    <i class="fas fa-star me-1"></i>На сегодня
+                                </small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                                <span class="badge bg-warning rounded-pill px-3">
+                                    <i class="fas fa-clock me-1"></i>В очереди
+                                </span>
+                            {% if has_comment %}
+                            <div class="mt-1">
+                                <small class="text-muted" title="Есть комментарий">
+                                    <i class="fas fa-comment text-info"></i>
+                                </small>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <!-- Редактирование -->
+                                <button type="button" class="btn btn-outline-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal{{ entry.id }}"
+                                        title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
 
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Список работ</label>
-                                        <textarea class="form-control" name="work_list" rows="3"
-                                                  placeholder="Замена масла, Диагностика, Ремонт тормозов..."></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-medium">Детализация (Excel файл)</label>
-                                        <input type="file" class="form-control" name="excel_file"
-                                               accept=".xls,.xlsx,.csv">
-                                        <small class="text-muted">Форматы: .xls, .xlsx, .csv</small>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x me-1"></i>Отмена
-                                    </button>
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="bi bi-wrench me-1"></i>Переместить
-                                    </button>
-                                </div>
-                            </form>
+                                <!-- Комментарий -->
+                                <button type="button" class="btn btn-outline-info"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#commentModal{{ entry.id }}"
+                                        title="{% if has_comment %}Изменить комментарий{% else %}Добавить комментарий{% endif %}">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+
+                                <!-- В ремонт -->
+                                <button type="button" class="btn btn-outline-success"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#serviceModal{{ entry.id }}"
+                                        title="Переместить в ремонт">
+                                    <i class="fas fa-wrench"></i>
+                                </button>
+
+                                <!-- Удаление -->
+                                <button type="button" class="btn btn-outline-danger delete-btn"
+                                        data-id="{{ entry.id }}"
+                                        data-name="{{ entry.name }}"
+                                        title="Удалить">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Используйте кнопки для управления очередью
+                </small>
+            </div>
+            <div class="d-flex align-items-center">
+                <small class="text-muted me-3">
+                    <span class="badge bg-info me-1"><i class="fas fa-star"></i></span> Сегодня
+                    <span class="badge bg-warning ms-3 me-1"><i class="fas fa-comment"></i></span> С комментарием
+                </small>
+                <a href="{{ url_for('admin_service.view_service') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-arrow-right me-1"></i>К ремонту
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    {% for entry in queue_entries %}
+    {% set has_comment = entry.comment and entry.comment|trim %}
+    <!-- Модальное окно редактирования -->
+    <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Редактирование #{{ entry.id }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_queue.update_queue', queue_id=entry.id) }}">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Имя клиента *</label>
+                                <input type="text" class="form-control" name="name" value="{{ entry.name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Телефон *</label>
+                                <input type="tel" class="form-control" name="phone" value="{{ entry.phone }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Марка авто *</label>
+                                <input type="text" class="form-control" name="car_brand" value="{{ entry.car_brand }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Модель авто *</label>
+                                <input type="text" class="form-control" name="car_model" value="{{ entry.car_model }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Дата записи *</label>
+                                <input type="date" class="form-control" name="desired_date"
+                                       value="{{ entry.desired_date.strftime('%Y-%m-%d') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Время записи *</label>
+                                <input type="time" class="form-control" name="desired_time"
+                                       value="{{ entry.desired_time.strftime('%H:%M') }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Комментарий</label>
+                                <textarea class="form-control" name="comment" rows="3"
+                                          placeholder="Дополнительная информация">{{ entry.comment if entry.comment else '' }}</textarea>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Отмена
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Сохранить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        {% else %}
-            <div class="admin-card">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-clock-history text-muted mb-3" style="font-size: 3rem;"></i>
-                    <h4 class="text-muted mb-3">Очередь пуста</h4>
-                    <p class="text-muted">Нет автомобилей в очереди на сервис.</p>
-                    <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-primary mt-2">
-                        <i class="bi bi-clipboard-list me-1"></i>Посмотреть заявки
+    <!-- Модальное окно комментария -->
+    <div class="modal fade" id="commentModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-gradient-info text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-comment me-2"></i>Комментарий #{{ entry.id }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_queue.add_queue_comment', queue_id=entry.id) }}">
+                    <div class="modal-body">
+                        {% if has_comment %}
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Текущий комментарий:</label>
+                            <div class="alert alert-light border p-3 rounded">
+                                <i class="fas fa-quote-left me-2 text-muted"></i>
+                                {{ entry.comment }}
+                                <i class="fas fa-quote-right ms-2 text-muted"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">{% if has_comment %}Изменить комментарий{% else %}Добавить комментарий{% endif %}:</label>
+                            <textarea class="form-control" name="comment" rows="4"
+                                      placeholder="Введите ваш комментарий..." {% if not has_comment %}required{% endif %}></textarea>
+                            <small class="text-muted">Комментарий поможет другим сотрудникам понять особенности заказа</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Отмена
+                        </button>
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fas fa-save me-1"></i>{% if has_comment %}Обновить{% else %}Добавить{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно перемещения в ремонт -->
+    <div class="modal fade" id="serviceModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-gradient-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-wrench me-2"></i>Переместить в ремонт #{{ entry.id }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ url_for('admin_queue.move_to_service', queue_id=entry.id) }}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Перемещение автомобиля <strong>{{ entry.car_brand }} {{ entry.car_model }}</strong> клиента <strong>{{ entry.name }}</strong> в раздел ремонта
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Примерное окончание работ</label>
+                                <input type="date" class="form-control" name="estimated_completion"
+                                       min="{{ today.strftime('%Y-%m-%d') if today else '' }}">
+                                <small class="text-muted">Планируемая дата завершения ремонта</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">Примерная стоимость</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="estimated_cost"
+                                           value="{{ entry.estimated_cost if entry.estimated_cost else '' }}"
+                                           placeholder="0"
+                                           min="0">
+                                    <span class="input-group-text">₽</span>
+                                </div>
+                                <small class="text-muted">Предварительная стоимость работ</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Список работ *</label>
+                                <textarea class="form-control" name="work_list" rows="3"
+                                          placeholder="Укажите перечень работ, например:&#10;1. Замена масла двигателя&#10;2. Диагностика подвески&#10;3. Ремонт тормозной системы" required></textarea>
+                                <small class="text-muted">Обязательное поле для перемещения в ремонт</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium">Детализация (Excel файл)</label>
+                                <input type="file" class="form-control" name="excel_file"
+                                       accept=".xls,.xlsx,.csv">
+                                <small class="text-muted">Можно загрузить файл с детализацией работ. Форматы: .xls, .xlsx, .csv</small>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="notify_client" id="notifyClient{{ entry.id }}" checked>
+                                    <label class="form-check-label fw-medium" for="notifyClient{{ entry.id }}">
+                                        Уведомить клиента о начале ремонта
+                                    </label>
+                                    <small class="text-muted d-block">Клиент получит SMS или email уведомление</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i>Отмена
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-wrench me-1"></i>Переместить в ремонт
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <!-- Состояние пустого списка -->
+    <div class="admin-card text-center py-5">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="fas fa-clock fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted mb-3">Очередь пуста</h3>
+                <p class="text-muted mb-4">Нет автомобилей в очереди на сервис.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-primary">
+                        <i class="fas fa-clipboard-list me-2"></i>Посмотреть заявки
+                    </a>
+                    <a href="{{ url_for('admin_service.view_service') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-wrench me-2"></i>Перейти к ремонту
                     </a>
                 </div>
             </div>
-        {% endif %}
+        </div>
     </div>
+    {% endif %}
+</div>
 
-    <style>
-        .admin-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            border: none;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
+<style>
+    /* Специальные стили для этой страницы */
+    .table-info-light {
+        background-color: rgba(13, 202, 240, 0.1) !important;
+    }
+
+    .table-warning-light {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+
+    .queue-row {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .queue-row:hover {
+        background-color: #f8fafc !important;
+    }
+
+    .avatar-sm {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%) !important;
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #4cc9f0 0%, #00b4d8 100%) !important;
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+    }
+
+    .btn-group .btn {
+        border-radius: 8px !important;
+        margin: 0 2px;
+    }
+
+    .text-primary {
+        color: #4361ee !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Поиск по таблице
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.queue-row');
+
+                rows.forEach(row => {
+                    const name = row.dataset.name;
+                    const phone = row.dataset.phone;
+                    const car = row.dataset.car;
+                    const text = name + ' ' + phone + ' ' + car;
+
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
         }
 
-        .admin-card-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
+        // Удаление с подтверждением
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Предотвращаем всплытие клика
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                if (confirm(`Удалить запись #${id} (${name}) из очереди?`)) {
+                    window.location.href = '/service/admin/queue/delete/' + id;
+                }
+            });
+        });
+
+        // Клик по строке для открытия редактирования
+        document.querySelectorAll('.queue-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Игнорируем клики по кнопкам
+                if (e.target.closest('button') ||
+                    e.target.closest('.btn-group')) {
+                    return;
+                }
+
+                // Находим ID из первого столбца
+                const badge = this.querySelector('.badge.bg-dark');
+                if (badge) {
+                    const id = badge.textContent.replace('#', '');
+                    const modal = new bootstrap.Modal(document.getElementById('editModal' + id));
+                    modal.show();
+                }
+            });
+        });
+
+        // Показываем уведомление о сегодняшних записях
+        const todayRows = document.querySelectorAll('.table-info-light').length;
+        if (todayRows > 0) {
+            setTimeout(() => {
+                const alertHTML = `
+                    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar-day me-3 fa-lg"></i>
+                            <div>
+                                <strong>Сегодняшние записи!</strong> У вас ${todayRows} автомобилей запланировано на сегодня.
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                const content = document.querySelector('.admin-content');
+                const firstChild = content.firstChild;
+                content.insertBefore(document.createRange().createContextualFragment(alertHTML), firstChild);
+            }, 1000);
         }
 
-        .table th {
-            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-            color: white;
-            font-weight: 500;
-            padding: 1rem 0.75rem;
-        }
+        // Автоматическое закрытие модальных окон после успешного сохранения
+        const forms = document.querySelectorAll('form[action*="update_queue"], form[action*="add_queue_comment"], form[action*="move_to_service"]');
+        forms.forEach(form => {
+            form.addEventListener('submit', function() {
+                setTimeout(() => {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        const modalInstance = bootstrap.Modal.getInstance(modal);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+                    }
+                }, 1000);
+            });
+        });
 
-        .table td {
-            padding: 1rem 0.75rem;
-            vertical-align: middle;
-        }
-
-        .btn-group .btn {
-            border-radius: 6px;
-            margin: 0 2px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-group .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .modal-header {
-            border-bottom: none;
-            border-radius: 12px 12px 0 0;
-        }
-
-        .modal-content {
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-        }
-
-        .badge {
-            font-weight: 500;
-            padding: 0.5rem 0.75rem;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f8f9fa;
-            transform: translateX(2px);
-            transition: all 0.2s ease;
-        }
-    </style>
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        // Установка минимальной даты для поля окончания работ
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelectorAll('input[name="estimated_completion"]').forEach(input => {
+            input.min = today;
+        });
+    });
+</script>
 {% endblock %}

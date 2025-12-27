@@ -3,234 +3,985 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Админ-панель автосервиса{% endblock %}</title>
+    <title>{% block title %}Админ-панель автосервиса | Dashboard{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome для иконок -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #e74c3c;
-            --accent-color: #3498db;
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #7209b7;
+            --accent-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f94144;
             --light-bg: #f8f9fa;
-            --dark-bg: #34495e;
+            --dark-bg: #1a1a2e;
+            --card-bg: #ffffff;
+            --sidebar-bg: #162447;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
+            font-family: 'Inter', 'Roboto', sans-serif;
             background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .admin-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-bg));
+        /* Стилизация скроллбара */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Основной макет */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Боковая панель */
+        .admin-sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, #1f2d4a 100%);
             color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+            overflow-y: auto;
         }
 
-        .admin-nav {
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        .sidebar-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #fff, #4cc9f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-header h2 i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .user-info p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0;
+        }
+
+        .sidebar-nav {
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
         }
 
         .nav-link {
-            color: var(--primary-color);
+            color: rgba(255,255,255,0.8);
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
             font-weight: 500;
-            padding: 1rem 1.5rem;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
         .nav-link:hover {
-            color: var(--secondary-color);
-            background-color: #f8f9fa;
-            border-bottom: 3px solid var(--secondary-color);
+            color: white;
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
         }
 
         .nav-link.active {
-            color: var(--secondary-color);
-            border-bottom: 3px solid var(--secondary-color);
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            box-shadow: var(--shadow-md);
         }
 
+        .nav-link.active:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-color);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+            margin-right: 12px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Основное содержимое */
+        .admin-main {
+            flex: 1;
+            margin-left: 260px;
+            transition: var(--transition);
+        }
+
+        .admin-header {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-bell {
+            position: relative;
+            margin-right: 1.5rem;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-bell:hover {
+            color: var(--primary-color);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: linear-gradient(90deg, var(--danger-color), #d90429);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .logout-btn i {
+            margin-right: 8px;
+        }
+
+        /* Основной контент */
         .admin-content {
-            padding: 2rem 0;
-            min-height: calc(100vh - 200px);
+            padding: 2rem;
         }
 
+        /* Карточки */
         .admin-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow-md);
             margin-bottom: 1.5rem;
             border: none;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
+            overflow: hidden;
         }
 
         .admin-card:hover {
+            box-shadow: var(--shadow-lg);
             transform: translateY(-5px);
         }
 
         .admin-card-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-bg));
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
-            padding: 1rem 1.5rem;
-            font-weight: 600;
+            background: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .stats-card {
-            text-align: center;
+        .admin-card-body {
             padding: 1.5rem;
         }
 
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--secondary-color);
-            margin: 0.5rem 0;
+        /* Статистические карточки */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .stats-label {
-            color: var(--primary-color);
-            font-weight: 500;
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border-left: 5px solid var(--primary-color);
         }
 
-        .car-icon {
-            font-size: 2rem;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
+        .stat-card:nth-child(2) {
+            border-left-color: var(--success-color);
         }
 
+        .stat-card:nth-child(3) {
+            border-left-color: var(--warning-color);
+        }
+
+        .stat-card:nth-child(4) {
+            border-left-color: var(--danger-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.2rem;
+            font-size: 1.8rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, var(--success-color), #00b4d8);
+        }
+
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, var(--warning-color), #f3722c);
+        }
+
+        .stat-card:nth-child(4) .stat-icon {
+            background: linear-gradient(135deg, var(--danger-color), #d00000);
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            color: var(--text-primary);
+        }
+
+        .stat-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.3rem;
+        }
+
+        .stat-change.positive {
+            color: #10b981;
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Кнопки */
         .btn-admin {
-            background-color: var(--secondary-color);
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
             border: none;
             color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 5px;
-            transition: all 0.3s ease;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-admin:hover {
-            background-color: #c0392b;
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
             color: white;
         }
 
+        .btn-admin i {
+            margin-right: 8px;
+        }
+
+        .btn-admin-sm {
+            padding: 0.35rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Таблицы */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table thead {
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .admin-table th {
+            padding: 1rem 1.2rem;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .admin-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .admin-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .admin-table td {
+            padding: 1rem 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-new {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-in-progress {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-completed {
+            background-color: #d1fae5;
+            color: #047857;
+        }
+
+        /* Подвал */
         .admin-footer {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 0;
+            background: var(--card-bg);
+            padding: 1.5rem 2rem;
             margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .btn-sm {
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.875rem !important;
+        /* Адаптивность */
+        @media (max-width: 992px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .admin-main {
+                margin-left: 0;
+            }
+
+            .sidebar-open .admin-sidebar {
+                transform: translateX(0);
+            }
+
+            .sidebar-open .admin-main {
+                margin-left: 280px;
+            }
+
+            .menu-toggle {
+                display: block !important;
+            }
         }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            }
+
+            .admin-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .admin-header {
+                padding: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                margin-top: 1rem;
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* Переключатель меню для мобильных */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-right: 1rem;
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-<!-- Шапка админ-панели -->
-<header class="admin-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-car me-2"></i>Админ-панель автосервиса
-                </h1>
+<!-- Переключатель меню для мобильных -->
+<button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<div class="admin-container" id="adminContainer">
+    <!-- Боковая панель -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <h2><i class="fas fa-car"></i> AutoService Admin</h2>
+            <p class="small text-white-50">Панель управления автосервисом</p>
+        </div>
+
+        <div class="user-profile">
+            <div class="user-avatar">
+                {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
             </div>
-            <div class="col-md-6 text-end">
-                <span class="me-3">
-                    <i class="fas fa-user-circle me-1"></i>
-                    {{ current_user.first_name }} {{ current_user.last_name }}
-                </span>
-                <a href="{{ url_for('user.logout') }}" class="btn btn-sm btn-outline-light">
-                    <i class="fas fa-sign-out-alt me-1"></i>Выйти
+            <div class="user-info">
+                <h4>{{ current_user.first_name }} {{ current_user.last_name }}</h4>
+                <p>Администратор</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"
+                   href="{{ url_for('admin.admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Главная</span>
                 </a>
             </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'view_requests' %}active{% endif %}"
+                   href="{{ url_for('admin_required.view_requests') }}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Заявки</span>
+                    <span class="nav-badge">5</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_queue.view_queue' %}active{% endif %}"
+                   href="{{ url_for('admin_queue.view_queue') }}">
+                    <i class="fas fa-clock"></i>
+                    <span>Очередь на сервис</span>
+                    <span class="nav-badge">3</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_service.view_service' %}active{% endif %}"
+                   href="{{ url_for('admin_service.view_service') }}">
+                    <i class="fas fa-wrench"></i>
+                    <span>В работе</span>
+                    <span class="nav-badge">7</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_discounts.admin_discounts' %}active{% endif %}"
+                   href="{{ url_for('admin_discounts.admin_discounts') }}">
+                    <i class="bi bi-percent"></i>
+                    <span>Скидки</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_price.admin_price' %}active{% endif %}"
+                   href="{{ url_for('admin_price.admin_price') }}">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Цены</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'visit.stats' %}active{% endif %}"
+                   href="{{ url_for('visit.stats') }}">
+                    <i class="bi bi-bar-chart-line"></i>
+                    <span>Статистика</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'index.index' %}active{% endif %}"
+                   href="{{ url_for('index.index') }}">
+                    <i class="bi bi-house"></i>
+                    <span>Главная страница</span>
+                    <small class="text-white-50 ms-1">(Пользователя)</small>
+                </a>
+            </div>
+        </nav>
+
+        <div class="mt-auto p-3 text-center text-white-50 small">
+            <p>© 2024 Автосервис</p>
+            <p>Версия 2.1.0</p>
         </div>
-    </div>
-</header>
+    </aside>
 
-<!-- Навигационная панель -->
-<nav class="admin-nav">
-    <div class="container">
-        <div class="nav nav-pills">
-            <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}"
-               href="{{ url_for('admin.admin_dashboard') }}">
-                <i class="fas fa-tachometer-alt me-2"></i>Главная
-            </a>
-            <a class="nav-link {% if request.endpoint == 'view_requests' %}active{% endif %}"
-               href="{{ url_for('admin_required.view_requests') }}">
-                <i class="fas fa-clipboard-list me-2"></i>Заявки
-            </a>
-            <a class="nav-link {% if request.endpoint == 'admin_queue.view_queue' %}active{% endif %}"
-               href="{{ url_for('admin_queue.view_queue') }}">
-                <i class="fas fa-clock me-2"></i>Очередь на сервис
-            </a>
-            <a class="nav-link {% if request.endpoint == 'admin_service.view_service' %}active{% endif %}"
-               href="{{ url_for('admin_service.view_service') }}">
-                <i class="fas fa-wrench me-2"></i>В работе
-            </a>
-            <a class="nav-link {% if request.endpoint == 'admin_discounts.admin_discounts' %}active{% endif %}"
-               href="{{ url_for('admin_discounts.admin_discounts') }}">
-                <i class="bi bi-percent me-2"></i>Скидки
-            </a>
-            <a class="nav-link {% if request.endpoint == 'admin_price.admin_price' %}active{% endif %}"
-               href="{{ url_for('admin_price.admin_price') }}">
-                <i class="bi bi-cash-stack me-2"></i>Цены
-            </a>
+    <!-- Основное содержимое -->
+    <main class="admin-main">
+        <!-- Шапка -->
+        <header class="admin-header">
+            <div class="page-title">
+                <h1>{% block page_title %}Панель управления{% endblock %}</h1>
+                <p>{% block page_subtitle %}Обзор системы и управление автосервисом{% endblock %}</p>
+            </div>
 
-            <!-- Новая кнопка статистики -->
-            <a class="nav-link {% if request.endpoint == 'visit.stats' %}active{% endif %}"
-               href="{{ url_for('visit.stats') }}">
-                <i class="bi bi-bar-chart-line me-2"></i>Статистика
-            </a>
+            <div class="header-actions">
+                <div class="notification-bell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </div>
+                <a href="{{ url_for('user.logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>Выйти
+                </a>
+            </div>
+        </header>
 
-            <a class="nav-link {% if request.endpoint == 'index.index' %}active{% endif %}"
-               href="{{ url_for('index.index') }}">
-                <i class="bi bi-house me-2"></i>Главная страница (Пользователя)
-            </a>
-        </div>
-    </div>
-</nav>
+        <!-- Основной контент -->
+        <section class="admin-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show d-flex align-items-center" role="alert">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-triangle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                        <div>{{ message }}</div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
 
+            {% block content %}
+            <!-- Контент по умолчанию - Статистика -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="mb-3">Обзор системы</h2>
+                    <p class="text-muted">Ключевые показатели и активность за последние 30 дней</p>
+                </div>
+            </div>
 
-<!-- Основное содержимое -->
-<main class="admin-content">
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+            <div class="stats-grid">
+                <div class="stat-card fade-in">
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>142</h3>
+                        <p>Новых заявок</p>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>12% с прошлого месяца
+                        </div>
+                    </div>
+                </div>
 
-        {% block content %}{% endblock %}
-    </div>
-</main>
+                <div class="stat-card fade-in delay-1">
+                    <div class="stat-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>89</h3>
+                        <p>Авто в работе</p>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>8% с прошлого месяца
+                        </div>
+                    </div>
+                </div>
 
-<!-- Подвал -->
-<footer class="admin-footer">
-    <div class="container text-center">
-        <p class="mb-0">&copy; 2024 Автосервис. Все права защищены.</p>
-    </div>
-</footer>
+                <div class="stat-card fade-in delay-2">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>327</h3>
+                        <p>Завершённых работ</p>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>15% с прошлого месяца
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card fade-in delay-3">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>₽1.2M</h3>
+                        <p>Общий доход</p>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up me-1"></i>22% с прошлого месяца
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <span>Последние заявки</span>
+                            <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-admin btn-admin-sm">Все заявки</a>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Клиент</th>
+                                        <th>Автомобиль</th>
+                                        <th>Услуга</th>
+                                        <th>Статус</th>
+                                        <th>Дата</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>#00125</td>
+                                        <td>Иванов А.П.</td>
+                                        <td>Toyota Camry</td>
+                                        <td>Замена масла</td>
+                                        <td><span class="status-badge status-new">Новая</span></td>
+                                        <td>15.05.2024</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#00124</td>
+                                        <td>Петрова М.В.</td>
+                                        <td>Hyundai Solaris</td>
+                                        <td>Диагностика</td>
+                                        <td><span class="status-badge status-in-progress">В работе</span></td>
+                                        <td>14.05.2024</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#00123</td>
+                                        <td>Сидоров К.Д.</td>
+                                        <td>Kia Rio</td>
+                                        <td>Шиномонтаж</td>
+                                        <td><span class="status-badge status-completed">Завершено</span></td>
+                                        <td>13.05.2024</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#00122</td>
+                                        <td>Кузнецов Р.Н.</td>
+                                        <td>Volkswagen Polo</td>
+                                        <td>Ремонт тормозов</td>
+                                        <td><span class="status-badge status-in-progress">В работе</span></td>
+                                        <td>12.05.2024</td>
+                                    </tr>
+                                    <tr>
+                                        <td>#00121</td>
+                                        <td>Федорова Л.С.</td>
+                                        <td>Skoda Octavia</td>
+                                        <td>Замена фильтров</td>
+                                        <td><span class="status-badge status-new">Новая</span></td>
+                                        <td>11.05.2024</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="admin-card">
+                        <div class="admin-card-header">
+                            <span>Быстрые действия</span>
+                        </div>
+                        <div class="admin-card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('admin_required.view_requests') }}" class="btn btn-admin mb-2">
+                                    <i class="fas fa-plus-circle"></i>Создать заявку
+                                </a>
+                                <a href="{{ url_for('admin_queue.view_queue') }}" class="btn btn-admin mb-2" style="background: linear-gradient(90deg, var(--success-color), #00b4d8);">
+                                    <i class="fas fa-user-clock"></i>Управление очередью
+                                </a>
+                                <a href="{{ url_for('admin_discounts.admin_discounts') }}" class="btn btn-admin mb-2" style="background: linear-gradient(90deg, var(--warning-color), #f3722c);">
+                                    <i class="fas fa-tags"></i>Настроить скидки
+                                </a>
+                                <a href="{{ url_for('visit.stats') }}" class="btn btn-admin" style="background: linear-gradient(90deg, var(--secondary-color), #560bad);">
+                                    <i class="fas fa-chart-bar"></i>Аналитика
+                                </a>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <h6 class="mb-3">Сегодняшняя активность</h6>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span>Завершено работ: <strong>12</strong></span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-clock text-warning me-2"></i>
+                                    <span>В работе: <strong>7</strong></span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-plus text-primary me-2"></i>
+                                    <span>Новых клиентов: <strong>3</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+        </section>
+
+        <!-- Подвал -->
+        <footer class="admin-footer">
+            <div>
+                <span>© 2024 Автосервис. Все права защищены.</span>
+            </div>
+            <div>
+                <span>Системное время: <span id="currentTime"></span></span>
+            </div>
+        </footer>
+    </main>
+</div>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    // Переключение боковой панели на мобильных устройствах
+    document.getElementById('menuToggle').addEventListener('click', function() {
+        document.getElementById('adminContainer').classList.toggle('sidebar-open');
+    });
+
+    // Обновление текущего времени
+    function updateTime() {
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+        document.getElementById('currentTime').textContent = now.toLocaleDateString('ru-RU', options);
+    }
+
+    // Обновляем время каждую секунду
+    setInterval(updateTime, 1000);
+    updateTime(); // Инициализация
+
+    // Анимация появления элементов при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach(el => {
+            el.style.opacity = '0';
+        });
+
+        setTimeout(() => {
+            fadeElements.forEach(el => {
+                el.style.opacity = '1';
+            });
+        }, 100);
+    });
+
+    // Закрытие боковой панели при клике вне её на мобильных
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const container = document.getElementById('adminContainer');
+        const toggleBtn = document.getElementById('menuToggle');
+
+        if (window.innerWidth <= 992 &&
+            container.classList.contains('sidebar-open') &&
+            !sidebar.contains(event.target) &&
+            !toggleBtn.contains(event.target)) {
+            container.classList.remove('sidebar-open');
+        }
+    });
+</script>
 
 {% block extra_js %}{% endblock %}
 </body>
