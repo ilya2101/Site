@@ -40,7 +40,7 @@
                                         <i class="bi bi-person-fill"></i>
                                     </div>
                                     <input type="text"
-                                           class="form-input {% if errors and errors.first_name %}input-error{% endif %}"
+                                           class="form-input"
                                            id="first_name"
                                            name="first_name"
                                            value="{{ first_name or '' }}"
@@ -48,12 +48,6 @@
                                            maxlength="30"
                                            placeholder="Иван">
                                 </div>
-                                {% if errors and errors.first_name %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.first_name }}
-                                </div>
-                                {% endif %}
-                                <small class="form-hint">Только русские буквы (2-30 символов)</small>
                             </div>
 
                             <!-- Фамилия -->
@@ -64,7 +58,7 @@
                                         <i class="bi bi-person-badge-fill"></i>
                                     </div>
                                     <input type="text"
-                                           class="form-input {% if errors and errors.last_name %}input-error{% endif %}"
+                                           class="form-input"
                                            id="last_name"
                                            name="last_name"
                                            value="{{ last_name or '' }}"
@@ -72,12 +66,6 @@
                                            maxlength="30"
                                            placeholder="Иванов">
                                 </div>
-                                {% if errors and errors.last_name %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.last_name }}
-                                </div>
-                                {% endif %}
-                                <small class="form-hint">Только русские буквы (2-30 символов)</small>
                             </div>
 
                             <!-- Номер телефона -->
@@ -88,7 +76,7 @@
                                         <i class="bi bi-telephone-fill"></i>
                                     </div>
                                     <input type="tel"
-                                           class="form-input {% if errors and errors.phone %}input-error{% endif %}"
+                                           class="form-input"
                                            id="phone"
                                            name="phone"
                                            value="{{ phone or '+7' }}"
@@ -96,12 +84,6 @@
                                            maxlength="16"
                                            placeholder="+71234567890">
                                 </div>
-                                {% if errors and errors.phone %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.phone }}
-                                </div>
-                                {% endif %}
-                                <small class="form-hint">Формат: +7XXXXXXXXXX (11 цифр)</small>
                             </div>
 
                             <!-- Email -->
@@ -112,7 +94,7 @@
                                         <i class="bi bi-envelope-fill"></i>
                                     </div>
                                     <input type="email"
-                                           class="form-input {% if errors and errors.email %}input-error{% endif %}"
+                                           class="form-input"
                                            id="email"
                                            name="email"
                                            value="{{ email or '' }}"
@@ -120,12 +102,6 @@
                                            maxlength="50"
                                            placeholder="example@mail.ru">
                                 </div>
-                                {% if errors and errors.email %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.email }}
-                                </div>
-                                {% endif %}
-                                <small class="form-hint">Допустимые домены: @mail.ru, @gmail.com, @yandex.ru, @vk.com</small>
                             </div>
 
                             <!-- Пароль -->
@@ -136,7 +112,7 @@
                                         <i class="bi bi-shield-lock-fill"></i>
                                     </div>
                                     <input type="password"
-                                           class="form-input {% if errors and errors.password %}input-error{% endif %}"
+                                           class="form-input"
                                            id="password"
                                            name="password"
                                            minlength="8"
@@ -144,14 +120,6 @@
                                            required
                                            placeholder="Минимум 8 символов">
                                 </div>
-                                {% if errors and errors.password %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.password }}
-                                </div>
-                                {% endif %}
-                                <small class="form-hint">
-                                    Должен содержать: заглавные и строчные буквы, цифры, специальные символы
-                                </small>
                             </div>
 
                             <!-- Подтверждение пароля -->
@@ -162,36 +130,26 @@
                                         <i class="bi bi-shield-check"></i>
                                     </div>
                                     <input type="password"
-                                           class="form-input {% if errors and errors.confirm_password %}input-error{% endif %}"
+                                           class="form-input"
                                            id="confirm_password"
                                            name="confirm_password"
                                            required
                                            placeholder="Повторите пароль">
                                 </div>
-                                {% if errors and errors.confirm_password %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.confirm_password }}
-                                </div>
-                                {% endif %}
                             </div>
 
                             <!-- Согласие с условиями -->
                             <div class="mb-4">
                                 <div class="form-check">
                                     <input type="checkbox"
-                                           class="form-check-input {% if errors and errors.agree_terms %}input-error-check{% endif %}"
+                                           class="form-check-input"
                                            id="agree_terms"
                                            name="agree_terms"
-                                           {% if not errors or not errors.agree_terms %}checked{% endif %}>
+                                           checked>
                                     <label class="form-check-label" for="agree_terms">
                                         Я согласен с условиями использования *
                                     </label>
                                 </div>
-                                {% if errors and errors.agree_terms %}
-                                <div class="form-error">
-                                    <i class="bi bi-exclamation-circle me-1"></i>{{ errors.agree_terms }}
-                                </div>
-                                {% endif %}
                             </div>
 
                             <!-- Кнопка отправки -->
@@ -377,11 +335,6 @@
         letter-spacing: 0.3px;
     }
 
-    .form-input.input-error {
-        border-color: var(--input-error-border);
-        background: rgba(255, 107, 107, 0.05);
-    }
-
     .form-input::placeholder {
         color: var(--input-placeholder);
         font-weight: 400;
@@ -396,29 +349,47 @@
         transform: translateY(-2px);
     }
 
-    .form-input:focus:not(.input-error) + .input-icon {
+    .form-input:focus + .input-icon {
         background: var(--gradient-accent);
         transform: translateY(-50%) scale(1.05);
         box-shadow: 0 6px 15px rgba(255, 107, 53, 0.4);
     }
 
     /* СООБЩЕНИЯ ОБ ОШИБКАХ И УСПЕХЕ */
-    .form-error {
-        color: var(--error-color);
+    .modern-alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 3rem 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         font-weight: 500;
-        font-size: 0.9rem;
-        padding: 0.5rem 0.8rem;
-        background: rgba(255, 107, 107, 0.1);
-        border-radius: 8px;
-        border-left: 3px solid var(--error-color);
-        margin-top: 0.5rem;
-        animation: slideIn 0.3s ease;
-        display: flex;
-        align-items: center;
+        position: relative;
     }
 
-    .input-error-check {
-        border-color: var(--error-color) !important;
+    .alert-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        border-left: 4px solid #ff8c8c;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, var(--accent-green) 0%, var(--green-dark) 100%);
+        color: white;
+        border-left: 4px solid var(--green-light);
+    }
+
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .btn-close:hover {
+        opacity: 1;
     }
 
     .form-check {
@@ -505,43 +476,6 @@
         border-top-color: var(--primary-orange);
         animation: spin 1s linear infinite;
         margin-right: 0.5rem;
-    }
-
-    /* СООБЩЕНИЯ */
-    .modern-alert {
-        border: none;
-        border-radius: 12px;
-        padding: 1.25rem 3rem 1.25rem 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        font-weight: 500;
-        position: relative;
-    }
-
-    .alert-danger {
-        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-        color: white;
-        border-left: 4px solid #ff8c8c;
-    }
-
-    .alert-success {
-        background: linear-gradient(135deg, var(--accent-green) 0%, var(--green-dark) 100%);
-        color: white;
-        border-left: 4px solid var(--green-light);
-    }
-
-    .btn-close {
-        filter: invert(1);
-        opacity: 0.8;
-        transition: opacity 0.3s ease;
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-
-    .btn-close:hover {
-        opacity: 1;
     }
 
     /* ФУТЕР */
@@ -702,6 +636,5 @@
         }
     }
 </style>
-
 
 {% endblock %}

@@ -8,6 +8,8 @@ from flask import Flask, render_template, abort
 from flask_login import LoginManager, login_required, current_user
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask import Flask
+from flask_mail import Mail
 
 from database.engine import db
 from database.models.user import User
@@ -47,6 +49,24 @@ migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'user_bp.login'  # важно: имя_блюпринта.имя_функции
+
+
+app.config['SECRET_KEY'] = 'your-secret-key'
+
+# Настройки для отправки email
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'adrautosaintp@gmail.com'  # Твоя почта
+app.config['MAIL_PASSWORD'] = 'mrbk xarl gxjf phdv'  # App Password
+app.config['MAIL_DEFAULT_SENDER'] = 'adrautosaintp@gmail.com'
+
+# Инициализация Flask-Mail
+mail = Mail(app)
+
+
+
 
 @login_manager.user_loader
 def load_user(user_id):

@@ -38,41 +38,7 @@ def logout():
     return redirect(url_for('index.index'))
 
 
-@user_bp.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        phone = request.form.get('phone')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
 
-        if password != confirm_password:
-            flash('Пароли не совпадают!', 'danger')
-            return redirect(url_for('user.register'))
-
-        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-
-        new_user = User(
-            first_name=first_name,
-            last_name=last_name,
-            phone=phone,
-            password=hashed_password
-        )
-
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-            flash('Регистрация успешна!', 'success')
-            return redirect(url_for('index.index'))
-        except:
-            db.session.rollback()
-            flash('Ошибка: номер телефона уже занят', 'danger')
-
-    return render_template('register.html')
-
-
-# УБЕРИТЕ ЭТУ СТРОКУ: user_bp = Blueprint('user', __name__)
 
 @user_bp.route('/update_profile', methods=['POST'])
 @login_required

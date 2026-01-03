@@ -1,6 +1,6 @@
 # routes/auth_register.py
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
 from flask_login import login_user, current_user
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -11,6 +11,7 @@ import uuid
 from database.engine import db
 from database.models.user import User
 from utils.phone_utils import normalize_phone_number
+from email_service import send_confirmation_email  # Импорт ВНЕРТИ функции!
 
 # Создаём блюпринт
 register_bp = Blueprint('register', __name__)
@@ -74,9 +75,10 @@ def validate_phone(phone_raw):
     print(f"✅ [validate_phone] Нормализованный: '{phone_normalized}'")
     return phone_normalized, None
 
+
 def validate_email(email):
     """
-    Валидация email (только @mail @gmail @yandex @vk .com или .ru)
+    Валидация email (упрощенная версия)
     Возвращает (email, сообщение_об_ошибке)
     """
     if not email:
@@ -84,17 +86,16 @@ def validate_email(email):
 
     email = email.strip().lower()
 
-    # Проверяем общий формат email
-    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
+    # Упрощенная проверка email
+    if '@' not in email or '.' not in email:
         return None, 'Введите корректный email адрес'
 
-    # Проверяем допустимые домены
-    allowed_domains = ['mail.ru', 'gmail.com', 'yandex.ru', 'yandex.com', 'vk.com']
-    domain = email.split('@')[1] if '@' in email else ''
+    # Разделяем email на локальную часть и домен
+    local_part, domain = email.split('@', 1)
 
-    # Проверяем на соответствие допустимым доменам
-    if not any(domain.endswith(allowed) for allowed in allowed_domains):
-        return None, 'Допустимы только @mail.ru, @gmail.com, @yandex.ru, @vk.com'
+    # Проверяем минимальную длину
+    if len(local_part) < 1:
+        return None, 'Некорректный email адрес'
 
     # Проверка на максимальную длину
     if len(email) > 50:
@@ -105,7 +106,7 @@ def validate_email(email):
 
 def validate_password(password):
     """
-    Валидация пароля
+    Валидация пароля (упрощенная версия)
     """
     if not password:
         return 'Введите пароль'
@@ -116,6 +117,7 @@ def validate_password(password):
     if len(password) > 50:
         return 'Пароль слишком длинный (максимум 50 символов)'
 
+    # Базовые проверки (можно закомментировать для тестирования)
     if not re.search(r'[A-ZА-Я]', password):
         return 'Пароль должен содержать хотя бы одну заглавную букву'
 
@@ -125,14 +127,17 @@ def validate_password(password):
     if not re.search(r'\d', password):
         return 'Пароль должен содержать хотя бы одну цифру'
 
-    # Можно добавить проверку на специальные символы
-    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        return 'Пароль должен содержать хотя бы один специальный символ (!@#$%^&* и т.д.)'
-
     return None
 
 
-@register_bp.route('/register', methods=['GET', 'POST'])
+# Добавляем в импорты:
+from flask import session
+
+# Изменяем функцию register() после валидации данных:
+
+
+
+
 @register_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -241,30 +246,40 @@ def register():
         print(f"  📧 Email: {validated_data['email']}")
         print(f"  🔐 Пароль (хеш): будет сгенерирован")
 
+        # ТЕПЕРЬ блок try-except идет ЗДЕСЬ, после проверки ошибок
         try:
-            # Проверяем есть ли уже такой телефон в базе
+            # 1. Проверяем дубликаты
             print(f"🔍 [DEBUG] Проверяем наличие телефона в базе...")
             existing_phone = User.query.filter_by(phone=validated_data['phone']).first()
             if existing_phone:
                 print(f"⚠️ [DEBUG] Телефон уже существует в базе!")
-                print(f"   ID пользователя: {existing_phone.id}")
-                print(f"   Имя: {existing_phone.first_name} {existing_phone.last_name}")
-                print(f"   Email: {existing_phone.email}")
+                flash('Этот номер телефона уже зарегистрирован', 'error')
+                errors['phone'] = 'Этот номер телефона уже зарегистрирован'
+                return render_template('register.html',
+                                       first_name=first_name_raw,
+                                       last_name=last_name_raw,
+                                       phone=phone_raw,
+                                       email=email_raw,
+                                       errors=errors)
             else:
                 print(f"✅ [DEBUG] Телефон свободен")
 
-            # Проверяем есть ли уже такой email в базе
             print(f"🔍 [DEBUG] Проверяем наличие email в базе...")
             existing_email = User.query.filter_by(email=validated_data['email']).first()
             if existing_email:
                 print(f"⚠️ [DEBUG] Email уже существует в базе!")
-                print(f"   ID пользователя: {existing_email.id}")
-                print(f"   Имя: {existing_email.first_name} {existing_email.last_name}")
-                print(f"   Телефон: {existing_email.phone}")
+                flash('Этот email уже зарегистрирован', 'error')
+                errors['email'] = 'Этот email уже зарегистрирован'
+                return render_template('register.html',
+                                       first_name=first_name_raw,
+                                       last_name=last_name_raw,
+                                       phone=phone_raw,
+                                       email=email_raw,
+                                       errors=errors)
             else:
                 print(f"✅ [DEBUG] Email свободен")
 
-            # Хэшируем пароль
+            # 2. Хэшируем пароль
             print(f"🔍 [DEBUG] Хэшируем пароль...")
             hashed_password = generate_password_hash(
                 validated_data['password'],
@@ -272,96 +287,74 @@ def register():
             )
             print(f"✅ [DEBUG] Пароль захеширован")
 
-            # Генерируем код подтверждения email
+            # 3. Генерируем код подтверждения
             email_confirmation_code = str(uuid.uuid4())[:8].upper()
             print(f"✅ [DEBUG] Код подтверждения: {email_confirmation_code}")
 
-            # Создаем нового пользователя
-            print(f"🔍 [DEBUG] Создаем объект пользователя...")
-            new_user = User(
-                first_name=validated_data['first_name'],
-                last_name=validated_data['last_name'],
-                phone=validated_data['phone'],
-                email=validated_data['email'],
-                password=hashed_password,
-                is_admin=False,
-                email_confirmed=False,
-                email_confirmation_code=email_confirmation_code,
-                confirmation_sent_at=datetime.utcnow(),
-                created_at=datetime.utcnow()
-            )
-            print(f"✅ [DEBUG] Объект пользователя создан")
+            # 4. Сохраняем данные в сессии (НЕ в БД!)
+            session['registration_data'] = {
+                'first_name': validated_data['first_name'],
+                'last_name': validated_data['last_name'],
+                'phone': validated_data['phone'],
+                'email': validated_data['email'],
+                'password_hash': hashed_password,
+                'confirmation_code': email_confirmation_code,
+                'confirmation_sent_at': datetime.utcnow().isoformat()
+            }
 
-            print(f"🔍 [DEBUG] Добавляем в сессию...")
-            db.session.add(new_user)
+            # Устанавливаем срок жизни сессии (например, 1 час)
+            session.permanent = True
 
-            print(f"🔍 [DEBUG] Пытаемся сохранить в БД...")
-            db.session.commit()
-            print(f"🎉 [DEBUG] ПОЛЬЗОВАТЕЛЬ УСПЕШНО СОЗДАН!")
-            print(f"   ID: {new_user.id}")
-            print(f"   Телефон: {new_user.phone}")
-            print(f"   Email: {new_user.email}")
-
-            # Отправляем письмо с подтверждением
+            # 5. Отправляем письмо
             print(f"🔍 [DEBUG] Пытаемся отправить письмо...")
-            from email_service import send_confirmation_email
-            email_sent = send_confirmation_email(new_user.email, email_confirmation_code)
+            email_sent = send_confirmation_email(validated_data['email'], email_confirmation_code)
 
-            if email_sent:
-                print(f"✅ [DEBUG] Письмо отправлено")
-                flash('✅ Регистрация успешна! Проверьте вашу почту для подтверждения email.', 'success')
-            else:
-                print(f"⚠️ [DEBUG] Не удалось отправить письмо")
-                flash('⚠️ Регистрация успешна, но не удалось отправить письмо подтверждения.', 'warning')
+            if not email_sent:
+                print(f"❌ [DEBUG] Не удалось отправить письмо")
+                # Очищаем сессию при ошибке
+                session.pop('registration_data', None)
+                flash('❌ Не удалось отправить письмо с подтверждением. Попробуйте позже.', 'error')
+                return render_template('register.html',
+                                       first_name=first_name_raw,
+                                       last_name=last_name_raw,
+                                       phone=phone_raw,
+                                       email=email_raw,
+                                       errors=errors)
 
-            return redirect(url_for('index.index'))
+            print(f"✅ [DEBUG] Письмо отправлено")
 
-        except IntegrityError as e:
-            db.session.rollback()
-            print(f"❌ [DEBUG] IntegrityError при регистрации!")
-            print(f"   Текст ошибки: {e}")
-            print(f"   Тип ошибки: {type(e)}")
-            print(f"   Аргументы: {e.args}")
-
-            error_str = str(e).lower()
-            print(f"   Ошибка в нижнем регистре: '{error_str}'")
-
-            # Проверяем что это за ошибка
-            if 'phone' in error_str:
-                print(f"   ❌ Это ошибка телефона (дубликат)")
-                flash('Этот номер телефона уже зарегистрирован', 'error')
-                errors['phone'] = 'Этот номер телефона уже зарегистрирован'
-            elif 'email' in error_str:
-                print(f"   ❌ Это ошибка email (дубликат)")
-                flash('Этот email уже зарегистрирован', 'error')
-                errors['email'] = 'Этот email уже зарегистрирован'
-            else:
-                print(f"   ❌ Неизвестная IntegrityError")
-                flash('Ошибка при регистрации', 'error')
+            # 6. Перенаправляем на страницу подтверждения
+            flash('📧 На вашу почту отправлен код подтверждения. Введите его ниже.', 'info')
+            return redirect(url_for('register.confirm_email_page'))
 
         except Exception as e:
-            db.session.rollback()
-            print(f"❌ [DEBUG] Общая ошибка при регистрации!")
+            print(f"❌ [DEBUG] Ошибка при регистрации!")
             print(f"   Тип: {type(e)}")
             print(f"   Сообщение: {str(e)}")
             import traceback
             traceback.print_exc()
 
-            current_app.logger.error(f"Неожиданная ошибка при регистрации: {e}")
+            # Очищаем сессию при ошибке
+            session.pop('registration_data', None)
+            current_app.logger.error(f"Ошибка при регистрации: {e}")
             flash('Произошла неожиданная ошибка при регистрации.', 'error')
 
-        # Если что-то пошло не так — возвращаем форму с сохраненными данными
-        print(f"🔍 [DEBUG] Возвращаем форму с ошибками: {errors}")
-        return render_template('register.html',
-                               first_name=first_name_raw,
-                               last_name=last_name_raw,
-                               phone=phone_raw,
-                               email=email_raw,
-                               errors=errors)
+            return render_template('register.html',
+                                   first_name=first_name_raw,
+                                   last_name=last_name_raw,
+                                   phone=phone_raw,
+                                   email=email_raw,
+                                   errors=errors)
 
     # GET-запрос
     print(f"🔍 [DEBUG] GET-запрос на регистрацию")
     return render_template('register.html')
+
+
+
+
+
+
 # Дополнительный маршрут для подтверждения email
 @register_bp.route('/confirm-email/<confirmation_code>')
 def confirm_email(confirmation_code):
@@ -418,12 +411,125 @@ def resend_confirmation():
     db.session.commit()
 
     # Отправляем письмо
-    from email_service import send_confirmation_email
-    email_sent = send_confirmation_email(current_user.email, new_code)
+    try:
+        email_sent = send_confirmation_email(current_user.email, new_code)
 
-    if email_sent:
-        flash('✅ Новое письмо с подтверждением отправлено на вашу почту', 'success')
-    else:
-        flash('❌ Не удалось отправить письмо. Попробуйте позже.', 'error')
+        if email_sent:
+            flash('✅ Новое письмо с подтверждением отправлено на вашу почту', 'success')
+        else:
+            flash('❌ Не удалось отправить письмо. Попробуйте позже.', 'error')
+    except Exception as e:
+        flash('❌ Ошибка при отправке письма', 'error')
 
     return redirect(url_for('index.index'))
+@register_bp.route('/confirm-email', methods=['GET', 'POST'])
+def confirm_email_page():
+    """
+    Страница для ввода кода подтверждения
+    """
+    # Проверяем есть ли данные в сессии
+    if 'registration_data' not in session:
+        flash('❌ Сессия истекла или данные не найдены. Пожалуйста, начните регистрацию заново.', 'error')
+        return redirect(url_for('register.register'))
+
+    if request.method == 'POST':
+        # Получаем код из формы
+        entered_code = request.form.get('confirmation_code', '').strip().upper()
+
+        # Получаем данные из сессии
+        reg_data = session.get('registration_data')
+        expected_code = reg_data.get('confirmation_code')
+        confirmation_sent_at_str = reg_data.get('confirmation_sent_at')
+
+        # Проверяем срок действия кода (1 час)
+        if confirmation_sent_at_str:
+            confirmation_sent_at = datetime.fromisoformat(confirmation_sent_at_str)
+            expiration_time = confirmation_sent_at + timedelta(hours=1)
+            if datetime.utcnow() > expiration_time:
+                flash('⏰ Срок действия кода истек. Пожалуйста, запросите новый код.', 'error')
+                return redirect(url_for('register.resend_confirmation_code'))
+
+        # Проверяем код
+        if not entered_code:
+            flash('❌ Введите код подтверждения', 'error')
+            return render_template('confirm_email.html')
+
+        if entered_code != expected_code:
+            flash('❌ Неверный код подтверждения. Попробуйте еще раз.', 'error')
+            return render_template('confirm_email.html')
+
+        # Код верный - создаем пользователя
+        try:
+            new_user = User(
+                first_name=reg_data['first_name'],
+                last_name=reg_data['last_name'],
+                phone=reg_data['phone'],
+                email=reg_data['email'],
+                password=reg_data['password_hash'],
+                is_admin=False,
+                email_confirmed=True,  # Сразу подтверждаем, так как код введен
+                email_confirmation_code=None,
+                confirmation_sent_at=datetime.fromisoformat(confirmation_sent_at_str) if confirmation_sent_at_str else None,
+                created_at=datetime.utcnow()
+            )
+
+            db.session.add(new_user)
+            db.session.commit()
+
+            print(f"🎉 [DEBUG] ПОЛЬЗОВАТЕЛЬ УСПЕШНО СОЗДАН!")
+            print(f"   ID: {new_user.id}")
+            print(f"   Телефон: {new_user.phone}")
+            print(f"   Email: {new_user.email}")
+
+            # Очищаем сессию
+            session.pop('registration_data', None)
+
+            # Логиним пользователя
+            login_user(new_user, remember=False)
+
+            flash('🎉 Регистрация успешно завершена! Добро пожаловать в ADRAuto!', 'success')
+            return redirect(url_for('index.index'))
+
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ [DEBUG] Ошибка при создании пользователя: {e}")
+            flash('❌ Ошибка при завершении регистрации. Попробуйте еще раз.', 'error')
+            return render_template('confirm_email.html')
+
+    # GET-запрос - показываем форму ввода кода
+    email = session.get('registration_data', {}).get('email', '')
+    return render_template('confirm_email.html', email=email)
+
+
+
+
+
+@register_bp.route('/resend-confirmation-code')
+def resend_confirmation_code():
+    """
+    Повторная отправка кода подтверждения
+    """
+    if 'registration_data' not in session:
+        flash('❌ Сессия истекла. Пожалуйста, начните регистрацию заново.', 'error')
+        return redirect(url_for('register.register'))
+
+    reg_data = session.get('registration_data')
+    email = reg_data.get('email')
+
+    # Генерируем новый код
+    new_code = str(uuid.uuid4())[:8].upper()
+
+    # Обновляем данные в сессии
+    reg_data['confirmation_code'] = new_code
+    reg_data['confirmation_sent_at'] = datetime.utcnow().isoformat()
+    session['registration_data'] = reg_data
+
+    # Отправляем письмо
+    email_sent = send_confirmation_email(email, new_code)
+
+    if email_sent:
+        flash('✅ Новый код подтверждения отправлен на вашу почту', 'success')
+    else:
+        flash('❌ Не удалось отправить код. Попробуйте позже.', 'error')
+
+    return redirect(url_for('register.confirm_email_page'))

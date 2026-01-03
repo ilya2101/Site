@@ -1,0 +1,77 @@
+<!-- templates/confirm_email.html -->
+{% extends "base.html" %}
+
+{% block title %}Подтверждение email{% endblock %}
+
+{% block body %}
+<main class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="register-card animate-fade-up">
+                    <!-- Заголовок -->
+                    <div class="register-header">
+                        <div class="register-icon">
+                            <i class="bi bi-envelope-check-fill"></i>
+                        </div>
+                        <h2 class="register-title">Подтверждение email</h2>
+                        <p class="register-subtitle">Введите код из письма</p>
+                    </div>
+
+                    <div class="register-body">
+                        <!-- Flash сообщения -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                        {% for category, message in messages %}
+                        <div class="modern-alert alert-{{ 'danger' if category == 'error' else 'success' }} animate-fade-in">
+                            <i class="bi bi-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endwith %}
+
+                        <div class="text-center mb-4">
+                            <p class="text-muted">
+                                Код подтверждения отправлен на
+                                <strong>{{ email }}</strong>
+                            </p>
+                            <p class="text-muted small">
+                                Если письмо не пришло, проверьте папку "Спам" или
+                                <a href="{{ url_for('register.resend_confirmation_code') }}" class="register-link">
+                                    запросите новый код
+                                </a>
+                            </p>
+                        </div>
+
+                        <form action="{{ url_for('register.confirm_email_page') }}" method="POST">
+                            <div class="mb-4">
+                                <label class="input-label">Код подтверждения *</label>
+                                <div class="input-with-icon">
+                                    <div class="input-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <input type="text"
+                                           class="form-input text-center"
+                                           id="confirmation_code"
+                                           name="confirmation_code"
+                                           required
+                                           maxlength="8"
+                                           placeholder="XXXX XXXX"
+                                           style="letter-spacing: 2px; font-size: 1.2rem;">
+                                </div>
+                                <small class="form-hint">Введите 8-значный код из письма (буквы заглавные)</small>
+                            </div>
+
+                            <button type="submit" class="btn-modern-primary w-100">
+                                <i class="bi bi-check-circle me-2"></i>Подтвердить email
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
