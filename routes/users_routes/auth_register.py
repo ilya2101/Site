@@ -357,7 +357,7 @@ def register():
 
 # Дополнительный маршрут для подтверждения email
 @register_bp.route('/confirm-email/<confirmation_code>')
-def confirm_email(confirmation_code):
+def confirm_email_by_link(confirmation_code):
     """
     Подтверждение email по коду из письма
     """
@@ -368,12 +368,19 @@ def confirm_email(confirmation_code):
         flash('Неверный код подтверждения', 'error')
         return redirect(url_for('index.index'))
 
-    # Проверяем не истек ли срок действия кода (24 часа)
+    # Проверяем не истек ли срок действия кода (10 минут вместо 24 часов)
     if user.confirmation_sent_at:
-        expiration_time = user.confirmation_sent_at + timedelta(hours=24)
+        expiration_time = user.confirmation_sent_at + timedelta(minutes=10)  # Изменено здесь
         if datetime.utcnow() > expiration_time:
-            flash('Срок действия кода подтверждения истек', 'error')
-            return redirect(url_for('index.index'))
+            # Автоматически генерируем новый код при истечении времени
+            flash('Срок действия кода подтверждения истек (10 минут). Пожалуйста, запросите новый код.', 'error')
+
+            # Удаляем старый просроченный код
+            user.email_confirmation_code = None
+            db.session.commit()
+
+            # Перенаправляем на страницу входа с предложением запросить новый код
+            return redirect(url_for('user.login'))
 
     # Если email уже подтвержден
     if user.email_confirmed:
@@ -382,12 +389,14 @@ def confirm_email(confirmation_code):
         # Подтверждаем email
         user.email_confirmed = True
         user.email_confirmation_code = None
+        user.email_confirmed_at = datetime.utcnow()  # Добавляем время подтверждения
         db.session.commit()
 
         flash('✅ Ваш email успешно подтвержден! Теперь вы можете войти в аккаунт.', 'success')
 
     # Перенаправляем на страницу входа
     return redirect(url_for('user.login'))
+
 
 
 # Маршрут для повторной отправки подтверждения
@@ -422,7 +431,11 @@ def resend_confirmation():
         flash('❌ Ошибка при отправке письма', 'error')
 
     return redirect(url_for('index.index'))
-@register_bp.route('/confirm-email', methods=['GET', 'POST'])
+
+
+
+
+@register_bp.route('/confirm-email-page', methods=['GET', 'POST'])
 def confirm_email_page():
     """
     Страница для ввода кода подтверждения
@@ -441,22 +454,42 @@ def confirm_email_page():
         expected_code = reg_data.get('confirmation_code')
         confirmation_sent_at_str = reg_data.get('confirmation_sent_at')
 
-        # Проверяем срок действия кода (1 час)
+        # Проверяем срок действия кода (10 минут)
         if confirmation_sent_at_str:
             confirmation_sent_at = datetime.fromisoformat(confirmation_sent_at_str)
-            expiration_time = confirmation_sent_at + timedelta(hours=1)
+            expiration_time = confirmation_sent_at + timedelta(minutes=10)
             if datetime.utcnow() > expiration_time:
-                flash('⏰ Срок действия кода истек. Пожалуйста, запросите новый код.', 'error')
+                flash('⏰ Срок действия кода истек (10 минут). Пожалуйста, запросите новый код.', 'error')
                 return redirect(url_for('register.resend_confirmation_code'))
 
         # Проверяем код
         if not entered_code:
             flash('❌ Введите код подтверждения', 'error')
-            return render_template('confirm_email.html')
+            return render_template('confirm_email.html',
+                                   email=reg_data.get('email', ''),
+                                   expires_in_seconds=calculate_time_left(confirmation_sent_at_str))
 
         if entered_code != expected_code:
             flash('❌ Неверный код подтверждения. Попробуйте еще раз.', 'error')
-            return render_template('confirm_email.html')
+            return render_template('confirm_email.html',
+                                   email=reg_data.get('email', ''),
+                                   expires_in_seconds=calculate_time_left(confirmation_sent_at_str))
+
+        # Проверяем дубликаты перед созданием
+        existing_user = User.query.filter(
+            (User.phone == reg_data['phone']) |
+            (User.email == reg_data['email'])
+        ).first()
+
+        if existing_user:
+            # Очищаем сессию
+            session.pop('registration_data', None)
+
+            if existing_user.phone == reg_data['phone']:
+                flash('❌ Этот номер телефона уже зарегистрирован', 'error')
+            else:
+                flash('❌ Этот email уже зарегистрирован', 'error')
+            return redirect(url_for('register.register'))
 
         # Код верный - создаем пользователя
         try:
@@ -467,7 +500,7 @@ def confirm_email_page():
                 email=reg_data['email'],
                 password=reg_data['password_hash'],
                 is_admin=False,
-                email_confirmed=True,  # Сразу подтверждаем, так как код введен
+                email_confirmed=True,
                 email_confirmation_code=None,
                 confirmation_sent_at=datetime.fromisoformat(confirmation_sent_at_str) if confirmation_sent_at_str else None,
                 created_at=datetime.utcnow()
@@ -476,10 +509,7 @@ def confirm_email_page():
             db.session.add(new_user)
             db.session.commit()
 
-            print(f"🎉 [DEBUG] ПОЛЬЗОВАТЕЛЬ УСПЕШНО СОЗДАН!")
-            print(f"   ID: {new_user.id}")
-            print(f"   Телефон: {new_user.phone}")
-            print(f"   Email: {new_user.email}")
+            print(f"🎉 [DEBUG] ПОЛЬЗОВАТЕЛЬ УСПЕШНО СОЗДАН! ID: {new_user.id}")
 
             # Очищаем сессию
             session.pop('registration_data', None)
@@ -490,15 +520,65 @@ def confirm_email_page():
             flash('🎉 Регистрация успешно завершена! Добро пожаловать в ADRAuto!', 'success')
             return redirect(url_for('index.index'))
 
+        except IntegrityError as e:
+            db.session.rollback()
+            if 'phone' in str(e).lower():
+                flash('❌ Этот номер телефона уже зарегистрирован', 'error')
+            elif 'email' in str(e).lower():
+                flash('❌ Этот email уже зарегистрирован', 'error')
+            else:
+                flash('❌ Ошибка при регистрации. Попробуйте еще раз.', 'error')
+            current_app.logger.error(f"Ошибка IntegrityError: {e}")
+            return render_template('confirm_email.html',
+                                   email=reg_data.get('email', ''),
+                                   expires_in_seconds=calculate_time_left(confirmation_sent_at_str))
+
         except Exception as e:
             db.session.rollback()
             print(f"❌ [DEBUG] Ошибка при создании пользователя: {e}")
-            flash('❌ Ошибка при завершении регистрации. Попробуйте еще раз.', 'error')
-            return render_template('confirm_email.html')
+            current_app.logger.error(f"Ошибка при создании пользователя: {e}")
+            flash('❌ Внутренняя ошибка сервера. Попробуйте позже.', 'error')
+            return render_template('confirm_email.html',
+                                   email=reg_data.get('email', ''),
+                                   expires_in_seconds=calculate_time_left(confirmation_sent_at_str))
 
     # GET-запрос - показываем форму ввода кода
-    email = session.get('registration_data', {}).get('email', '')
-    return render_template('confirm_email.html', email=email)
+    reg_data = session.get('registration_data', {})
+    email = reg_data.get('email', '')
+    confirmation_sent_at_str = reg_data.get('confirmation_sent_at')
+
+    # Рассчитываем оставшееся время
+    expires_in_seconds = calculate_time_left(confirmation_sent_at_str)
+
+    return render_template('confirm_email.html',
+                           email=email,
+                           expires_in_seconds=expires_in_seconds)
+
+
+def calculate_time_left(confirmation_sent_at_str):
+    """
+    Рассчитывает оставшееся время в секундах
+    """
+    if not confirmation_sent_at_str:
+        return 600  # 10 минут по умолчанию
+
+    try:
+        confirmation_sent_at = datetime.fromisoformat(confirmation_sent_at_str)
+        expiration_time = confirmation_sent_at + timedelta(minutes=10)
+        time_left = max(0, int((expiration_time - datetime.utcnow()).total_seconds()))
+        return time_left
+    except Exception as e:
+        current_app.logger.error(f"Ошибка расчета времени: {e}")
+        return 600  # 10 минут по умолчанию
+
+
+
+
+
+
+
+
+
 
 
 
@@ -519,10 +599,11 @@ def resend_confirmation_code():
     # Генерируем новый код
     new_code = str(uuid.uuid4())[:8].upper()
 
-    # Обновляем данные в сессии
+    # Обновляем данные в сессии с текущим временем
     reg_data['confirmation_code'] = new_code
     reg_data['confirmation_sent_at'] = datetime.utcnow().isoformat()
     session['registration_data'] = reg_data
+    session.modified = True  # Важно для сохранения изменений
 
     # Отправляем письмо
     email_sent = send_confirmation_email(email, new_code)

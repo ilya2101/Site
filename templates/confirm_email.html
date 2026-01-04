@@ -1,4 +1,3 @@
-<!-- templates/confirm_email.html -->
 {% extends "base.html" %}
 
 {% block title %}Подтверждение email{% endblock %}
@@ -15,10 +14,11 @@
                             <i class="bi bi-envelope-check-fill"></i>
                         </div>
                         <h2 class="register-title">Подтверждение email</h2>
-                        <p class="register-subtitle">Введите код из письма</p>
+                        <p class="register-subtitle">Завершите регистрацию в ADRAuto</p>
                     </div>
 
                     <div class="register-body">
+                        <div id="timerData" data-expires-in="{{ expires_in_seconds }}" style="display: none;"></div>
                         <!-- Flash сообщения -->
                         {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
@@ -33,11 +33,13 @@
                         {% endwith %}
 
                         <div class="text-center mb-4">
-                            <p class="text-muted">
+                            <p class="text-light mb-2" style="font-size: 1.05rem;">
                                 Код подтверждения отправлен на
-                                <strong>{{ email }}</strong>
                             </p>
-                            <p class="text-muted small">
+                            <p class="text-orange fw-bold mb-3" style="font-size: 1.2rem;">
+                                <i class="bi bi-envelope-paper me-2"></i>{{ email }}
+                            </p>
+                            <p class="text-muted mb-4" style="font-size: 0.95rem;">
                                 Если письмо не пришло, проверьте папку "Спам" или
                                 <a href="{{ url_for('register.resend_confirmation_code') }}" class="register-link">
                                     запросите новый код
@@ -45,7 +47,8 @@
                             </p>
                         </div>
 
-                        <form action="{{ url_for('register.confirm_email_page') }}" method="POST">
+                        <form action="{{ url_for('register.confirm_email_page') }}" method="POST" id="confirmForm">
+                            <!-- Код подтверждения -->
                             <div class="mb-4">
                                 <label class="input-label">Код подтверждения *</label>
                                 <div class="input-with-icon">
@@ -59,19 +62,736 @@
                                            required
                                            maxlength="8"
                                            placeholder="XXXX XXXX"
-                                           style="letter-spacing: 2px; font-size: 1.2rem;">
+                                           style="letter-spacing: 3px; font-size: 1.3rem; font-weight: 600; padding-left: 4.5rem;">
                                 </div>
-                                <small class="form-hint">Введите 8-значный код из письма (буквы заглавные)</small>
+                                <small class="form-hint">
+                                    Введите 8-значный код из письма (только заглавные буквы и цифры)
+                                </small>
                             </div>
 
-                            <button type="submit" class="btn-modern-primary w-100">
+                            <!-- Кнопка отправки -->
+                            <button type="submit" class="btn-modern-primary w-100 mt-2" id="submitBtn">
                                 <i class="bi bi-check-circle me-2"></i>Подтвердить email
                             </button>
+
+                            <!-- Индикатор загрузки -->
+                            <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+                                <div class="spinner"></div>
+                                <span>Проверка кода...</span>
+                            </div>
                         </form>
+
+                        <!-- Таймер и повторная отправка -->
+                        <div class="register-footer mt-4 pt-3 border-top">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                                    <p class="text-light mb-1 small">
+                                        <i class="bi bi-clock-history me-1"></i>Код действителен:
+                                        <span id="timer" class="fw-bold">10:00</span>
+                                    </p>
+                                </div>
+                                <div class="col-md-6 text-center text-md-end">
+                                    <a href="{{ url_for('register.resend_confirmation_code') }}"
+                                       class="register-link small"
+                                       id="resendLink">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Отправить код повторно
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ссылка на вход -->
+                        <div class="mt-3 pt-3 border-top">
+                            <p class="text-muted text-center mb-0 small">
+                                Уже подтвердили email?
+                                <a href="{{ url_for('user.login') }}" class="register-link">Войти в систему</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+
+<style>
+    /* СТАНДАРТИЗИРОВАННЫЕ СТИЛИ ПО ДИЗАЙН-СИСТЕМЕ */
+    :root {
+        --primary-orange: #FF6B35;
+        --orange-dark: #E55A2B;
+        --orange-light: #FF8C42;
+        --accent-green: #27AE60;
+        --green-dark: #219653;
+        --green-light: #6FCF97;
+        --dark-bg: #1A1A1A;
+        --card-bg: #2D2D2D;
+        --text-light: #FFFFFF;
+        --text-muted: #B0B0B0;
+        --input-bg: rgba(40, 40, 40, 0.8);
+        --input-border: #4A4A4A;
+        --input-focus-border: #FF6B35;
+        --input-error-border: #FF4757;
+        --input-text: #FFFFFF;
+        --input-placeholder: #888888;
+        --icon-bg: #FF6B35;
+        --icon-color: #FFFFFF;
+        --gradient-primary: linear-gradient(135deg, var(--primary-orange) 0%, var(--orange-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-green) 0%, var(--green-light) 100%);
+        --gradient-card: linear-gradient(145deg, #2D2D2D 0%, #3A3A3A 100%);
+        --error-color: #FF6B6B;
+        --success-color: #27AE60;
+        --warning-color: #FFA726;
+    }
+
+    .text-orange {
+        color: var(--primary-orange) !important;
+    }
+
+    /* КАРТОЧКА РЕГИСТРАЦИИ */
+    .register-card {
+        background: var(--gradient-card);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        overflow: hidden;
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        position: relative;
+        max-width: 550px;
+        margin: 0 auto;
+    }
+
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--gradient-primary);
+        box-shadow: 0 3px 10px rgba(255, 107, 53, 0.4);
+    }
+
+    .register-header {
+        background: linear-gradient(135deg, #2A2A2A 0%, #222222 100%);
+        padding: 2.5rem 2rem 2rem;
+        text-align: center;
+        color: var(--text-light);
+        border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+    }
+
+    .register-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--gradient-primary);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .register-card:hover .register-icon {
+        transform: scale(1.05);
+    }
+
+    .register-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.5px;
+    }
+
+    .register-subtitle {
+        color: var(--text-muted);
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 400;
+    }
+
+    .register-body {
+        padding: 2.5rem 2rem;
+        background: transparent;
+    }
+
+    /* ФОРМЫ */
+    .input-label {
+        display: block;
+        color: var(--text-light);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.8rem;
+        letter-spacing: 0.3px;
+    }
+
+    .form-hint {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+        font-weight: 400;
+    }
+
+    .input-with-icon {
+        position: relative;
+        width: 100%;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--gradient-primary);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--icon-color);
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        z-index: 2;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1.2rem 1.2rem 1.2rem 4.5rem;
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--input-bg);
+        color: var(--input-text);
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .form-input::placeholder {
+        color: var(--input-placeholder);
+        font-weight: 400;
+        opacity: 0.7;
+    }
+
+    .form-input:focus {
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        background: rgba(45, 45, 45, 0.9);
+        outline: none;
+        transform: translateY(-2px);
+    }
+
+    .form-input:focus + .input-icon {
+        background: var(--gradient-accent);
+        transform: translateY(-50%) scale(1.05);
+        box-shadow: 0 6px 15px rgba(255, 107, 53, 0.4);
+    }
+
+    /* СООБЩЕНИЯ ОБ ОШИБКАХ И УСПЕХЕ */
+    .modern-alert {
+        border: none;
+        border-radius: 12px;
+        padding: 1.25rem 3rem 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        font-weight: 500;
+        position: relative;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+        border-left: 4px solid #ff8c8c;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, var(--accent-green) 0%, var(--green-dark) 100%);
+        color: white;
+        border-left: 4px solid var(--green-light);
+    }
+
+    .btn-close {
+        filter: invert(1);
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* КНОПКА */
+    .btn-modern-primary {
+        background: var(--gradient-primary);
+        border: none;
+        padding: 1.4rem 2.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 0.5rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-modern-primary:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+        background: var(--gradient-primary);
+    }
+
+    .btn-modern-primary:active:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    .btn-modern-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* ИНДИКАТОР ЗАГРУЗКИ */
+    .loading-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        margin-top: 1rem;
+        color: var(--primary-orange);
+        font-weight: 500;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .spinner {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 3px solid rgba(255, 107, 53, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--primary-orange);
+        animation: spin 1s linear infinite;
+        margin-right: 0.5rem;
+    }
+
+    /* ФУТЕР */
+    .register-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1.5rem;
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .register-link {
+        color: var(--primary-orange);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .register-link:hover {
+        color: var(--orange-light);
+        text-decoration: underline;
+    }
+
+    /* ТАЙМЕР */
+    #timer {
+        color: var(--accent-green);
+        font-family: 'Courier New', monospace;
+        font-size: 1.1rem;
+    }
+
+    .timer-warning {
+        color: var(--warning-color) !important;
+        animation: pulse 1s infinite;
+    }
+
+    .timer-danger {
+        color: var(--error-color) !important;
+        animation: pulse 0.5s infinite;
+    }
+
+    /* АНИМАЦИИ */
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeInUp 0.6s forwards;
+    }
+
+    .animate-fade-up {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 0.8s forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* СТИЛЬ ДЛЯ ОТКЛЮЧЕННОЙ ССЫЛКИ ПОВТОРНОЙ ОТПРАВКИ */
+    .register-link.disabled {
+        color: var(--text-muted) !important;
+        pointer-events: none;
+        cursor: not-allowed;
+        text-decoration: none;
+    }
+
+    /* АДАПТИВНОСТЬ */
+    @media (max-width: 768px) {
+        .register-card {
+            margin: 1rem;
+            border-radius: 18px;
+        }
+
+        .register-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .register-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .register-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.6rem;
+        }
+
+        .register-title {
+            font-size: 1.6rem;
+        }
+
+        .form-input {
+            padding: 1.1rem 1rem 1.1rem 4rem;
+            font-size: 0.95rem;
+        }
+
+        .input-icon {
+            width: 2.2rem;
+            height: 2.2rem;
+            font-size: 1rem;
+            left: 0.8rem;
+        }
+
+        .btn-modern-primary {
+            padding: 1.2rem 2rem;
+            font-size: 0.95rem;
+        }
+
+        #timer {
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .register-header {
+            padding: 1.5rem 1rem 1rem;
+        }
+
+        .register-body {
+            padding: 1.5rem 1rem;
+        }
+
+        .register-icon {
+            width: 55px;
+            height: 55px;
+            font-size: 1.4rem;
+        }
+
+        .register-title {
+            font-size: 1.5rem;
+        }
+
+        .form-input {
+            padding: 1rem 0.8rem 1rem 3.5rem;
+        }
+
+        .input-icon {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.9rem;
+            left: 0.6rem;
+        }
+
+        .input-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .btn-modern-primary {
+            padding: 1.1rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .modern-alert {
+            padding: 1rem 2.5rem 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('confirmation_code');
+        const form = document.getElementById('confirmForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const timerElement = document.getElementById('timer');
+        const resendLink = document.getElementById('resendLink');
+
+        // Получаем время из серверных данных
+const timerData = document.getElementById('timerData');
+let timeLeft = timerData ? parseInt(timerData.dataset.expiresIn) : 600; // 10 минут по умолчанию
+let timerInterval;
+
+// Проверяем, не истекло ли время сразу
+if (timeLeft <= 0) {
+    timerElement.textContent = "00:00";
+    timerElement.classList.add('timer-danger');
+    if (resendLink) resendLink.classList.remove('disabled');
+    showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
+}
+
+// Инициализация таймера
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+
+    // Обновляем отображение сразу
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function() {
+        timeLeft--;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerElement.textContent = "00:00";
+            timerElement.classList.add('timer-danger');
+            if (resendLink) resendLink.classList.remove('disabled');
+            showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
+            return;
+        }
+
+        updateTimerDisplay();
+    }, 1000);
+}
+
+// Функция обновления отображения таймера
+function updateTimerDisplay() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // Изменение цвета при малом времени
+    if (timeLeft <= 60) {
+        timerElement.classList.add('timer-danger');
+        timerElement.classList.remove('timer-warning');
+    } else if (timeLeft <= 180) {
+        timerElement.classList.add('timer-warning');
+        timerElement.classList.remove('timer-danger');
+    } else {
+        timerElement.classList.remove('timer-danger', 'timer-warning');
+    }
+}
+
+        // Запуск таймера
+        startTimer();
+
+        // Автоматическое добавление пробела после 4 символов и преобразование в верхний регистр
+        if (codeInput) {
+            codeInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '').toUpperCase();
+
+                if (value.length > 4) {
+                    value = value.substr(0, 4) + ' ' + value.substr(4, 4);
+                }
+
+                e.target.value = value;
+
+                // Автоматическая отправка при вводе 8 символов
+                if (value.replace(/\s/g, '').length === 8) {
+                    setTimeout(() => {
+                        submitForm();
+                    }, 300);
+                }
+            });
+
+            // Разрешаем только буквы A-Z и цифры
+            codeInput.addEventListener('keypress', function(e) {
+                const charCode = e.charCode || e.keyCode;
+                const char = String.fromCharCode(charCode);
+
+                // Разрешаем только: буквы A-Z, цифры 0-9, Backspace, Delete, Tab
+                if (!/^[A-Za-z0-9]$/.test(char) &&
+                    charCode !== 8 && // Backspace
+                    charCode !== 46 && // Delete
+                    charCode !== 9) { // Tab
+                    e.preventDefault();
+                }
+            });
+
+            // Фокус на поле ввода при загрузке
+            setTimeout(() => {
+                codeInput.focus();
+                codeInput.select();
+            }, 300);
+        }
+
+        // Обработка отправки формы
+        function submitForm() {
+            const code = codeInput.value.replace(/\s/g, '');
+
+            // Проверка длины кода
+            if (code.length !== 8) {
+                showAlert('Пожалуйста, введите 8-значный код подтверждения', 'danger');
+                return false;
+            }
+
+            // Проверка формата кода (только буквы и цифры)
+            if (!/^[A-Z0-9]{8}$/.test(code)) {
+                showAlert('Код должен содержать только заглавные буквы и цифры', 'danger');
+                return false;
+            }
+
+            // Показываем индикатор загрузки
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Проверка...';
+            loadingIndicator.style.display = 'flex';
+
+            // Убираем пробел перед отправкой
+            codeInput.value = code;
+
+            return true;
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!submitForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Отображение всплывающих сообщений
+        function showAlert(message, type) {
+            // Если уже есть alert, удаляем его
+            const existingAlert = document.querySelector('.modern-alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Создаем новый alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `modern-alert alert-${type} animate-fade-in mb-4`;
+            alertDiv.innerHTML = `
+                <i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Вставляем перед формой
+            const registerBody = document.querySelector('.register-body');
+            const formElement = document.querySelector('#confirmForm');
+            registerBody.insertBefore(alertDiv, formElement);
+
+            // Добавляем обработчик для кнопки закрытия
+            const closeBtn = alertDiv.querySelector('.btn-close');
+            closeBtn.addEventListener('click', function() {
+                alertDiv.remove();
+            });
+
+            // Автоматическое скрытие через 5 секунд
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transition = 'opacity 0.5s ease';
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.remove();
+                        }
+                    }, 500);
+                }
+            }, 5000);
+
+            return alertDiv;
+        }
+
+        // Обработка клика по ссылке повторной отправки
+        if (resendLink) {
+            resendLink.addEventListener('click', function(e) {
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Показываем сообщение
+                showAlert('Новый код подтверждения отправлен на вашу почту', 'success');
+
+                // Отключаем ссылку на 60 секунд
+                this.classList.add('disabled');
+                this.innerHTML = '<i class="bi bi-hourglass me-1"></i>Повторная отправка через 60 секунд';
+
+                // Перезапускаем таймер
+                timeLeft = 10 * 60;
+                startTimer();
+
+                // Включаем ссылку через 60 секунд
+                setTimeout(() => {
+                    this.classList.remove('disabled');
+                    this.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Отправить код повторно';
+                }, 60000);
+            });
+        }
+
+        // Скрытие индикатора загрузки при ошибке
+        function resetForm() {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Подтвердить email';
+            loadingIndicator.style.display = 'none';
+
+            // Возвращаем форматирование кода
+            const code = codeInput.value;
+            if (code.length === 8 && !code.includes(' ')) {
+                codeInput.value = code.substr(0, 4) + ' ' + code.substr(4);
+            }
+        }
+
+        // Сброс формы при изменении поля
+        codeInput.addEventListener('input', resetForm);
+    });
+</script>
 {% endblock %}
