@@ -32,19 +32,16 @@
                         {% endif %}
                         {% endwith %}
 
-                        <div class="text-center mb-4">
-                            <p class="text-light mb-2" style="font-size: 1.05rem;">
-                                Код подтверждения отправлен на
-                            </p>
-                            <p class="text-orange fw-bold mb-3" style="font-size: 1.2rem;">
-                                <i class="bi bi-envelope-paper me-2"></i>{{ email }}
-                            </p>
-                            <p class="text-muted mb-4" style="font-size: 0.95rem;">
-                                Если письмо не пришло, проверьте папку "Спам" или
-                                <a href="{{ url_for('register.resend_confirmation_code') }}" class="register-link">
-                                    запросите новый код
+                        <!-- Добавить этот блок для сообщения об истечении времени -->
+                        <div id="expiredMessage" class="modern-alert alert-danger animate-fade-in" style="display: none;">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span id="expiredText">Срок действия кода истек</span>
+                            <div class="mt-2">
+                                <a href="{{ url_for('register.resend_confirmation_code') }}"
+                                   class="btn btn-sm btn-outline-light" id="resendBtn">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Отправить новый код
                                 </a>
-                            </p>
+                            </div>
                         </div>
 
                         <form action="{{ url_for('register.confirm_email_page') }}" method="POST" id="confirmForm">
@@ -563,6 +560,28 @@
             font-size: 0.9rem;
         }
     }
+    /* Стили для кнопки в сообщении об истечении */
+#expiredMessage .btn-outline-light {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+}
+
+#expiredMessage .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+/* Плавное появление сообщения */
+#expiredMessage {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#expiredMessage.show {
+    opacity: 1;
+}
 </style>
 
 <script>
@@ -573,63 +592,170 @@
         const loadingIndicator = document.getElementById('loadingIndicator');
         const timerElement = document.getElementById('timer');
         const resendLink = document.getElementById('resendLink');
+        const expiredMessage = document.getElementById('expiredMessage');
+        const expiredText = document.getElementById('expiredText');
+        const resendBtn = document.getElementById('resendBtn');
 
         // Получаем время из серверных данных
-const timerData = document.getElementById('timerData');
-let timeLeft = timerData ? parseInt(timerData.dataset.expiresIn) : 600; // 10 минут по умолчанию
-let timerInterval;
+        const timerData = document.getElementById('timerData');
+        let timeLeft = timerData ? parseInt(timerData.dataset.expiresIn) : 600;
+        let timerInterval;
 
-// Проверяем, не истекло ли время сразу
-if (timeLeft <= 0) {
-    timerElement.textContent = "00:00";
-    timerElement.classList.add('timer-danger');
-    if (resendLink) resendLink.classList.remove('disabled');
-    showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
-}
-
-// Инициализация таймера
-function startTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-
-    // Обновляем отображение сразу
-    updateTimerDisplay();
-
-    timerInterval = setInterval(function() {
-        timeLeft--;
-
+        // Проверяем, не истекло ли время сразу при загрузке
         if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerElement.textContent = "00:00";
-            timerElement.classList.add('timer-danger');
-            if (resendLink) resendLink.classList.remove('disabled');
-            showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
+            showExpiredMessage();
+            disableForm();
             return;
         }
 
-        updateTimerDisplay();
-    }, 1000);
-}
+        // Функция показа сообщения об истечении времени
+        function showExpiredMessage() {
+            timerElement.textContent = "00:00";
+            timerElement.classList.add('timer-danger');
+            expiredMessage.style.display = 'block';
 
-// Функция обновления отображения таймера
-function updateTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // Плавное появление
+            setTimeout(() => {
+                expiredMessage.style.opacity = '1';
+            }, 10);
 
-    // Изменение цвета при малом времени
-    if (timeLeft <= 60) {
-        timerElement.classList.add('timer-danger');
-        timerElement.classList.remove('timer-warning');
-    } else if (timeLeft <= 180) {
-        timerElement.classList.add('timer-warning');
-        timerElement.classList.remove('timer-danger');
-    } else {
-        timerElement.classList.remove('timer-danger', 'timer-warning');
-    }
-}
+            // Обновляем текст ссылки
+            if (resendLink) {
+                resendLink.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Отправить новый код';
+                resendLink.classList.remove('disabled');
+            }
+        }
+
+        // Функция отключения формы
+        function disableForm() {
+            if (codeInput) {
+                codeInput.disabled = true;
+                codeInput.placeholder = "Код истек";
+            }
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-clock me-2"></i>Срок действия истек';
+                submitBtn.classList.add('disabled');
+            }
+        }
+
+        // Функция включения формы (при новом коде)
+        function enableForm() {
+            if (codeInput) {
+                codeInput.disabled = false;
+                codeInput.placeholder = "XXXX XXXX";
+                codeInput.value = "";
+                codeInput.focus();
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Подтвердить email';
+                submitBtn.classList.remove('disabled');
+            }
+            if (expiredMessage) {
+                expiredMessage.style.display = 'none';
+            }
+        }
+
+        // Инициализация таймера
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            // Обновляем отображение сразу
+            updateTimerDisplay();
+
+            timerInterval = setInterval(function() {
+                timeLeft--;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showExpiredMessage();
+                    disableForm();
+
+                    // Показываем уведомление
+                    showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
+                    return;
+                }
+
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        // Функция обновления отображения таймера
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            // Изменение цвета при малом времени
+            if (timeLeft <= 60) {
+                timerElement.classList.add('timer-danger');
+                timerElement.classList.remove('timer-warning');
+                expiredText.textContent = `Код истекает через ${timeLeft} секунд`;
+            } else if (timeLeft <= 180) {
+                timerElement.classList.add('timer-warning');
+                timerElement.classList.remove('timer-danger');
+            } else {
+                timerElement.classList.remove('timer-danger', 'timer-warning');
+            }
+
+            // Показываем предупреждение за 60 секунд до конца
+            if (timeLeft === 60) {
+                showAlert('Код истекает через 1 минуту!', 'warning');
+            }
+        }
 
         // Запуск таймера
         startTimer();
+
+        // Обработка клика по ссылке повторной отправки
+        if (resendLink) {
+            resendLink.addEventListener('click', function(e) {
+                if (this.classList.contains('disabled')) {
+                    e.preventDefault();
+                    return;
+                }
+
+                // Блокируем на время запроса
+                this.classList.add('disabled');
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass me-1"></i>Отправка...';
+
+                // Показываем индикатор
+                showAlert('Отправляем новый код...', 'info');
+
+                // Отправляем запрос
+                fetch(this.href)
+                    .then(response => {
+                        if (response.redirected) {
+                            // Если редирект (успех), обновляем страницу
+                            window.location.reload();
+                        }
+                        return response.text();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        this.classList.remove('disabled');
+                        this.innerHTML = originalText;
+                        showAlert('Ошибка при отправке. Попробуйте снова.', 'danger');
+                    });
+
+                e.preventDefault();
+            });
+        }
+
+        // Обработка кнопки "Отправить новый код" в сообщении
+        if (resendBtn) {
+            resendBtn.addEventListener('click', function(e) {
+                if (resendLink && !resendLink.classList.contains('disabled')) {
+                    resendLink.click();
+                }
+                e.preventDefault();
+            });
+        }
+
+        // Остальной код (форматирование кода, отправка формы и т.д.)
+        // ... существующий код для обработки ввода кода ...
 
         // Автоматическое добавление пробела после 4 символов и преобразование в верхний регистр
         if (codeInput) {
@@ -643,7 +769,7 @@ function updateTimerDisplay() {
                 e.target.value = value;
 
                 // Автоматическая отправка при вводе 8 символов
-                if (value.replace(/\s/g, '').length === 8) {
+                if (value.replace(/\s/g, '').length === 8 && timeLeft > 0) {
                     setTimeout(() => {
                         submitForm();
                     }, 300);
@@ -665,15 +791,23 @@ function updateTimerDisplay() {
             });
 
             // Фокус на поле ввода при загрузке
-            setTimeout(() => {
-                codeInput.focus();
-                codeInput.select();
-            }, 300);
+            if (timeLeft > 0) {
+                setTimeout(() => {
+                    codeInput.focus();
+                    codeInput.select();
+                }, 300);
+            }
         }
 
         // Обработка отправки формы
         function submitForm() {
             const code = codeInput.value.replace(/\s/g, '');
+
+            // Проверка если время истекло
+            if (timeLeft <= 0) {
+                showAlert('Срок действия кода истек. Запросите новый код.', 'danger');
+                return false;
+            }
 
             // Проверка длины кода
             if (code.length !== 8) {
@@ -709,8 +843,8 @@ function updateTimerDisplay() {
         // Отображение всплывающих сообщений
         function showAlert(message, type) {
             // Если уже есть alert, удаляем его
-            const existingAlert = document.querySelector('.modern-alert');
-            if (existingAlert) {
+            const existingAlert = document.querySelector('.modern-alert:not(#expiredMessage)');
+            if (existingAlert && !existingAlert.id.includes('expired')) {
                 existingAlert.remove();
             }
 
@@ -718,7 +852,8 @@ function updateTimerDisplay() {
             const alertDiv = document.createElement('div');
             alertDiv.className = `modern-alert alert-${type} animate-fade-in mb-4`;
             alertDiv.innerHTML = `
-                <i class="bi bi-${type === 'danger' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
+                <i class="bi bi-${type === 'danger' ? 'exclamation-triangle' :
+                                   type === 'warning' ? 'exclamation-triangle' : 'check-circle'} me-2"></i>
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
@@ -750,33 +885,6 @@ function updateTimerDisplay() {
             return alertDiv;
         }
 
-        // Обработка клика по ссылке повторной отправки
-        if (resendLink) {
-            resendLink.addEventListener('click', function(e) {
-                if (this.classList.contains('disabled')) {
-                    e.preventDefault();
-                    return;
-                }
-
-                // Показываем сообщение
-                showAlert('Новый код подтверждения отправлен на вашу почту', 'success');
-
-                // Отключаем ссылку на 60 секунд
-                this.classList.add('disabled');
-                this.innerHTML = '<i class="bi bi-hourglass me-1"></i>Повторная отправка через 60 секунд';
-
-                // Перезапускаем таймер
-                timeLeft = 10 * 60;
-                startTimer();
-
-                // Включаем ссылку через 60 секунд
-                setTimeout(() => {
-                    this.classList.remove('disabled');
-                    this.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Отправить код повторно';
-                }, 60000);
-            });
-        }
-
         // Скрытие индикатора загрузки при ошибке
         function resetForm() {
             submitBtn.disabled = false;
@@ -791,7 +899,9 @@ function updateTimerDisplay() {
         }
 
         // Сброс формы при изменении поля
-        codeInput.addEventListener('input', resetForm);
+        if (codeInput) {
+            codeInput.addEventListener('input', resetForm);
+        }
     });
 </script>
 {% endblock %}

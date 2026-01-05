@@ -1,18 +1,85 @@
-# /home/ilya/Site/email_service.py
-
+# Стандартные библиотеки Python
 import os
-from flask import current_app, url_for
-from flask_mail import Message
-from extensions import mail
 import logging
+from datetime import datetime, timedelta  # для работы со временем
+
+# Flask и расширения
+from flask import current_app  # для доступа к конфигурации приложения
+from flask_mail import Message  # для создания email сообщений
+
+# Ваши собственные модули
+from extensions import mail  # инициализированный объект Flask-Mail
+from database.engine import db  # для работы с базой данных
+from database.models import EmailAttempt  # новая модель для отслеживания попыток
 
 logger = logging.getLogger(__name__)
 
-def send_confirmation_email(user_email, confirmation_code):
+def send_confirmation_email(user_email, confirmation_code, request=None):
     """
-    Отправляет письмо с подтверждением email
+    Отправляет письмо с подтверждением email с проверкой лимитов
     """
     try:
+        # ========== ШАГ 1: Получаем информацию о запросе ==========
+        # request - это объект Flask request, который содержит информацию о клиенте
+        ip_address = request.remote_addr if request else '127.0.0.1'  # IP адрес пользователя
+        user_agent = request.user_agent.string if request else 'Unknown'  # Браузер/устройство
+
+        # ========== ШАГ 2: Проверяем лимит по email (1 раз в 10 минут) ==========
+        # Создаем временную метку "10 минут назад"
+        ten_minutes_ago = datetime.utcnow() - datetime.timedelta(minutes=10)
+
+        # Ищем в базе: все попытки отправки на этот email за последние 10 минут
+        recent_attempts = EmailAttempt.query.filter(
+            EmailAttempt.email == user_email,           # для этого email
+            EmailAttempt.sent_at > ten_minutes_ago      # отправленные после "10 минут назад"
+        ).count()  # считаем количество
+
+        # Если уже была отправка за последние 10 минут - отклоняем
+        if recent_attempts >= 1:
+            logger.warning(f"❌ Превышен лимит отправок для {user_email}: {recent_attempts} попыток за 10 минут")
+
+            # Возвращаем специальный результат вместо True/False
+            return {
+                'success': False,  # не удалось
+                'message': 'Слишком частые запросы. Подождите 10 минут перед следующей отправкой.',
+                'limit_type': 'email',  # тип ограничения
+                'wait_minutes': 10      # сколько ждать
+            }
+
+        # ========== ШАГ 3: Проверяем лимит по IP (10 раз в 24 часа) ==========
+        # Создаем временную метку "24 часа назад"
+        twenty_four_hours_ago = datetime.utcnow() - timedelta(hours=24)
+
+        # Ищем в базе: все попытки отправки с этого IP за последние 24 часа
+        ip_attempts = EmailAttempt.query.filter(
+            EmailAttempt.ip_address == ip_address,      # для этого IP
+            EmailAttempt.sent_at > twenty_four_hours_ago  # отправленные после "24 часа назад"
+        ).count()  # считаем количество
+
+        # Если больше 10 попыток за сутки - отклоняем
+        if ip_attempts >= 10:
+            logger.warning(f"❌ Превышен суточный лимит для IP {ip_address}: {ip_attempts} попыток")
+
+            return {
+                'success': False,
+                'message': 'Превышен суточный лимит отправок с вашего устройства.',
+                'limit_type': 'ip',
+                'wait_hours': 24
+            }
+
+        # ========== ШАГ 4: Сохраняем информацию о попытке в БД ==========
+        # Создаем новую запись в таблице EmailAttempt
+        attempt = EmailAttempt(
+            email=user_email,               # email пользователя
+            ip_address=ip_address,          # его IP адрес
+            user_agent=user_agent,          # информация о браузере
+            confirmation_code=confirmation_code  # отправленный код (для логов)
+        )
+
+        # Добавляем запись в сессию БД (пока не сохраняем)
+        db.session.add(attempt)
+
+        # ========== ШАГ 5: Отправляем письмо (ваш существующий код) ==========
         # ВАЖНО: Используйте ваш реальный домен вместо 127.0.0.1:5000
         base_url = current_app.config.get('BASE_URL', 'http://127.0.0.1:5000')
 
@@ -109,9 +176,26 @@ def send_confirmation_email(user_email, confirmation_code):
         # Отправляем письмо
         mail.send(msg)
 
+        # ========== ШАГ 6: Сохраняем попытку в БД ==========
+        # Только после успешной отправки письма сохраняем запись
+        db.session.commit()
+
         logger.info(f"✅ Письмо с подтверждением отправлено на {user_email}")
-        return True
+
+        # Возвращаем успешный результат
+        return {
+            'success': True,
+            'message': 'Письмо отправлено'
+        }
 
     except Exception as e:
+        # ========== ШАГ 7: Обработка ошибок ==========
+        # Если что-то пошло не так, откатываем изменения в БД
+        db.session.rollback()
+
         logger.error(f"❌ Ошибка отправки email на {user_email}: {str(e)}")
-        return False
+
+        return {
+            'success': False,
+            'message': f'Ошибка отправки: {str(e)}'
+        }

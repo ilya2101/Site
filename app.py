@@ -129,6 +129,33 @@ def get_service_prices():
     active_prices = ServicePrice.query.filter_by(is_active=True).order_by(ServicePrice.service_name).all()
     return render_template('price.html', prices=active_prices)
 
+
+
+scheduler_initialized = False
+
+@app.before_request
+def initialize_scheduler():
+    global scheduler_initialized
+    if not scheduler_initialized:
+        try:
+            from database.tasks.scheduler import setup_scheduled_tasks, start_scheduler
+
+            # Настраиваем задачи
+            setup_scheduled_tasks()
+
+            # Запускаем планировщик
+            start_scheduler()
+
+            app.logger.info("✅ Планировщик задач инициализирован")
+            scheduler_initialized = True
+
+        except Exception as e:
+            app.logger.error(f"❌ Ошибка инициализации планировщика: {e}")
+
+
+
+
+
 # Запуск
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

@@ -1,6 +1,6 @@
 # routes/auth_register.py
 
-from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app, jsonify
 from flask_login import login_user, current_user
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from database.engine import db
+from database.models import EmailAttempt
 from database.models.user import User
 from utils.phone_utils import normalize_phone_number
 from email_service import send_confirmation_email  # Импорт ВНЕРТИ функции!
@@ -583,13 +584,14 @@ def calculate_time_left(confirmation_sent_at_str):
 
 
 
-
 @register_bp.route('/resend-confirmation-code')
 def resend_confirmation_code():
     """
     Повторная отправка кода подтверждения
     """
     if 'registration_data' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'Сессия истекла'}), 400
         flash('❌ Сессия истекла. Пожалуйста, начните регистрацию заново.', 'error')
         return redirect(url_for('register.register'))
 
@@ -603,14 +605,18 @@ def resend_confirmation_code():
     reg_data['confirmation_code'] = new_code
     reg_data['confirmation_sent_at'] = datetime.utcnow().isoformat()
     session['registration_data'] = reg_data
-    session.modified = True  # Важно для сохранения изменений
+    session.modified = True
 
     # Отправляем письмо
     email_sent = send_confirmation_email(email, new_code)
 
     if email_sent:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': True, 'message': 'Новый код отправлен'})
         flash('✅ Новый код подтверждения отправлен на вашу почту', 'success')
     else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'message': 'Ошибка отправки'}), 500
         flash('❌ Не удалось отправить код. Попробуйте позже.', 'error')
 
     return redirect(url_for('register.confirm_email_page'))
